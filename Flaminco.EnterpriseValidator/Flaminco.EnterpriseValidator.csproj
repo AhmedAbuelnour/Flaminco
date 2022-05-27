@@ -1,9 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+	  <TargetFramework>net6.0</TargetFramework>
+	  <ImplicitUsings>enable</ImplicitUsings>
+	  <Nullable>enable</Nullable>
+	  <Version>0.0.1</Version>
+	  <Authors>Ahmed Abuelnour</Authors>
+	  <Company>Personal</Company>
+	  <Description>A Validation Rules Pattern implementation.</Description>
+	  <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
+	  <Copyright>Free</Copyright>
   </PropertyGroup>
 
 </Project>

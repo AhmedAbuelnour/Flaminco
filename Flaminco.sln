@@ -5,11 +5,11 @@ VisualStudioVersion = 17.2.32519.379
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.PeriodicAction", "Flaminco.PeriodicAction\Flaminco.PeriodicAction.csproj", "{65926901-14A7-4A7C-84AB-EEF00DF6BB54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.JWTHandler", "Flaminco.JWTHandler\Flaminco.JWTHandler.csproj", "{5E3DD1D9-5BC6-405B-873B-A4E4D5DACC7C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.JWTHandler", "Flaminco.JWTHandler\Flaminco.JWTHandler.csproj", "{5E3DD1D9-5BC6-405B-873B-A4E4D5DACC7C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.CommitResult", "Flaminco.CommitResult\Flaminco.CommitResult.csproj", "{FBCF1F08-59BE-46BF-A5BC-23517D5D7CE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.CommitResult", "Flaminco.CommitResult\Flaminco.CommitResult.csproj", "{FBCF1F08-59BE-46BF-A5BC-23517D5D7CE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.EnterpriseValidator", "Flaminco.EnterpriseValidator\Flaminco.EnterpriseValidator.csproj", "{A19711A2-EBAA-433D-8AA2-9A993082949B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.EnterpriseValidator", "Flaminco.EnterpriseValidator\Flaminco.EnterpriseValidator.csproj", "{A19711A2-EBAA-433D-8AA2-9A993082949B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
