@@ -1,4 +1,5 @@
 ﻿using Flaminco.CommitResult.CommitResultTypes;
+using Flaminco.CommitResult.ValueCommitResultsTypes;
 using Flaminco.CommitResult.ValueCommitResultTypes;
 
 namespace Flaminco.CommitResult;
@@ -33,18 +34,18 @@ public static class CommitResultExtension
             _ => new OthersValueCommitResult<T>(errorCode, errorMessage),
         };
     }
-    public static ICommitResults<T> GetValuesCommitResult<T>(this ResultType resultType, IEnumerable<T> value, string? errorCode = default, string? errorMessage = default)
+    public static ICommitResults<T> GetValueCommitResults<T>(this ResultType resultType, IEnumerable<T> value, string? errorCode = default, string? errorMessage = default)
     {
         return resultType switch
         {
-            ResultType.Ok => new SuccessValuesCommitResult<T>(value),
-            ResultType.Empty => new EmptyValuesCommitResult<T>(errorCode, errorMessage),
-            ResultType.Invalid => new InvalidValuesCommitResult<T>(errorCode, errorMessage),
-            ResultType.NotFound => new NotFoundValuesCommitResult<T>(errorCode, errorMessage),
-            ResultType.InvalidValidation => new InvalidValuesCommitResult<T>(errorCode, errorMessage),
-            ResultType.Exception => new ExceptionValuesCommitResult<T>(errorCode, errorMessage),
-            ResultType.Duplicated => new DuplicatedValuesCommitResult<T>(errorCode, errorMessage),
-            _ => new OthersValuesCommitResult<T>(errorCode, errorMessage),
+            ResultType.Ok => new SuccessValueCommitResults<T>(value),
+            ResultType.Empty => new EmptyValueCommitResults<T>(errorCode, errorMessage),
+            ResultType.Invalid => new InvalidValueCommitResults<T>(errorCode, errorMessage),
+            ResultType.NotFound => new NotFoundValueCommitResults<T>(errorCode, errorMessage),
+            ResultType.InvalidValidation => new InvalidValueCommitResults<T>(errorCode, errorMessage),
+            ResultType.Exception => new ExceptionValueCommitResults<T>(errorCode, errorMessage),
+            ResultType.Duplicated => new DuplicatedValueCommitResults<T>(errorCode, errorMessage),
+            _ => new OthersValueCommitResults<T>(errorCode, errorMessage),
         };
     }
 }

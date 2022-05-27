@@ -51,7 +51,6 @@ public class TokenHandlerManager
     }
     public AccessToken GetRefreshAccessToken(string expiredToken)
         => GetAccessToken(GetPrincipalFromExpiredToken(expiredToken));
-
     private Dictionary<string, string> GetPrincipalFromExpiredToken(string expiredToken)
     {
         TokenValidationParameters tokenValidationParameters = new TokenValidationParameters

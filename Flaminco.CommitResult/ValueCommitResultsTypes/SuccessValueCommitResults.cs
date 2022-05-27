@@ -1,8 +1,8 @@
-﻿namespace Flaminco.CommitResult.ValueCommitResultTypes;
+﻿namespace Flaminco.CommitResult.ValueCommitResultsTypes;
 
-public class SuccessValuesCommitResult<T> : ICommitResults<T>
+public class SuccessValueCommitResults<T> : ICommitResults<T>
 {
-    public SuccessValuesCommitResult(IEnumerable<T>? _value)
+    public SuccessValueCommitResults(IEnumerable<T>? _value)
     {
         Value = _value;
     }

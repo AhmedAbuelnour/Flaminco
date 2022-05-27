@@ -2,6 +2,6 @@
 
 public class PeriodicActionOption
 {
-    public TimeSpan InvokeForEach { get; set; } = TimeSpan.Zero;
+    public TimeSpan TimeInterval { get; set; } = TimeSpan.Zero;
     public Action PeridicAction { get; set; }
 }

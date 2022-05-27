@@ -4,9 +4,10 @@ namespace Flaminco.PeriodicAction;
 
 public static class PeriodicActionExtension
 {
-    public static void AddPeriodicAction(this IServiceCollection services, Action<PeriodicActionOption> options)
+    public static IServiceCollection AddPeriodicAction(this IServiceCollection services, Action<PeriodicActionOption> options)
     {
         services.Configure(options);
         services.AddSingleton<PeriodicActionHandler>();
+        return services;
     }
 }
