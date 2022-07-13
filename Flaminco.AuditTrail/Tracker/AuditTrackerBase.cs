@@ -16,6 +16,8 @@ public abstract class AuditTrackerBase<TIntermediate, TSource> : IAuditTrailTrac
         _logger = logger;
     }
 
+    protected TimeSpan? ExpireTimeSpan { get; set; }
+    public void SetExpireTime(TimeSpan timeSpan) => ExpireTimeSpan = timeSpan;
     public abstract ValueTask GetTrackerResultAsync<TMapper>(TSource source, ActionType actionType, Action<AuditSnapshot> onSnapshotGenerate, CancellationToken cancellationToken);
 
     public abstract ValueTask<Guid> SetTrackerAsync<TMapper>(TSource source, string primaryKeyValue, string userId, CancellationToken cancellationToken);

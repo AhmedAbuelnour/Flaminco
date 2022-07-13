@@ -46,7 +46,7 @@ public class AuditTrailTracker<TIntermediate, TSource> : AuditTrackerBase<TInter
 
             await _cache.SetStringAsync(intermediate.LiveTrackerId.ToString(), cacheItemAsJson, new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(12)
+                AbsoluteExpirationRelativeToNow = ExpireTimeSpan ?? TimeSpan.FromMinutes(30)
             }, cancellationToken);
 
             _logger.LogInformation($"Finish adding audit Tracker with Id {intermediate.LiveTrackerId} to audit trail storage");

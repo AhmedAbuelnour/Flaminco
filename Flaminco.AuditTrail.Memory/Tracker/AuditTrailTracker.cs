@@ -39,7 +39,7 @@ public class AuditTrailTracker<TIntermediate, TSource> : AuditTrackerBase<TInter
                 Id = intermediate.LiveTrackerId,
                 TableName = tableName,
                 UserId = userId
-            }, TimeSpan.FromHours(12));
+            }, ExpireTimeSpan ?? TimeSpan.FromMinutes(60));
 
             _logger.LogInformation($"Finish adding audit Tracker with Id {intermediate.LiveTrackerId} to audit trail storage");
         }
