@@ -19,9 +19,7 @@ public abstract class AuditTrackerBase<TIntermediate, TSource> : IAuditTrailTrac
     protected TimeSpan? ExpireTimeSpan { get; set; }
     public void SetExpireTime(TimeSpan timeSpan) => ExpireTimeSpan = timeSpan;
     public abstract ValueTask GetTrackerResultAsync<TMapper>(TSource source, ActionType actionType, Action<AuditSnapshot> onSnapshotGenerate, CancellationToken cancellationToken);
-
     public abstract ValueTask<Guid> SetTrackerAsync<TMapper>(TSource source, string primaryKeyValue, string userId, CancellationToken cancellationToken);
-
     public async ValueTask<AuditSnapshot> GenerateSnapshotForAddAsync<TMapper>(TSource source, string primaryKeyValue, string userId)
     {
         TIntermediate intermediate = await MapperAsync<TMapper>(source);
@@ -41,7 +39,6 @@ public abstract class AuditTrackerBase<TIntermediate, TSource> : IAuditTrailTrac
             UserId = userId
         };
     }
-
     protected async ValueTask<TIntermediate> MapperAsync<TMapper>(TSource source)
     {
         IAuditTrailMapper? mapper = _auditTrailMapperFactory.Create<TMapper>();
