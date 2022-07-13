@@ -11,7 +11,7 @@ public static class AuditTrailFactoryExtension
     {
         return services.AddAuditTrailMapper(assemblyScanner)
                        .AddAuditTrailTracker(assemblyScanner)
-                       .AddCacheManager();
+                       .AddMemoryCache();
     }
     static IServiceCollection AddAuditTrailTracker(this IServiceCollection services, Type assemblyScanner)
     {

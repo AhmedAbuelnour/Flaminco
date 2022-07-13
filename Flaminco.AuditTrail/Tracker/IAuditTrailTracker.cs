@@ -1,9 +1,7 @@
-﻿namespace Flaminco.AuditTrail.Core.Tracker
+﻿namespace Flaminco.AuditTrail.Core.Tracker;
+
+public interface IAuditTrailTracker<TIntermediate, TSource> where TIntermediate : ITracker
 {
-    public interface IAuditTrailTracker<TIntermediate, TSource> where TIntermediate : ITracker
-    {
-        ValueTask<Guid> EnableTrackerAsync<TMapper>(TSource source, string primaryKeyValue, string userId);
-        ValueTask<AuditSnapshot> GenerateSnapshotForAddAsync<TMapper>(TSource source, string primaryKeyValue, string userId);
-        ValueTask ValidateTrackerAsync<TMapper>(TSource source, ActionType actionType, Action<AuditSnapshot> onSnapshotGenerate);
-    }
+    ValueTask<Guid> SetTrackerAsync<TMapper>(TSource source, string primaryKeyValue, string userId, CancellationToken cancellationToken);
+    ValueTask GetTrackerResultAsync<TMapper>(TSource source, ActionType actionType, Action<AuditSnapshot> onSnapshotGenerate, CancellationToken cancellationToken);
 }
