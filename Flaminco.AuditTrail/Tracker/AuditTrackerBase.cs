@@ -5,6 +5,7 @@ using System.Text.Json;
 namespace Flaminco.AuditTrail.Core.Tracker;
 
 public abstract class AuditTrackerBase<TIntermediate, TSource> : IAuditTrailTracker<TIntermediate, TSource> where TIntermediate : ITracker
+                                                                                                            where TSource : ITracker
 {
     private readonly IAuditTrailMapperFactory _auditTrailMapperFactory;
     private readonly ILogger _logger;

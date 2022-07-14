@@ -9,6 +9,7 @@ using System.Text.Json;
 namespace Flaminco.AuditTrail.Redis.Tracker;
 
 public class AuditTrailTracker<TIntermediate, TSource> : AuditTrackerBase<TIntermediate, TSource> where TIntermediate : ITracker
+                                                                                                  where TSource : ITracker
 {
 
     private readonly IDistributedCache _cache;
