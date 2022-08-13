@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Flaminco.ManualMapper\Flaminco.ManualMapper.csproj" />
     <ProjectReference Include="..\Flaminco.ProDownloader\Flaminco.ProDownloader.csproj" />
   </ItemGroup>
 
