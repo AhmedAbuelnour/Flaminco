@@ -15,12 +15,13 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        public int Get()
+        public async ValueTask<int> Get()
         {
-            return _mapper.Map(new SimpleMapHandler(), "Ahmed", opts =>
+            return await _mapper.Map<SimpleMapProfile, int>(new SimpleMapProfile("Ahmed"), opts =>
             {
                 opts.Arguments["ReturnValue"] = 5;
-            }).Result;
+
+            });
         }
     }
 }

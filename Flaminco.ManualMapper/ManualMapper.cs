@@ -1,18 +1,28 @@
-﻿namespace Flaminco.ManualMapper
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace Flaminco.ManualMapper
 {
     public class ManualMapper : IManualMapper
     {
-        public ValueTask<TDestination> Map<TSource, TDestination>(IMapHandler<TSource, TDestination> handler, TSource source, Action<MapperOptions>? options = null, CancellationToken cancellationToken = default)
+        private readonly IServiceProvider _serviceProvider;
+        public ManualMapper(IServiceProvider serviceProvider)
         {
-            if (handler == null)
+            _serviceProvider = serviceProvider;
+        }
+        public ValueTask<TDestination> Map<TMapProfile, TDestination>(TMapProfile profile, Action<MapperOptions>? options = null, CancellationToken cancellationToken = default) where TMapProfile : IMapProfile<TDestination>
+        {
+            if (profile == null)
             {
-                throw new ArgumentNullException(nameof(handler));
+                throw new ArgumentNullException(nameof(profile));
             }
-            if (source == null)
+
+            IMapProfileHandler<TMapProfile, TDestination>? handler = _serviceProvider.GetService<IMapProfileHandler<TMapProfile, TDestination>>();
+
+            if (handler is null)
             {
-                throw new ArgumentNullException(nameof(handler));
+                throw new InvalidOperationException($"{nameof(IMapProfileHandler<TMapProfile, TDestination>)} Is not registed as a service");
             }
-            return handler.Handler(source, options, cancellationToken);
+            return handler.Handler(profile, options, cancellationToken);
         }
     }
 }
