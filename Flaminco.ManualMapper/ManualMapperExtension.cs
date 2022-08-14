@@ -13,7 +13,7 @@ namespace Flaminco.ManualMapper
                      .AsImplementedInterfaces()
                      .WithTransientLifetime());
 
-            services.AddSingleton(typeof(IManualMapper), typeof(ManualMapper));
+            services.AddSingleton(typeof(IManualMapper<>), typeof(ManualMapper<>));
 
             return services;
         }
