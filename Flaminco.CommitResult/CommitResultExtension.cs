@@ -10,11 +10,11 @@ public static class CommitResultExtension
     {
         return resultType switch
         {
-            ResultType.Ok => new SuccessCommitResult(),
+            ResultType.Ok => new SuccessCommitResult(errorCode, errorMessage),
             ResultType.Empty => new EmptyCommitResult(errorCode, errorMessage),
             ResultType.Invalid => new InvalidCommitResult(errorCode, errorMessage),
             ResultType.NotFound => new NotFoundCommitResult(errorCode, errorMessage),
-            ResultType.InvalidValidation => new InvalidCommitResult(errorCode, errorMessage),
+            ResultType.InvalidValidation => new InvalidValidationCommitResult(errorCode, errorMessage),
             ResultType.Exception => new ExceptionCommitResult(errorCode, errorMessage),
             ResultType.Duplicated => new DuplicatedCommitResult(errorCode, errorMessage),
             _ => new OthersCommitResult(errorCode, errorMessage),
@@ -24,28 +24,28 @@ public static class CommitResultExtension
     {
         return resultType switch
         {
-            ResultType.Ok => new SuccessValueCommitResult<T>(value),
-            ResultType.Empty => new EmptyValueCommitResult<T>(errorCode, errorMessage),
-            ResultType.Invalid => new InvalidValueCommitResult<T>(errorCode, errorMessage),
-            ResultType.NotFound => new NotFoundValueCommitResult<T>(errorCode, errorMessage),
-            ResultType.InvalidValidation => new InvalidValueCommitResult<T>(errorCode, errorMessage),
-            ResultType.Exception => new ExceptionValueCommitResult<T>(errorCode, errorMessage),
-            ResultType.Duplicated => new DuplicatedValueCommitResult<T>(errorCode, errorMessage),
-            _ => new OthersValueCommitResult<T>(errorCode, errorMessage),
+            ResultType.Ok => new SuccessValueCommitResult<T>(value, errorCode, errorMessage),
+            ResultType.Empty => new EmptyValueCommitResult<T>(value, errorCode, errorMessage),
+            ResultType.Invalid => new InvalidValueCommitResult<T>(value, errorCode, errorMessage),
+            ResultType.NotFound => new NotFoundValueCommitResult<T>(value, errorCode, errorMessage),
+            ResultType.InvalidValidation => new InvalidValidationValueCommitResult<T>(value, errorCode, errorMessage),
+            ResultType.Exception => new ExceptionValueCommitResult<T>(value, errorCode, errorMessage),
+            ResultType.Duplicated => new DuplicatedValueCommitResult<T>(value, errorCode, errorMessage),
+            _ => new OthersValueCommitResult<T>(value, errorCode, errorMessage),
         };
     }
     public static ICommitResults<T> GetValueCommitResults<T>(this ResultType resultType, IEnumerable<T> value, string? errorCode = default, string? errorMessage = default)
     {
         return resultType switch
         {
-            ResultType.Ok => new SuccessValueCommitResults<T>(value),
-            ResultType.Empty => new EmptyValueCommitResults<T>(errorCode, errorMessage),
-            ResultType.Invalid => new InvalidValueCommitResults<T>(errorCode, errorMessage),
-            ResultType.NotFound => new NotFoundValueCommitResults<T>(errorCode, errorMessage),
-            ResultType.InvalidValidation => new InvalidValueCommitResults<T>(errorCode, errorMessage),
-            ResultType.Exception => new ExceptionValueCommitResults<T>(errorCode, errorMessage),
-            ResultType.Duplicated => new DuplicatedValueCommitResults<T>(errorCode, errorMessage),
-            _ => new OthersValueCommitResults<T>(errorCode, errorMessage),
+            ResultType.Ok => new SuccessValueCommitResults<T>(value, errorCode, errorMessage),
+            ResultType.Empty => new EmptyValueCommitResults<T>(value, errorCode, errorMessage),
+            ResultType.Invalid => new InvalidValueCommitResults<T>(value, errorCode, errorMessage),
+            ResultType.NotFound => new NotFoundValueCommitResults<T>(value, errorCode, errorMessage),
+            ResultType.InvalidValidation => new InvalidValidationValueCommitResults<T>(value, errorCode, errorMessage),
+            ResultType.Exception => new ExceptionValueCommitResults<T>(value, errorCode, errorMessage),
+            ResultType.Duplicated => new DuplicatedValueCommitResults<T>(value, errorCode, errorMessage),
+            _ => new OthersValueCommitResults<T>(value, errorCode, errorMessage),
         };
     }
 }

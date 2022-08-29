@@ -1,16 +1,9 @@
 ﻿namespace Flaminco.CommitResult.ValueCommitResultsTypes;
 
-public class InvalidValidationValueCommitResults<T> : ICommitResults<T>
+public class InvalidValidationValueCommitResults<TValue> : CommitResults<TValue>
 {
-    public InvalidValidationValueCommitResults(string? errorCode, string? errorMessage)
+    public InvalidValidationValueCommitResults(IEnumerable<TValue>? value, string? errorCode, string? errorMessage) : base(value, errorCode, errorMessage)
     {
-        ErrorCode = errorCode;
-        ErrorMessage = errorMessage;
+        ResultType = ResultType.InvalidValidation;
     }
-    public string? ErrorMessage { get; set; }
-    public string? ErrorCode { get; set; }
-    public ResultType ResultType { get; set; } = ResultType.InvalidValidation;
-    public bool IsSuccess => string.IsNullOrEmpty(ErrorCode) && string.IsNullOrEmpty(ErrorMessage);
-    public IEnumerable<T>? Value { get; set; } = Array.Empty<T>();
-
 }

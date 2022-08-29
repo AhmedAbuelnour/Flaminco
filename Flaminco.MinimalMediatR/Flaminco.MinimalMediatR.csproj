@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <Version>0.0.3</Version>
+	  <Authors>Ahmed Abuelnour</Authors>
+	  <Company>Personal</Company>
+	  <Description>A Simple MediatR for Minimal APIs</Description>
+	  <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
+	  <Copyright>Free</Copyright>
+  </PropertyGroup>
+	
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="10.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+  </ItemGroup>
+
+</Project>

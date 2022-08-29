@@ -1,14 +1,9 @@
 ﻿namespace Flaminco.CommitResult.CommitResultTypes;
 
-public class InvalidCommitResult : ICommitResult
+public class InvalidCommitResult : CommitResult
 {
-    public InvalidCommitResult(string? errorCode, string? errorMessage)
+    public InvalidCommitResult(string? errorCode, string? errorMessage) : base(errorCode, errorMessage)
     {
-        ErrorCode = errorCode;
-        ErrorMessage = errorMessage;
+        ResultType = ResultType.Invalid;
     }
-    public string? ErrorMessage { get; set; }
-    public string? ErrorCode { get; set; }
-    public ResultType ResultType { get; set; } = ResultType.Invalid;
-    public bool IsSuccess => string.IsNullOrEmpty(ErrorCode) && string.IsNullOrEmpty(ErrorMessage);
 }

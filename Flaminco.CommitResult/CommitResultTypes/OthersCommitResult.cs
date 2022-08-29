@@ -1,14 +1,9 @@
 ﻿namespace Flaminco.CommitResult.CommitResultTypes;
 
-public class OthersCommitResult : ICommitResult
+public class OthersCommitResult : CommitResult
 {
-    public OthersCommitResult(string? errorCode, string? errorMessage)
+    public OthersCommitResult(string? errorCode, string? errorMessage) : base(errorCode, errorMessage)
     {
-        ErrorCode = errorCode;
-        ErrorMessage = errorMessage;
+        ResultType = ResultType.Others;
     }
-    public string? ErrorMessage { get; set; }
-    public string? ErrorCode { get; set; }
-    public ResultType ResultType { get; set; } = ResultType.Others;
-    public bool IsSuccess => string.IsNullOrEmpty(ErrorCode) && string.IsNullOrEmpty(ErrorMessage);
 }

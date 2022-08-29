@@ -8,14 +8,14 @@ namespace WebApplication1.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private readonly IManualMapper<int> _mapper;
-        public WeatherForecastController(IManualMapper<int> mapper)
+        private readonly IManualMapper<List<int>> _mapper;
+        public WeatherForecastController(IManualMapper<List<int>> mapper)
         {
             _mapper = mapper;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        public async ValueTask<int> Get()
+        public async ValueTask<List<int>> Get()
         {
             return await _mapper.Map(new SimpleMapProfile("Ahmed"), opts =>
             {

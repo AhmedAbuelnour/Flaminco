@@ -1,16 +1,9 @@
 ﻿namespace Flaminco.CommitResult.ValueCommitResultTypes;
 
-public class NotFoundValueCommitResult<T> : ICommitResult<T>
+public class NotFoundValueCommitResult<TValue> : CommitResult<TValue>
 {
-    public NotFoundValueCommitResult(string? errorCode, string? errorMessage)
+    public NotFoundValueCommitResult(TValue? value, string? errorCode, string? errorMessage) : base(value, errorCode, errorMessage)
     {
-        ErrorCode = errorCode;
-        ErrorMessage = errorMessage;
+        ResultType = ResultType.NotFound;
     }
-    public string? ErrorMessage { get; set; }
-    public string? ErrorCode { get; set; }
-    public ResultType ResultType { get; set; } = ResultType.NotFound;
-    public bool IsSuccess => string.IsNullOrEmpty(ErrorCode) && string.IsNullOrEmpty(ErrorMessage);
-    public T? Value { get; set; } = default;
-
 }

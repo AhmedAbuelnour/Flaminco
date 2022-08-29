@@ -1,16 +1,9 @@
 ﻿namespace Flaminco.CommitResult.ValueCommitResultsTypes;
 
-public class OthersValueCommitResults<T> : ICommitResults<T>
+public class OthersValueCommitResults<TValue> : CommitResults<TValue>
 {
-    public OthersValueCommitResults(string? errorCode, string? errorMessage)
+    public OthersValueCommitResults(IEnumerable<TValue>? value, string? errorCode, string? errorMessage) : base(value, errorCode, errorMessage)
     {
-        ErrorCode = errorCode;
-        ErrorMessage = errorMessage;
+        ResultType = ResultType.Others;
     }
-    public string? ErrorMessage { get; set; }
-    public string? ErrorCode { get; set; }
-    public ResultType ResultType { get; set; } = ResultType.Others;
-    public bool IsSuccess => string.IsNullOrEmpty(ErrorCode) && string.IsNullOrEmpty(ErrorMessage);
-    public IEnumerable<T>? Value { get; set; } = Array.Empty<T>();
-
 }

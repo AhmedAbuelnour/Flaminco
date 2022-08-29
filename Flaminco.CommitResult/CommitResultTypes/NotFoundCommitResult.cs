@@ -1,14 +1,9 @@
 ﻿namespace Flaminco.CommitResult.CommitResultTypes;
 
-public class NotFoundCommitResult : ICommitResult
+public class NotFoundCommitResult : CommitResult
 {
-    public NotFoundCommitResult(string? errorCode, string? errorMessage)
+    public NotFoundCommitResult(string? errorCode, string? errorMessage) : base(errorCode, errorMessage)
     {
-        ErrorCode = errorCode;
-        ErrorMessage = errorMessage;
+        ResultType = ResultType.NotFound;
     }
-    public string? ErrorMessage { get; set; }
-    public string? ErrorCode { get; set; }
-    public ResultType ResultType { get; set; } = ResultType.NotFound;
-    public bool IsSuccess => string.IsNullOrEmpty(ErrorCode) && string.IsNullOrEmpty(ErrorMessage);
 }

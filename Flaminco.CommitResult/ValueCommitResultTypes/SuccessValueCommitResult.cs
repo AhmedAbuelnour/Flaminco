@@ -1,14 +1,9 @@
 ﻿namespace Flaminco.CommitResult.ValueCommitResultTypes;
 
-public class SuccessValueCommitResult<T> : ICommitResult<T>
+public class SuccessValueCommitResult<TValue> : CommitResult<TValue>
 {
-    public SuccessValueCommitResult(T _value)
+    public SuccessValueCommitResult(TValue? value, string? errorCode, string? errorMessage) : base(value, errorCode, errorMessage)
     {
-        Value = _value;
+        ResultType = ResultType.Ok;
     }
-    public string? ErrorMessage { get; set; }
-    public string? ErrorCode { get; set; }
-    public ResultType ResultType { get; set; } = ResultType.Ok;
-    public bool IsSuccess => string.IsNullOrEmpty(ErrorCode) && string.IsNullOrEmpty(ErrorMessage);
-    public T? Value { get; set; }
 }

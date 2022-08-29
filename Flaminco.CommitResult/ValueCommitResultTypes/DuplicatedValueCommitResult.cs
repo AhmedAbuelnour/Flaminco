@@ -1,15 +1,9 @@
 ﻿namespace Flaminco.CommitResult.ValueCommitResultTypes;
 
-public class DuplicatedValueCommitResult<T> : ICommitResult<T>
+public class DuplicatedValueCommitResult<TValue> : CommitResult<TValue>
 {
-    public DuplicatedValueCommitResult(string? errorCode, string? errorMessage)
+    public DuplicatedValueCommitResult(TValue? value, string? errorCode, string? errorMessage) : base(value, errorCode, errorMessage)
     {
-        ErrorCode = errorCode;
-        ErrorMessage = errorMessage;
+        ResultType = ResultType.Duplicated;
     }
-    public string? ErrorMessage { get; set; }
-    public string? ErrorCode { get; set; }
-    public ResultType ResultType { get; set; } = ResultType.Duplicated;
-    public bool IsSuccess => string.IsNullOrEmpty(ErrorCode) && string.IsNullOrEmpty(ErrorMessage);
-    public T? Value { get; set; } = default;
 }

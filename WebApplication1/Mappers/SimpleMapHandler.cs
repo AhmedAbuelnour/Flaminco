@@ -2,12 +2,12 @@
 
 namespace WebApplication1.Mappers
 {
-    public record SimpleMapProfile(string Name) : IMapProfile<int>;
+    public record SimpleMapProfile(string Name) : IMapProfile<List<int>>;
 
 
-    public class SimpleMapHandler : IMapProfileHandler<SimpleMapProfile, int>
+    public class SimpleMapHandler : IMapProfileHandler<SimpleMapProfile, List<int>>
     {
-        public ValueTask<int> Handler(SimpleMapProfile profile, Action<MapperOptions>? options = null, CancellationToken cancellationToken = default)
+        public ValueTask<List<int>> Handler(SimpleMapProfile profile, Action<MapperOptions>? options = null, CancellationToken cancellationToken = default)
         {
             MapperOptions? mapperOptions = new MapperOptions();
 
@@ -15,9 +15,9 @@ namespace WebApplication1.Mappers
 
             if (profile.Name == "Ahmed")
             {
-                return ValueTask.FromResult(15);
+                return ValueTask.FromResult(new List<int> { 15, 16 });
             }
-            return ValueTask.FromResult(int.Parse(mapperOptions?.Arguments["ReturnValue"]?.ToString()));
+            return ValueTask.FromResult(new List<int> { 15, 16, 17 });
         }
     }
 }
