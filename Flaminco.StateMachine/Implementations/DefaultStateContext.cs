@@ -6,13 +6,14 @@ namespace Flaminco.StateMachine.Implementations;
 public class DefaultStateContext : IStateContext
 {
     private readonly IServiceProvider _serviceProvider;
-
+    private readonly List<IState> States;
     public DefaultStateContext(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
+        States = new List<IState>();
     }
 
-    public async ValueTask Execute(IState? start, ISharedValue? sharedValue = default, CancellationToken cancellationToken = default)
+    public async ValueTask Execute(IState? start, ISharedValue? sharedValue = default, Action<IState>? onTransition = default, Action<IEnumerable<IState>>? onComplete = default, CancellationToken cancellationToken = default)
     {
         if (start is null)
         {
@@ -25,18 +26,24 @@ public class DefaultStateContext : IStateContext
         {
             await ValueTask.CompletedTask;
         }
-
-        if (state?.IsCircuitBreakerState == true)
-        {
-            _ = await state!.Handle(sharedValue, cancellationToken);
-            
-            await ValueTask.CompletedTask;
-        }
         else
-        { 
-           IState? nextState =  await state!.Handle(sharedValue, cancellationToken);
+        {
+            States.Add(start);
 
-           await Execute(nextState, sharedValue, cancellationToken);
+            onTransition?.Invoke(state!);
+
+            IState? nextState = await state!.Handle(sharedValue, cancellationToken);
+
+            if (state?.IsCircuitBreakerState == false)
+            {
+                await Execute(nextState, sharedValue, onTransition, onComplete, cancellationToken);
+            }
+            else
+            {
+                onComplete?.Invoke(States);
+
+                await ValueTask.CompletedTask;
+            }
         }
     }
 }

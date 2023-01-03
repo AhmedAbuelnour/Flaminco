@@ -2,6 +2,7 @@ using Flaminco.ManualMapper.Abstractions;
 using Flaminco.Pipeline.Abstractions;
 using Flaminco.StateMachine.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using WebApplication1.StateMachines;
 
 namespace WebApplication1.Controllers
@@ -24,9 +25,15 @@ namespace WebApplication1.Controllers
         public async Task<string> Get()
         {
             var sharedValue = new SharedValue();
-            
-            await _stateContext.Execute(new FirstState(),sharedValue
-           );
+
+            await _stateContext.Execute(new FirstState(), sharedValue, (currentState) =>
+            {
+                Debug.WriteLine($"CurrentState: {currentState.Name}");
+            },
+            (states) =>
+            {
+                Debug.WriteLine(states.Count());
+            });
 
             return $"Value: {sharedValue.Value}";
         }
