@@ -4,7 +4,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	  <Version>0.0.3</Version>
+	  <Version>0.0.5</Version>
 	  <Authors>Ahmed Abuelnour</Authors>
 	  <Company>Personal</Company>
 	  <Description>A Simple MediatR for Minimal APIs</Description>
@@ -16,7 +16,8 @@
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="10.0.1" />
+    <PackageReference Include="Flaminco.CommitResult" Version="0.0.5" />
+    <PackageReference Include="MediatR" Version="11.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
   </ItemGroup>
 

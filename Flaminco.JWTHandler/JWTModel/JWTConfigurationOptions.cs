@@ -9,5 +9,10 @@ public class JWTConfigurationOptions
     public bool ClearCliamTypeMap { get; set; } = false;
     public bool RequireHttpsMetadata { get; set; } = false;
     public bool SaveTokenInAuthProperties { get; set; } = false;
+    public bool ValidateIssuerSigningKey { get; set; } = true;
+    public bool ValidateLifetime { get; set; } = true;
+    public bool ValidateIssuer { get; set; } = true;
+    public bool ValidateAudience { get; set; } = true;
+    public TimeSpan ClockSkew { get; set; } = TimeSpan.Zero;
 }
 

@@ -1,6 +1,8 @@
-using Flaminco.ManualMapper;
+using Flaminco.ManualMapper.Abstractions;
+using Flaminco.Pipeline.Abstractions;
+using Flaminco.StateMachine.Abstractions;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Mappers;
+using WebApplication1.StateMachines;
 
 namespace WebApplication1.Controllers
 {
@@ -8,19 +10,25 @@ namespace WebApplication1.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private readonly IManualMapper<List<int>> _mapper;
-        public WeatherForecastController(IManualMapper<List<int>> mapper)
+        private readonly IPipeline _pipeline;
+        private readonly IManualMapper _manualMapper;
+        private readonly IStateContext _stateContext;
+        public WeatherForecastController(IPipeline pipeline, IManualMapper manualMapper, IStateContext stateContext)
         {
-            _mapper = mapper;
+            _pipeline = pipeline;
+            _manualMapper = manualMapper;
+            _stateContext = stateContext;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        public async ValueTask<List<int>> Get()
+        public async Task<string> Get()
         {
-            return await _mapper.Map(new SimpleMapProfile("Ahmed"), opts =>
-            {
-                opts.Arguments["ReturnValue"] = 5;
-            });
+            var sharedValue = new SharedValue();
+            
+            await _stateContext.Execute(new FirstState(),sharedValue
+           );
+
+            return $"Value: {sharedValue.Value}";
         }
     }
 }

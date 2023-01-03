@@ -1,4 +1,7 @@
-using Flaminco.ManualMapper;
+using Flaminco.ManualMapper.Extensions;
+using Flaminco.Pipeline.Extensions;
+using Flaminco.StateMachine.Extensions;
+using WebApplication1.Pipelines;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +12,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddManualMapper(typeof(Program));
+builder.Services.AddStateMachine<Program>();
+
+builder.Services.AddManualMapper<Program>();
+
+builder.Services.AddPipelines<IPipelinesScanner>();
 
 var app = builder.Build();
 

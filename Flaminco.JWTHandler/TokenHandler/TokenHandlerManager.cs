@@ -16,7 +16,7 @@ public class TokenHandlerManager
     }
     public AccessToken GetAccessToken(Dictionary<string, string> userProfileClaims)
     {
-        JwtSecurityToken token = new JwtSecurityToken(
+        JwtSecurityToken token = new(
         issuer: _configuration.Issuer,
         audience: _configuration.Audience,
         notBefore: DateTime.UtcNow,
@@ -53,7 +53,7 @@ public class TokenHandlerManager
         => GetAccessToken(GetPrincipalFromExpiredToken(expiredToken));
     private Dictionary<string, string> GetPrincipalFromExpiredToken(string expiredToken)
     {
-        TokenValidationParameters tokenValidationParameters = new TokenValidationParameters
+        TokenValidationParameters tokenValidationParameters = new()
         {
             ValidateAudience = false, //you might want to validate the audience and issuer depending on your use case
             ValidateIssuer = false,
@@ -62,10 +62,8 @@ public class TokenHandlerManager
             ValidateLifetime = false //here we are saying that we don't care about the token's expiration date
         };
         var tokenHandler = new JwtSecurityTokenHandler();
-        SecurityToken securityToken;
-        ClaimsPrincipal? principal = tokenHandler.ValidateToken(expiredToken, tokenValidationParameters, out securityToken);
-        JwtSecurityToken? jwtSecurityToken = securityToken as JwtSecurityToken;
-        if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature, StringComparison.InvariantCultureIgnoreCase))
+        ClaimsPrincipal? principal = tokenHandler.ValidateToken(expiredToken, tokenValidationParameters, out SecurityToken securityToken);
+        if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature, StringComparison.InvariantCultureIgnoreCase))
             throw new SecurityTokenException("Invalid token");
         return principal.Claims.ToDictionary(keySelector: m => m.Type, elementSelector: m => m.Value);
     }
