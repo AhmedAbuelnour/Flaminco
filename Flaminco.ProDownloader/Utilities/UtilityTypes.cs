@@ -40,9 +40,9 @@ public class ServerSegmentProfile : BaseProfile
 
 public class ServerFileProfile : BaseProfile
 {
-    public string Name { get; set; }
-    public string Extension { get; set; }
-    public string MediaType { get; set; }
+    public string? Name { get; set; }
+    public string? Extension { get; set; }
+    public string? MediaType { get; set; }
     public bool IsResumable { get; set; }
 }
 

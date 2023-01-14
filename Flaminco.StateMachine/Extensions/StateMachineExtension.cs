@@ -18,11 +18,11 @@ public static class StateMachineExtension
         {
             foreach (var implementedInterface in typeInfo.ImplementedInterfaces)
             {
-                services.AddTransient(implementedInterface, typeInfo);
+                services.AddScoped(implementedInterface, typeInfo);
             }
         }
 
-        services.AddTransient<IStateContext, DefaultStateContext>();
+        services.AddScoped<IStateContext, DefaultStateContext>();
 
 
         return services;

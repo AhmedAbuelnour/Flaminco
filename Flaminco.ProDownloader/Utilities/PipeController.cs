@@ -24,6 +24,7 @@ public class PipeController
 
             // Make the data available to the PipeReader.
             FlushResult flushResult = await _pipeline.Writer.FlushAsync(cancellationToken);
+
             if (flushResult.IsCanceled || flushResult.IsCompleted) break;
         }
         // By completing PipeWriter, tell the PipeReader that there's no more data coming.
@@ -34,6 +35,7 @@ public class PipeController
         using (Stream LocalFile = new FileStream(profile.FileLocation, FileMode.Append, FileAccess.Write))
         {
             LocalFile.Seek(LocalFile.Length, SeekOrigin.Begin);
+
             while (true)
             {
                 ReadResult ReadResult = await _pipeline.Reader.ReadAsync(cancellationToken);

@@ -26,7 +26,7 @@ namespace WebApplication1.StateMachines
     public record SecondState : IState
     {
         public string Name => nameof(SecondState);
-        public async  ValueTask<IState?> Handle(ISharedValue? value = default, CancellationToken cancellationToken = default)
+        public async ValueTask<IState?> Handle(ISharedValue? value = default, CancellationToken cancellationToken = default)
         {
             if (value is SharedValue sharedValue)
             {
@@ -42,6 +42,8 @@ namespace WebApplication1.StateMachines
     public record ThirdState : IState
     {
         public string Name => nameof(ThirdState);
+        public bool IsCircuitBreakerState => true;
+
         public ValueTask<IState?> Handle(ISharedValue? value = default, CancellationToken cancellationToken = default)
         {
             if (value is SharedValue sharedValue)
@@ -51,6 +53,5 @@ namespace WebApplication1.StateMachines
             return default;
         }
 
-        public bool IsCircuitBreakerState => true;
     }
 }

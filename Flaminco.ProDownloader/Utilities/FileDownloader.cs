@@ -2,19 +2,18 @@
 
 namespace Flaminco.ProDownloader.Utilities;
 
-public class ProfileDownloader
+public class FileDownloader
 {
     private readonly PipeController _pipelineController;
-    private readonly Stopwatch SWatch;
-
-    public ProfileDownloader()
+    public FileDownloader(PipeController _pipeController)
     {
-        SWatch = new Stopwatch();
-        _pipelineController = new PipeController();
+        _pipelineController = _pipeController;
     }
 
     public async Task DownloadAsync(ServerFileProfile profile, Action<DownloadInfo> CurrentProgress, CancellationToken cancellationToken = default)
     {
+        Stopwatch SWatch = new Stopwatch();
+
         SWatch.Start();
 
         Task writing = _pipelineController.WriteInPipeAsync(profile, () => CurrentProgress.Invoke(ProgressCallback(profile, SWatch)), cancellationToken);
@@ -30,6 +29,8 @@ public class ProfileDownloader
 
     public async Task DownloadAsync(ServerSegmentProfile profile, Action<DownloadInfo> CurrentProgress, CancellationToken cancellationToken = default)
     {
+        Stopwatch SWatch = new Stopwatch();
+
         SWatch.Start();
 
         Task writing = _pipelineController.WriteInPipeAsync(profile, () => CurrentProgress.Invoke(ProgressCallback(profile, SWatch)), cancellationToken);
@@ -43,8 +44,8 @@ public class ProfileDownloader
         SWatch.Reset();
     }
 
-    public DownloadInfo ProgressCallback(BaseProfile profile, Stopwatch SWatch)
-       => new DownloadInfo
+    private static DownloadInfo ProgressCallback(BaseProfile profile, Stopwatch SWatch)
+       => new()
        {
            CurrentPercentage = ((profile.TotalReadBytes) / (float)profile.Size) * 100, // Gets the Current Percentage
            DownloadSpeed = Convert.ToInt64((profile.TotalReadBytes / SWatch.Elapsed.TotalSeconds)).SizeSuffix(), // Get The Current Speed

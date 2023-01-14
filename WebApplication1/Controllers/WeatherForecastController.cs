@@ -3,6 +3,7 @@ using Flaminco.Pipeline.Abstractions;
 using Flaminco.StateMachine.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using WebApplication1.Mappers;
 using WebApplication1.StateMachines;
 
 namespace WebApplication1.Controllers
@@ -24,16 +25,22 @@ namespace WebApplication1.Controllers
         [HttpGet(Name = "GetWeatherForecast")]
         public async Task<string> Get()
         {
+
+            await _manualMapper.Map(new SimpleMapProfile("AAA"));
+
             var sharedValue = new SharedValue();
 
-            await _stateContext.Execute(new FirstState(), sharedValue, (currentState) =>
-            {
-                Debug.WriteLine($"CurrentState: {currentState.Name}");
-            },
-            (states) =>
-            {
-                Debug.WriteLine(states.Count());
-            });
+            await _stateContext.Execute(
+                new FirstState(),
+                sharedValue,
+                onTransition: (currentState) =>
+                {
+                    Debug.WriteLine($"CurrentState: {currentState.Name}");
+                },
+                onComplete: (states) =>
+                {
+                    Debug.WriteLine(states.Count());
+                });
 
             return $"Value: {sharedValue.Value}";
         }

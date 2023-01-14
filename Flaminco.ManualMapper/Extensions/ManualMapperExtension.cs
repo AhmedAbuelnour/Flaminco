@@ -17,11 +17,11 @@ namespace Flaminco.ManualMapper.Extensions
             {
                 foreach (var implementedInterface in typeInfo.ImplementedInterfaces)
                 {
-                    services.AddTransient(implementedInterface, typeInfo);
+                    services.AddScoped(implementedInterface, typeInfo);
                 }
             }
 
-            services.AddSingleton<IManualMapper, DefaultManualMapper>();
+            services.AddScoped<IManualMapper, DefaultManualMapper>();
 
             return services;
         }

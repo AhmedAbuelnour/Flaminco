@@ -17,11 +17,11 @@ public static class PipelineExtension
         {
             foreach (var implementedInterface in typeInfo.ImplementedInterfaces)
             {
-                services.AddTransient(implementedInterface, typeInfo);
+                services.AddScoped(implementedInterface, typeInfo);
             }
         }
 
-        services.AddTransient<IPipeline, DefaultPipeline>();
+        services.AddScoped<IPipeline, DefaultPipeline>();
 
         return services;
     }
