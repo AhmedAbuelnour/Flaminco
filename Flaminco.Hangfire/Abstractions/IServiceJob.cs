@@ -4,6 +4,6 @@ namespace Flaminco.Hangfire.Abstractions
 {
     public interface IServiceJob
     {
-        ValueTask Execute();
+        ValueTask Execute<TValue>(TValue? value = default) where TValue : IServiceValue;
     }
 }
