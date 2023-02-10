@@ -1,7 +1,10 @@
 ﻿namespace Flaminco.EnterpriseValidator.ValidatorRules.Integers;
 
-public record IsNotEqualToRule<T>(int NotEqualTo, string ValidationMessage) : IValidationRule<T>
+public class IsNotEqualToRule<T> : IValidationRule<T>
 {
+    public required string ValidationMessage { get; init; }
+    public required int NotEqualTo { get; init; }
+
     public ValueTask<bool> Check(T value)
     {
         if (value == null)

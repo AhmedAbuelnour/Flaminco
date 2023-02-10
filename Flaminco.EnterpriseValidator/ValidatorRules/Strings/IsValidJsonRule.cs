@@ -2,8 +2,10 @@
 
 namespace Flaminco.EnterpriseValidator.ValidatorRules.Strings;
 
-public record IsValidJsonRule<T>(string ValidationMessage) : IValidationRule<T>
+public class IsValidJsonRule<T> : IValidationRule<T>
 {
+    public required string ValidationMessage { get; init; }
+
     public ValueTask<bool> Check(T value)
     {
         if (value == null)

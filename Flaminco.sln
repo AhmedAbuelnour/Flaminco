@@ -33,7 +33,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.StateMachine", "Fl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Pipeline", "Flaminco.Pipeline\Flaminco.Pipeline.csproj", "{C859199F-C80C-4704-83D8-A1B85ADC5A11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Hangfire", "Flaminco.Hangfire\Flaminco.Hangfire.csproj", "{33112C42-D01D-40BB-940C-32F661A2B03B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Hangfire", "Flaminco.Hangfire\Flaminco.Hangfire.csproj", "{33112C42-D01D-40BB-940C-32F661A2B03B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.ServiceBus", "Flaminco.ServiceBus\Flaminco.ServiceBus.csproj", "{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -105,6 +107,10 @@ Global
 		{33112C42-D01D-40BB-940C-32F661A2B03B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33112C42-D01D-40BB-940C-32F661A2B03B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33112C42-D01D-40BB-940C-32F661A2B03B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

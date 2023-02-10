@@ -18,7 +18,7 @@ public class ValidatableObject<T> : IValidatable<T>
     public List<IValidationRule<T>> ValidationsRules { get; }
     public List<ValidationRuleResult<T>> Errors { get; }
     public bool IsValid { get; private set; }
-    public T Value { get; set; }
+    public required T Value { get; init; }
 
     /// <summary>
     /// Add Rules to run against your input
@@ -27,7 +27,7 @@ public class ValidatableObject<T> : IValidatable<T>
     public void AddRules(params IValidationRule<T>[] rules)
     {
         if (rules == null)
-            throw new ArgumentNullException(nameof(rules), "You have't set any validation rules");
+            throw new ArgumentNullException(nameof(rules), "You haven't set any validation rules");
 
         if (rules.Any(a => string.IsNullOrWhiteSpace(a.ValidationMessage)))
             throw new ArgumentNullException(nameof(rules), $"One or more of the validation rules has no validation message");
@@ -37,7 +37,7 @@ public class ValidatableObject<T> : IValidatable<T>
     public bool Validate()
     {
         if (Value is null)
-            throw new NullReferenceException($"You have't set a value for the property {nameof(Value)}");
+            throw new NullReferenceException($"You haven't set a value for the property {nameof(Value)}");
 
         ValidationsRules.ForEach(async a =>
         {

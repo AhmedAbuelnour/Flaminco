@@ -1,7 +1,9 @@
 ﻿namespace Flaminco.EnterpriseValidator.ValidatorRules.Integers;
 
-public record IsNotEqualToZeroRule<T>(string ValidationMessage) : IValidationRule<T>
+public class IsNotEqualToZeroRule<T> : IValidationRule<T>
 {
+    public required string ValidationMessage { get; init; }
+
     public ValueTask<bool> Check(T value)
     {
         if (value == null)

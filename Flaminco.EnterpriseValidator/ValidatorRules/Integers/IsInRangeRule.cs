@@ -1,7 +1,11 @@
 ﻿namespace Flaminco.EnterpriseValidator.ValidatorRules.Integers;
 
-public record IsInRangeRule<T>(int Start, int End, string ValidationMessage) : IValidationRule<T>
+public class IsInRangeRule<T> : IValidationRule<T>
 {
+    public required string ValidationMessage { get; init; }
+    public required int Start { get; init; }
+    public required int End { get; init; }
+
     public ValueTask<bool> Check(T value)
     {
         if (value == null)

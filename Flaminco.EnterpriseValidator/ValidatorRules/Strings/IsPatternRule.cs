@@ -2,9 +2,11 @@
 
 namespace Flaminco.EnterpriseValidator.ValidatorRules.Strings;
 
-
-public record IsPatternRule<T>(string Pattern, string ValidationMessage) : IValidationRule<T>
+public class IsPatternRule<T> : IValidationRule<T>
 {
+    public required string ValidationMessage { get; init; }
+    public required string Pattern { get; init; }
+
     public ValueTask<bool> Check(T value)
     {
         if (value == null)

@@ -24,7 +24,6 @@ public static class StateMachineExtension
 
         services.AddScoped<IStateContext, DefaultStateContext>();
 
-
         return services;
     }
 }

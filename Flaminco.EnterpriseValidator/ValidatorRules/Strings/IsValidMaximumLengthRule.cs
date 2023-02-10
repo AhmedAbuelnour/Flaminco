@@ -1,7 +1,10 @@
 ﻿namespace Flaminco.EnterpriseValidator.ValidatorRules.Strings;
 
-public record IsValidMaximumLengthRule<T>(int Maximum, string ValidationMessage) : IValidationRule<T>
+public class IsValidMaximumLengthRule<T> : IValidationRule<T>
 {
+    public required string ValidationMessage { get; init; }
+    public required int Maximum { get; init; }
+
     public ValueTask<bool> Check(T value)
     {
         if (value == null)

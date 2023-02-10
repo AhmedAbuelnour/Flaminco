@@ -1,7 +1,9 @@
 ﻿namespace Flaminco.EnterpriseValidator.ValidatorRules.Strings;
 
-public record IsOnlyNumbersRule<T>(string ValidationMessage) : IValidationRule<T>
+public class IsOnlyNumbersRule<T> : IValidationRule<T>
 {
+    public required string ValidationMessage { get; init; }
+
     public ValueTask<bool> Check(T value)
     {
         if (value == null)

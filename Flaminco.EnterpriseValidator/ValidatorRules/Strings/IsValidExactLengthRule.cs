@@ -1,7 +1,10 @@
 ﻿namespace Flaminco.EnterpriseValidator.ValidatorRules.Strings;
 
-public record IsValidExactLengthRule<T>(int Exact, string ValidationMessage) : IValidationRule<T>
+public class IsValidExactLengthRule<T> : IValidationRule<T>
 {
+    public required string ValidationMessage { get; init; }
+    public required int Exact { get; init; }
+
     public ValueTask<bool> Check(T value)
     {
         if (value == null)
