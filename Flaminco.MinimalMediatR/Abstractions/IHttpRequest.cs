@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace Flaminco.MinimalMediatR.Contracts;
+namespace Flaminco.MinimalMediatR.Abstractions;
 
 public interface IHttpRequest : IRequest<IResult>
 {

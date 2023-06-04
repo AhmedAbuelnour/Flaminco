@@ -1,37 +1,42 @@
-﻿using Flaminco.ProDownloader.Extensions;
-using Flaminco.ProDownloader.Utilities;
-using Microsoft.Extensions.DependencyInjection;
+﻿
 
-ServiceCollection services = new ServiceCollection();
+using BenchmarkDotNet.Running;
+using ConsoleApp;
 
-services.AddProDownloader();
-
-ServiceProvider provider = services.BuildServiceProvider();
+BenchmarkRunner.Run<ResultPatterBenchmark>();
 
 
-FileProfileCreator? profileCreator = provider.GetService<FileProfileCreator>();
+Console.Read();
+//ServiceCollection services = new ServiceCollection();
 
-profileCreator.Initializer("https://raw.githubusercontent.com/AhmedAbuelnour/MBs/master/4MB.txt", @"C:\Users\Ahmed\source\repos\Flaminco\ConsoleApp", "text.txt");
+//services.AddProDownloader();
+
+//ServiceProvider provider = services.BuildServiceProvider();
 
 
-var profiles = profileCreator.CreateSegmentProfilesAsync(8);
+//FileProfileCreator? profileCreator = provider.GetService<FileProfileCreator>();
+
+//profileCreator.Initializer("https://raw.githubusercontent.com/AhmedAbuelnour/MBs/master/4MB.txt", @"C:\Users\Ahmed\source\repos\Flaminco\ConsoleApp", "text.txt");
 
 
-List<ServerSegmentProfile> segments = new List<ServerSegmentProfile>();
+//var profiles = profileCreator.CreateSegmentProfilesAsync(8);
 
-await foreach (var profile in profiles)
-{
-    FileDownloader FileDownloader = provider.GetService<FileDownloader>();
 
-    segments.Add(profile);
+//List<ServerSegmentProfile> segments = new List<ServerSegmentProfile>();
 
-    await FileDownloader.DownloadAsync(profile, (e) =>
-    {
-        Console.WriteLine($"Current Percentage: {e.CurrentPercentage}");
-        Console.WriteLine($"Downloaded Progress: {e.DownloadedProgress}");
-        Console.WriteLine($"DownloadSpeed: {e.DownloadSpeed}");
-    });
-}
+//await foreach (var profile in profiles)
+//{
+//    FileDownloader FileDownloader = provider.GetService<FileDownloader>();
+
+//    segments.Add(profile);
+
+//    await FileDownloader.DownloadAsync(profile, (e) =>
+//    {
+//        Console.WriteLine($"Current Percentage: {e.CurrentPercentage}");
+//        Console.WriteLine($"Downloaded Progress: {e.DownloadedProgress}");
+//        Console.WriteLine($"DownloadSpeed: {e.DownloadSpeed}");
+//    });
+//}
 
 //await profileCreator.ReconstructSegmentProfilesAsync(segments);
 

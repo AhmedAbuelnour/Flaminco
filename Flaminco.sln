@@ -13,10 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.EnterpriseValidato
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ProDownloader", "Flaminco.ProDownloader\Flaminco.ProDownloader.csproj", "{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{8CF75E29-F2D5-48F1-B6FE-93978F43A3A8}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.JsonLocalizer", "Flaminco.JsonLocalizer\Flaminco.JsonLocalizer.csproj", "{D7FB0B91-4D6C-4138-B6EE-2240852E6CFA}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.AuditTrail.Core", "Flaminco.AuditTrail\Flaminco.AuditTrail.Core.csproj", "{D1563A40-EC40-4040-8C1B-B866A9DD2812}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.AuditTrail.Redis", "Flaminco.AuditTrail.Redis\Flaminco.AuditTrail.Redis.csproj", "{6C904A16-A7F4-4E68-B09D-DAAC2C489E9F}"
@@ -35,7 +31,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Pipeline", "Flamin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Hangfire", "Flaminco.Hangfire\Flaminco.Hangfire.csproj", "{33112C42-D01D-40BB-940C-32F661A2B03B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.ServiceBus", "Flaminco.ServiceBus\Flaminco.ServiceBus.csproj", "{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ServiceBus", "Flaminco.ServiceBus\Flaminco.ServiceBus.csproj", "{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Results", "Flaminco.MinimalResult\Flaminco.Results.csproj", "{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,14 +61,6 @@ Global
 		{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8CF75E29-F2D5-48F1-B6FE-93978F43A3A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8CF75E29-F2D5-48F1-B6FE-93978F43A3A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8CF75E29-F2D5-48F1-B6FE-93978F43A3A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8CF75E29-F2D5-48F1-B6FE-93978F43A3A8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D7FB0B91-4D6C-4138-B6EE-2240852E6CFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D7FB0B91-4D6C-4138-B6EE-2240852E6CFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D7FB0B91-4D6C-4138-B6EE-2240852E6CFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D7FB0B91-4D6C-4138-B6EE-2240852E6CFA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D1563A40-EC40-4040-8C1B-B866A9DD2812}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D1563A40-EC40-4040-8C1B-B866A9DD2812}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1563A40-EC40-4040-8C1B-B866A9DD2812}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -111,6 +101,10 @@ Global
 		{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3,6 +3,8 @@ using Flaminco.Pipeline.Extensions;
 using Flaminco.StateMachine.Extensions;
 using WebApplication1.Pipelines;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -18,7 +20,9 @@ builder.Services.AddManualMapper<Program>();
 
 builder.Services.AddPipelines<IPipelinesScanner>();
 
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -6,24 +6,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Flaminco.Hangfire.Extensions
-{
-    public static class HangfireServiceLocatorExtension
-    {
-        public static IServiceCollection AddHangfireServiceLocator<TAssemblyScanner>(this IServiceCollection services)
-        {
-            IEnumerable<TypeInfo> types = from type in typeof(TAssemblyScanner).Assembly.DefinedTypes
-                                          where !type.IsAbstract && typeof(IServiceJob).IsAssignableFrom(type)
-                                          select type.GetTypeInfo();
+namespace Flaminco.Hangfire.Extensions;
 
-            foreach (Type? type in types)
-            {
-                services.AddScoped(typeof(IServiceJob), type);
-            }
+public static class HangfireServiceLocatorExtension {
+    public static IServiceCollection AddHangfireServiceLocator<TAssemblyScanner>(this IServiceCollection services) {
+        IEnumerable<TypeInfo> types = from type in typeof(TAssemblyScanner).Assembly.DefinedTypes
+                                      where !type.IsAbstract && typeof(IServiceJob).IsAssignableFrom(type)
+                                      select type.GetTypeInfo();
 
-            services.AddScoped<IHangfireServiceLocator, DefaultHangfireServiceLocator>();
-
-            return services;
+        foreach (Type? type in types) {
+            services.AddScoped(typeof(IServiceJob), type);
         }
+
+        services.AddScoped<IHangfireServiceLocator, DefaultHangfireServiceLocator>();
+
+        return services;
     }
 }

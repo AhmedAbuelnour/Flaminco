@@ -34,7 +34,7 @@ namespace Flaminco.ServiceBus.Abstractions
             // occurs when an error happen
             processor.ProcessErrorAsync += fallback;
 
-            // Singal the processor to start listening
+            // Signal the processor to start listening
             return processor.StartProcessingAsync(cancellationToken);
         }
         public ValueTask Dispose()

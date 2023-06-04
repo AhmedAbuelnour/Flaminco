@@ -1,9 +1,7 @@
 ﻿namespace Flaminco.CommitResult.CommitResultTypes;
 
-public class SuccessCommitResult : CommitResult
-{
-    public SuccessCommitResult(string? errorCode, string? errorMessage) : base(errorCode, errorMessage)
-    {
+public class SuccessCommitResult : CommitResult {
+    public SuccessCommitResult(string? errorCode = default, string? errorMessage = default) : base(errorCode, errorMessage) {
         ResultType = ResultType.Ok;
     }
 }

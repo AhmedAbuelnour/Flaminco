@@ -1,6 +1,4 @@
-﻿namespace Flaminco.Hangfire.Abstractions
-{
-    public interface IServiceValue
-    {
-    }
+﻿namespace Flaminco.Hangfire.Abstractions;
+
+public interface IServiceValue {
 }

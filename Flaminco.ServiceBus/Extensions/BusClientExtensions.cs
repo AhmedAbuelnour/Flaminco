@@ -13,9 +13,19 @@ namespace Flaminco.ServiceBus.Extensions
 
     public static class BusClientExtensions
     {
-        public static IServiceCollection AddBusClient<TAssemblyScanner>(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddBusLocator(this IServiceCollection services, IConfiguration configuration)
         {
-            IEnumerable<TypeInfo> publisherTypes = from type in typeof(TAssemblyScanner).Assembly.DefinedTypes
+            services.Configure<ServiceBusSettings>(configuration.GetSection(nameof(ServiceBusSettings)));
+
+            services.AddSingleton<IServiceBusLocator, ServiceBusLocator>();
+
+            return services;
+
+        }
+
+        public static IServiceCollection AddPublishers<TPublisherScanner>(this IServiceCollection services)
+        {
+            IEnumerable<TypeInfo> publisherTypes = from type in typeof(TPublisherScanner).Assembly.DefinedTypes
                                                    where !type.IsAbstract && typeof(MessagePublisher).IsAssignableFrom(type)
                                                    select type.GetTypeInfo();
 
@@ -24,7 +34,13 @@ namespace Flaminco.ServiceBus.Extensions
                 services.AddSingleton(typeof(MessagePublisher), type);
             }
 
-            IEnumerable<TypeInfo> queueConsumerTypes = from type in typeof(TAssemblyScanner).Assembly.DefinedTypes
+            return services;
+        }
+
+        public static IServiceCollection AddConsumers<TConsumerScanner>(this IServiceCollection services)
+        {
+
+            IEnumerable<TypeInfo> queueConsumerTypes = from type in typeof(TConsumerScanner).Assembly.DefinedTypes
                                                        where !type.IsAbstract && typeof(MessageQueueConsumer).IsAssignableFrom(type)
                                                        select type.GetTypeInfo();
 
@@ -34,7 +50,7 @@ namespace Flaminco.ServiceBus.Extensions
             }
 
 
-            IEnumerable<TypeInfo> topicConsumerTypes = from type in typeof(TAssemblyScanner).Assembly.DefinedTypes
+            IEnumerable<TypeInfo> topicConsumerTypes = from type in typeof(TConsumerScanner).Assembly.DefinedTypes
                                                        where !type.IsAbstract && typeof(MessageTopicConsumer).IsAssignableFrom(type)
                                                        select type.GetTypeInfo();
 
@@ -43,13 +59,7 @@ namespace Flaminco.ServiceBus.Extensions
                 services.AddSingleton(typeof(MessageTopicConsumer), type);
             }
 
-            services.Configure<ServiceBusSettings>(configuration.GetSection(nameof(ServiceBusSettings)));
-
-
-            services.AddSingleton<IServiceBusLocator, ServiceBusLocator>();
-
             return services;
-
         }
     }
 }
