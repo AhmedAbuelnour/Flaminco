@@ -2,15 +2,14 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
-namespace Flaminco.Results.Extensions
-{
-    public static class ValidatorExtensions
-    {
-        public static RouteHandlerBuilder Validator<TValue>(this RouteHandlerBuilder handlerBuilder)
-        {
-            handlerBuilder.AddEndpointFilter<ValidatorEndpointFilter<TValue>>();
+namespace Flaminco.Results.Extensions;
 
-            return handlerBuilder;
-        }
+public static class ValidatorExtensions
+{
+    public static RouteHandlerBuilder AddValidator<TValue>(this RouteHandlerBuilder handlerBuilder)
+    {
+        handlerBuilder.AddEndpointFilter<ValidatorEndpointFilter<TValue>>();
+
+        return handlerBuilder;
     }
 }
