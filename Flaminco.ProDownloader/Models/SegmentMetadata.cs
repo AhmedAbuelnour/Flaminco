@@ -1,4 +1,6 @@
-﻿namespace Flaminco.ProDownloader.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace Flaminco.ProDownloader.Models;
 
 
 /// <summary>
@@ -24,4 +26,9 @@ public sealed class SegmentMetadata
     /// Segment's End position
     /// </summary>
     public required long End { get; set; }
+
+    /// <summary>
+    /// Indicate the total bytes that has been downloaded.
+    /// </summary>
+    [JsonIgnore] internal long TotalReadBytes { get; set; }
 }

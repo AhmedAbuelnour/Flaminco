@@ -40,7 +40,7 @@ internal sealed class FileProfileClient
             DownloadPath = downloadPath,
             Url = url,
             ChunksNumber = chunkNumbers,
-            SegmentMetadata = isResumable && chunkNumbers > 1 ? FileSegmenter.SegmentPosition(fileSize, chunkNumbers).Select(segment => new SegmentMetadata
+            SegmentMetadata = isResumable && chunkNumbers > 1 ? DownloadHelper.SegmentPosition(fileSize, chunkNumbers).Select(segment => new SegmentMetadata
             {
                 Url = url,
                 Start = segment.Start,

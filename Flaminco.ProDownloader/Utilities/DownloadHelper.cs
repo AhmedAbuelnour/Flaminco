@@ -1,6 +1,9 @@
-﻿namespace Flaminco.ProDownloader.Utilities;
+﻿using System.Security.Cryptography;
+using System.Text;
 
-internal static class FileSegmenter
+namespace Flaminco.ProDownloader.Utilities;
+
+internal static class DownloadHelper
 {
     internal static IEnumerable<(long Start, long End)> SegmentPosition(long ContentLength, int ChunksNumber)
     {
@@ -9,4 +12,7 @@ internal static class FileSegmenter
             yield return (i * PartSize + Math.Min(1, i), Math.Min((i + 1) * PartSize, ContentLength));
         yield break;
     }
+
+    public static string GenerateKeyFromString(string input)
+        => (new Guid(MD5.HashData(Encoding.UTF8.GetBytes(input)))).ToString();
 }

@@ -2,6 +2,7 @@
 using Flaminco.ProDownloader.Utilities;
 using System.Diagnostics;
 using System.IO.Pipelines;
+using System.Text.Json;
 
 namespace Flaminco.ProDownloader.HttpClients;
 
@@ -20,13 +21,49 @@ public sealed class DownloaderClient
     {
         FileProfileClient fileProfileClient = new(_httpClientFactory.CreateClient(), new ResumableClient(_httpClientFactory.CreateClient()));
 
-        FileProfile fileProfile = await fileProfileClient.GetFileProfileAsync(url, downloadPath, chunkNumbers, cancellationToken);
+        FileProfile? fileProfile = await GetProfileConfiguration(url, cancellationToken);
 
-        await DownloadAsync(fileProfile, CurrentProgress, cancellationToken);
+        if (fileProfile is null)
+        {
+            fileProfile = await fileProfileClient.GetFileProfileAsync(url, downloadPath, chunkNumbers, cancellationToken);
 
-        await ReconstructProfilesAsync(fileProfile, cancellationToken);
+            await SaveProfileConfiguration(fileProfile, cancellationToken);
+        }
+
+        await DownloadAsync(fileProfile!, CurrentProgress, cancellationToken);
+
+        await ReconstructProfilesAsync(fileProfile!, cancellationToken);
     }
 
+    private async Task<FileProfile?> GetProfileConfiguration(string url, CancellationToken cancellationToken = default)
+    {
+        string configuration = Path.Combine(Path.GetTempPath(), $"{DownloadHelper.GenerateKeyFromString(url)}.txt");
+
+        if (File.Exists(configuration))
+        {
+            string content = await File.ReadAllTextAsync(configuration, cancellationToken);
+
+            return JsonSerializer.Deserialize<FileProfile>(content);
+        }
+        else
+        {
+            return default;
+        }
+    }
+
+    private Task SaveProfileConfiguration(FileProfile fileProfile, CancellationToken cancellationToken = default)
+    {
+        string configuration = Path.Combine(Path.GetTempPath(), $"{DownloadHelper.GenerateKeyFromString(fileProfile.Url)}.txt");
+
+        if (File.Exists(configuration))
+        {
+            File.Delete(configuration);
+        }
+
+        string content = JsonSerializer.Serialize(fileProfile);
+
+        return File.WriteAllTextAsync(configuration, content, cancellationToken);
+    }
 
     private async Task DownloadAsync(FileProfile profile, Action<DownloadFileInfo> CurrentProgress, CancellationToken cancellationToken = default)
     {
@@ -39,7 +76,7 @@ public sealed class DownloaderClient
             await segmentClient.DownloadAsync(segment, (totalReadBytes) =>
             {
                 _totalReadBytes += totalReadBytes;
-
+                Console.WriteLine($"Total Read Bytes: ${_totalReadBytes}");
                 CurrentProgress(ProgressCallback(profile));
 
             }, token);
