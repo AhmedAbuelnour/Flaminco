@@ -31,7 +31,7 @@ namespace WebApplication1.Controllers
             await fileDownloader.DownloadAsync(
                 url: "https://raw.githubusercontent.com/AhmedAbuelnour/MBs/master/4MB.txt",
                 downloadPath: @"D:\Downloads",
-                CurrentProgress: (e) =>
+                progressCallback: (e) =>
                 {
                     Console.WriteLine($"Download Speed: {e.DownloadSpeed}");
                     Console.WriteLine($"Percentage: {e.CurrentPercentage}");

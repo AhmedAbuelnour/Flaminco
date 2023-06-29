@@ -17,7 +17,7 @@ public sealed class DownloaderClient
         _stopwatch = new Stopwatch();
     }
 
-    public async Task DownloadAsync(string url, string downloadPath, Action<DownloadFileInfo> CurrentProgress, int chunkNumbers = 16, CancellationToken cancellationToken = default)
+    public async Task DownloadAsync(string url, string downloadPath, Action<DownloadFileInfo> progressCallback, int chunkNumbers = 16, CancellationToken cancellationToken = default)
     {
         FileProfileClient fileProfileClient = new(_httpClientFactory.CreateClient(), new ResumableClient(_httpClientFactory.CreateClient()));
 
@@ -30,7 +30,7 @@ public sealed class DownloaderClient
             await SaveProfileConfiguration(fileProfile, cancellationToken);
         }
 
-        await DownloadAsync(fileProfile!, CurrentProgress, cancellationToken);
+        await DownloadAsync(fileProfile!, progressCallback, cancellationToken);
 
         await ReconstructProfilesAsync(fileProfile!, cancellationToken);
     }
