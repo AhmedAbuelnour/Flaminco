@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Flaminco.ManualMapper\Flaminco.ManualMapper.csproj" />
     <ProjectReference Include="..\Flaminco.Pipeline\Flaminco.Pipeline.csproj" />
+    <ProjectReference Include="..\Flaminco.ProDownloader\Flaminco.ProDownloader.csproj" />
     <ProjectReference Include="..\Flaminco.StateMachine\Flaminco.StateMachine.csproj" />
   </ItemGroup>
 

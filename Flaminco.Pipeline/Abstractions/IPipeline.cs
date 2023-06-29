@@ -2,5 +2,5 @@
 
 public interface IPipeline
 {
-    ValueTask ExecutePipeline<TValue>(TValue source, string name, CancellationToken cancellationToken = default) where TValue : class;
+    ValueTask ExecutePipeline<TInput>(TInput source, CancellationToken cancellationToken = default) where TInput : class;
 }

@@ -2,6 +2,6 @@
 {
     public interface IManualMapper
     {
-        ValueTask<TResponse> Map<TResponse>(IMapProfile<TResponse> profile, string[]? args = default, CancellationToken cancellationToken = default);
+        ValueTask<TResponse> Map<TResponse>(IMapProfile<TResponse> profile, CancellationToken cancellationToken = default);
     }
 }

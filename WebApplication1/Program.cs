@@ -18,6 +18,8 @@ builder.Services.AddStateMachine<Program>();
 
 builder.Services.AddManualMapper<Program>();
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddPipelines<IPipelinesScanner>();
 
 

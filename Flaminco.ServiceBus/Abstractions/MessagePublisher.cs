@@ -44,6 +44,7 @@
                 Body = new BinaryData(JsonSerializer.SerializeToUtf8Bytes(message)),
                 ContentType = ContentType,
             };
+
             // Checks for filter
             if (CustomFilters?.Any() ?? false)
                 foreach (var filter in CustomFilters)

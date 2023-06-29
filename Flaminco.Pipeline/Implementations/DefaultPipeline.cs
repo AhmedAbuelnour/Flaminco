@@ -7,31 +7,28 @@ namespace Flaminco.Pipeline.Implementations;
 public sealed class DefaultPipeline : IPipeline
 {
     private readonly IServiceProvider _serviceProvider;
-    public DefaultPipeline(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
+    public DefaultPipeline(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
-    public async ValueTask ExecutePipeline<TValue>(TValue source, string name, CancellationToken cancellationToken = default) where TValue : class
+    public async ValueTask ExecutePipeline<TInput>(TInput source, CancellationToken cancellationToken = default) where TInput : class
     {
-        IEnumerable<IPipelineHandler<TValue>>? handlers = _serviceProvider.GetServices<IPipelineHandler<TValue>>();
+        IEnumerable<IPipelineHandler<TInput>>? handlers = _serviceProvider.GetServices<IPipelineHandler<TInput>>();
 
         if (!handlers?.Any() ?? true)
         {
             throw new InvalidOperationException("No pipeline are registered!");
         }
 
-        PriorityQueue<IPipelineHandler<TValue>, int> handlerQueue = new();
+        PriorityQueue<IPipelineHandler<TInput>, int> handlerQueue = new();
 
-        foreach (IPipelineHandler<TValue> handler in handlers!)
+        foreach (IPipelineHandler<TInput> handler in handlers!)
         {
-            if (Attribute.GetCustomAttribute(handler.GetType(), typeof(PipelineAttribute)) is PipelineAttribute attribute && attribute.Name == name)
+            if (Attribute.GetCustomAttribute(handler.GetType(), typeof(PipelineAttribute<TInput>)) is PipelineAttribute<TInput> attribute)
             {
                 handlerQueue.Enqueue(handler, attribute.Order);
             }
         }
 
-        while (handlerQueue.TryDequeue(out IPipelineHandler<TValue>? handler, out _))
+        while (handlerQueue.TryDequeue(out IPipelineHandler<TInput>? handler, out _))
         {
             await handler.Handler(source, cancellationToken);
         }

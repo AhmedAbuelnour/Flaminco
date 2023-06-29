@@ -18,8 +18,7 @@ public static class MinimalResultExtension
         _ => TypedResults.Empty
     };
 
-    public static IResult GetMinimalResult(this ResultType resultType,
-                                          IDictionary<string, string[]> errorDetails)
+    public static IResult GetMinimalResult(this ResultType resultType, IDictionary<string, string[]> errorDetails)
    => resultType switch
    {
        ResultType.Ok => TypedResults.Ok(new MinimalResult(ResultType.Ok, default, default, errorDetails)),

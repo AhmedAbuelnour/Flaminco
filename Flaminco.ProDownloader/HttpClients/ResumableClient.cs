@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 
 namespace Flaminco.ProDownloader.HttpClients;
 
-public class ResumableClient
+public sealed class ResumableClient
 {
     private readonly HttpClient _httpClient;
     public ResumableClient(HttpClient httpClient)
@@ -13,7 +13,8 @@ public class ResumableClient
     }
     public async Task<bool> IsResumableAsync(string Url, CancellationToken cancellationToken = default)
     {
-        using HttpResponseMessage Result = await _httpClient.GetAsync(Url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-        return Result.StatusCode == HttpStatusCode.PartialContent;
+        using HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync(Url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+        return httpResponseMessage.StatusCode == HttpStatusCode.PartialContent;
     }
 }

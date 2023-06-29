@@ -11,7 +11,7 @@
         public ScheduleMessagePublisher(IOptions<ServiceBusSettings> options) : base(options)
         {
         }
-        public DateTimeOffset Offset { get; init; } = default!;
+        public required DateTimeOffset Offset { get; init; }
         public new Task Publish<TMessage>(TMessage message, CancellationToken cancellationToken = default)
         {
             ServiceBusMessage serviceBusMessage = BusMessageBuilder(message);
