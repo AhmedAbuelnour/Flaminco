@@ -17,5 +17,5 @@ public interface IMinimalResult<T> : IMinimalResult
 
 public interface IMinimalResults<T> : IMinimalResult
 {
-    IEnumerable<T>? Value { get; init; }
+    IReadOnlyCollection<T>? Value { get; init; }
 }

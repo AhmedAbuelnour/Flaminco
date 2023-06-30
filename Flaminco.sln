@@ -3,13 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32519.379
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.PeriodicAction", "Flaminco.PeriodicAction\Flaminco.PeriodicAction.csproj", "{65926901-14A7-4A7C-84AB-EEF00DF6BB54}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.JWTHandler", "Flaminco.JWTHandler\Flaminco.JWTHandler.csproj", "{5E3DD1D9-5BC6-405B-873B-A4E4D5DACC7C}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.CommitResult", "Flaminco.CommitResult\Flaminco.CommitResult.csproj", "{FBCF1F08-59BE-46BF-A5BC-23517D5D7CE1}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.EnterpriseValidator", "Flaminco.EnterpriseValidator\Flaminco.EnterpriseValidator.csproj", "{A19711A2-EBAA-433D-8AA2-9A993082949B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ProDownloader", "Flaminco.ProDownloader\Flaminco.ProDownloader.csproj", "{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}"
 EndProject
@@ -21,11 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.AuditTrail.Memory"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ManualMapper", "Flaminco.ManualMapper\Flaminco.ManualMapper.csproj", "{7FDAAF88-9F9C-4911-B5B2-FD0AE04CF234}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{154F8E7D-8536-4860-B169-C52D7A2229A3}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.MinimalMediatR", "Flaminco.MinimalMediatR\Flaminco.MinimalMediatR.csproj", "{AEC18576-BF18-4BD5-A56A-B0BF89E6BE97}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.StateMachine", "Flaminco.StateMachine\Flaminco.StateMachine.csproj", "{5960C725-DC1C-401B-948F-C16799FF5074}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Pipeline", "Flaminco.Pipeline\Flaminco.Pipeline.csproj", "{C859199F-C80C-4704-83D8-A1B85ADC5A11}"
 EndProject
@@ -33,9 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Hangfire", "Flamin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ServiceBus", "Flaminco.ServiceBus\Flaminco.ServiceBus.csproj", "{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Results", "Flaminco.MinimalResult\Flaminco.Results.csproj", "{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{9DD11CDA-CD93-46B5-9311-5AC8F028F528}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Results", "Flaminco.Results\Flaminco.Results.csproj", "{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,22 +31,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{65926901-14A7-4A7C-84AB-EEF00DF6BB54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{65926901-14A7-4A7C-84AB-EEF00DF6BB54}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{65926901-14A7-4A7C-84AB-EEF00DF6BB54}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{65926901-14A7-4A7C-84AB-EEF00DF6BB54}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5E3DD1D9-5BC6-405B-873B-A4E4D5DACC7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5E3DD1D9-5BC6-405B-873B-A4E4D5DACC7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E3DD1D9-5BC6-405B-873B-A4E4D5DACC7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E3DD1D9-5BC6-405B-873B-A4E4D5DACC7C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FBCF1F08-59BE-46BF-A5BC-23517D5D7CE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FBCF1F08-59BE-46BF-A5BC-23517D5D7CE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FBCF1F08-59BE-46BF-A5BC-23517D5D7CE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FBCF1F08-59BE-46BF-A5BC-23517D5D7CE1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A19711A2-EBAA-433D-8AA2-9A993082949B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A19711A2-EBAA-433D-8AA2-9A993082949B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A19711A2-EBAA-433D-8AA2-9A993082949B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A19711A2-EBAA-433D-8AA2-9A993082949B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -79,18 +55,10 @@ Global
 		{7FDAAF88-9F9C-4911-B5B2-FD0AE04CF234}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FDAAF88-9F9C-4911-B5B2-FD0AE04CF234}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FDAAF88-9F9C-4911-B5B2-FD0AE04CF234}.Release|Any CPU.Build.0 = Release|Any CPU
-		{154F8E7D-8536-4860-B169-C52D7A2229A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{154F8E7D-8536-4860-B169-C52D7A2229A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{154F8E7D-8536-4860-B169-C52D7A2229A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{154F8E7D-8536-4860-B169-C52D7A2229A3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AEC18576-BF18-4BD5-A56A-B0BF89E6BE97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AEC18576-BF18-4BD5-A56A-B0BF89E6BE97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEC18576-BF18-4BD5-A56A-B0BF89E6BE97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AEC18576-BF18-4BD5-A56A-B0BF89E6BE97}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5960C725-DC1C-401B-948F-C16799FF5074}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5960C725-DC1C-401B-948F-C16799FF5074}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5960C725-DC1C-401B-948F-C16799FF5074}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5960C725-DC1C-401B-948F-C16799FF5074}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C859199F-C80C-4704-83D8-A1B85ADC5A11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C859199F-C80C-4704-83D8-A1B85ADC5A11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C859199F-C80C-4704-83D8-A1B85ADC5A11}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -107,10 +75,6 @@ Global
 		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9DD11CDA-CD93-46B5-9311-5AC8F028F528}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9DD11CDA-CD93-46B5-9311-5AC8F028F528}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9DD11CDA-CD93-46B5-9311-5AC8F028F528}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9DD11CDA-CD93-46B5-9311-5AC8F028F528}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
