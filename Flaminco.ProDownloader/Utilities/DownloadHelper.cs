@@ -5,7 +5,7 @@ namespace Flaminco.ProDownloader.Utilities;
 
 internal static class DownloadHelper
 {
-    internal static IEnumerable<(long Start, long End)> SegmentPosition(long ContentLength, int ChunksNumber)
+    public static IEnumerable<(long Start, long End)> SegmentPosition(long ContentLength, int ChunksNumber)
     {
         long PartSize = (long)Math.Ceiling(ContentLength / (double)ChunksNumber);
         for (var i = 0; i < ChunksNumber; i++)

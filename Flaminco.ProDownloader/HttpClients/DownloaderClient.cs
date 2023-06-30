@@ -17,22 +17,22 @@ public sealed class DownloaderClient
         _stopwatch = new Stopwatch();
     }
 
-    public async Task DownloadAsync(string url, string downloadPath, Action<DownloadFileInfo> progressCallback, int chunkNumbers = 16, CancellationToken cancellationToken = default)
+    public async Task DownloadAsync(DownloadOptions downloadOptions, CancellationToken cancellationToken = default)
     {
-        FileProfileClient fileProfileClient = new(_httpClientFactory.CreateClient(), new ResumableClient(_httpClientFactory.CreateClient()));
+        FileProfileClient fileProfileClient = new(_httpClientFactory);
 
-        FileProfile? fileProfile = await GetProfileConfiguration(url, cancellationToken);
+        FileProfile? fileProfile = await GetProfileConfiguration(downloadOptions.Url, cancellationToken);
 
         if (fileProfile is null)
         {
-            fileProfile = await fileProfileClient.GetFileProfileAsync(url, downloadPath, chunkNumbers, cancellationToken);
+            fileProfile = await fileProfileClient.GetFileProfileAsync(downloadOptions, cancellationToken);
 
             await SaveProfileConfiguration(fileProfile, cancellationToken);
         }
 
-        await DownloadAsync(fileProfile!, progressCallback, cancellationToken);
+        await DownloadAsync(fileProfile!, downloadOptions.ProgressCallback, cancellationToken);
 
-        await ReconstructProfilesAsync(fileProfile!, cancellationToken);
+        await ReconstructSegmentsAsync(fileProfile!, cancellationToken);
     }
 
     private async Task<FileProfile?> GetProfileConfiguration(string url, CancellationToken cancellationToken = default)
@@ -90,13 +90,13 @@ public sealed class DownloaderClient
         _totalReadBytes = 0;
     }
 
-    private async Task ReconstructProfilesAsync(FileProfile profile, CancellationToken cancellationToken = default)
+    private async Task ReconstructSegmentsAsync(FileProfile profile, CancellationToken cancellationToken = default)
     {
         string FilePath = Path.Combine(profile.DownloadPath, profile.Name);
 
         using Stream localFileStream = new FileStream(FilePath, FileMode.Create, FileAccess.ReadWrite);
 
-        foreach (var Segment in profile.SegmentMetadata.OrderBy(x => x.Start))
+        foreach (var Segment in profile.SegmentMetadata.OrderBy(a => a.Start))
         {
             localFileStream.Seek(Segment.Start, SeekOrigin.Begin);
 

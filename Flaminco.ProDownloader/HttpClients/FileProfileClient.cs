@@ -8,41 +8,41 @@ internal sealed class FileProfileClient
 {
     private readonly HttpClient _httpClient;
     private readonly ResumableClient _resumableClient;
-    internal FileProfileClient(HttpClient httpClient, ResumableClient resumableClient)
+    public FileProfileClient(IHttpClientFactory _httpClientFactory)
     {
-        _httpClient = httpClient;
-        _resumableClient = resumableClient;
+        _httpClient = _httpClientFactory.CreateClient();
+        _resumableClient = new ResumableClient(_httpClientFactory);
     }
 
-    internal async Task<FileProfile> GetFileProfileAsync(string url, string downloadPath, int chunkNumbers = 16, CancellationToken cancellationToken = default)
+    public async Task<FileProfile> GetFileProfileAsync(DownloadOptions downloadOptions, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrEmpty(url);
+        ArgumentException.ThrowIfNullOrEmpty(downloadOptions.Url);
 
-        if (!(url.StartsWith("https://") || url.StartsWith("http://"))) throw new Exception("Only Support Http, Https protocols");
+        if (!(downloadOptions.Url.StartsWith("https://") || downloadOptions.Url.StartsWith("http://"))) throw new SupportHTTPProtocolOnlyException();
 
-        ArgumentException.ThrowIfNullOrEmpty(downloadPath);
+        ArgumentException.ThrowIfNullOrEmpty(downloadOptions.DownloadPath);
 
-        HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync(downloadOptions.Url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
         httpResponseMessage.EnsureSuccessStatusCode();
 
-        bool isResumable = await _resumableClient.IsResumableAsync(url, cancellationToken);
+        bool isResumable = await _resumableClient.IsResumableAsync(downloadOptions.Url, cancellationToken);
 
         long fileSize = httpResponseMessage.Content.Headers.ContentLength.GetValueOrDefault();
 
         return new FileProfile
         {
-            Name = httpResponseMessage.Content.Headers?.ContentDisposition?.FileName ?? httpResponseMessage.RequestMessage?.RequestUri?.Segments.LastOrDefault(),
+            Name = downloadOptions.SuggestedFileName ?? httpResponseMessage.Content.Headers?.ContentDisposition?.FileName ?? httpResponseMessage.RequestMessage?.RequestUri?.Segments.LastOrDefault(),
             MediaType = httpResponseMessage.Content.Headers?.ContentType?.MediaType,
             Size = fileSize,
             Extension = httpResponseMessage.Content.Headers.ContentType?.MediaType?.GetFileExtension(),
             IsResumable = isResumable,
-            DownloadPath = downloadPath,
-            Url = url,
-            ChunksNumber = chunkNumbers,
-            SegmentMetadata = isResumable && chunkNumbers > 1 ? DownloadHelper.SegmentPosition(fileSize, chunkNumbers).Select(segment => new SegmentMetadata
+            DownloadPath = downloadOptions.DownloadPath,
+            Url = downloadOptions.Url,
+            ChunksNumber = downloadOptions.ChunkNumbers,
+            SegmentMetadata = isResumable && downloadOptions.ChunkNumbers > 1 ? DownloadHelper.SegmentPosition(fileSize, downloadOptions.ChunkNumbers).Select(segment => new SegmentMetadata
             {
-                Url = url,
+                Url = downloadOptions.Url,
                 Start = segment.Start,
                 End = segment.End,
                 TempPath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName())
@@ -50,7 +50,7 @@ internal sealed class FileProfileClient
             {
                 new SegmentMetadata
                 {
-                    Url = url,
+                    Url = downloadOptions.Url,
                     Start = 0,
                     End = fileSize,
                     TempPath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName())

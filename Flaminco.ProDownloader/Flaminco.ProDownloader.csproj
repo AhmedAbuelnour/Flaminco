@@ -4,7 +4,7 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>0.0.4</Version>
+		<Version>0.0.5</Version>
 		<Authors>Ahmed Abuelnour</Authors>
 		<Company>Personal</Company>
 		<Description>A Pro downloader which support segmentation, resuming, easy on memory consumtion taking advantage of System.IO.Pipelines, and easy to use ;) </Description>

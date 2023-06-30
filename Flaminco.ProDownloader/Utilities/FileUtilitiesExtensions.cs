@@ -77,10 +77,10 @@ internal static class FileUtilities
     {".zip", "application/zip"}
     };
     #endregion
-    internal static string GetFileExtension(this string MediaType) => MediaTypeMappings.FirstOrDefault(x => x.Value == MediaType).Key;
+    public static string GetFileExtension(this string MediaType) => MediaTypeMappings.FirstOrDefault(x => x.Value == MediaType).Key;
 
-    internal static readonly string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-    internal static string SizeSuffix(this long value, int decimalPlaces = 1)
+    public static readonly string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+    public static string SizeSuffix(this long value, int decimalPlaces = 1)
     {
         if (decimalPlaces < 0) { throw new ArgumentOutOfRangeException("decimalPlaces"); }
         if (value < 0) { return "-" + SizeSuffix(-value); }

@@ -6,7 +6,7 @@ namespace Flaminco.ProDownloader.Models;
 /// <summary>
 /// A class which represents the segment to download
 /// </summary>
-public sealed class SegmentMetadata
+internal sealed class SegmentMetadata
 {
     /// <summary>
     ///  Remote Server File location

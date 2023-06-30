@@ -6,12 +6,12 @@ namespace Flaminco.ProDownloader.HttpClients;
 internal sealed class ResumableClient
 {
     private readonly HttpClient _httpClient;
-    internal ResumableClient(HttpClient httpClient)
+    public ResumableClient(IHttpClientFactory httpClientFactory)
     {
-        _httpClient = httpClient;
+        _httpClient = httpClientFactory.CreateClient();
         _httpClient.DefaultRequestHeaders.Range = new RangeHeaderValue(1, 1);
     }
-    internal async Task<bool> IsResumableAsync(string Url, CancellationToken cancellationToken = default)
+    public async Task<bool> IsResumableAsync(string Url, CancellationToken cancellationToken = default)
     {
         using HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync(Url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 

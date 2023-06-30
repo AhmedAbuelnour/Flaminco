@@ -1,6 +1,6 @@
 ﻿namespace Flaminco.ProDownloader.Models;
 
-public sealed class FileProfile
+internal sealed class FileProfile
 {
     public required string Url { get; set; }
     public required string? Name { get; set; } = Path.GetFileNameWithoutExtension(Path.GetTempFileName());

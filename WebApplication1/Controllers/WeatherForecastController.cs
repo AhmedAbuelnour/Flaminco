@@ -1,6 +1,7 @@
 using Flaminco.ManualMapper.Abstractions;
 using Flaminco.Pipeline.Abstractions;
 using Flaminco.ProDownloader.HttpClients;
+using Flaminco.ProDownloader.Models;
 using Flaminco.StateMachine.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,17 +29,19 @@ namespace WebApplication1.Controllers
 
             DownloaderClient fileDownloader = new DownloaderClient(httpClientFactory);
 
-            await fileDownloader.DownloadAsync(
-                url: "https://raw.githubusercontent.com/AhmedAbuelnour/MBs/master/4MB.txt",
-                downloadPath: @"D:\Downloads",
-                progressCallback: (e) =>
+            await fileDownloader.DownloadAsync(new DownloadOptions
+            {
+                Url = "https://raw.githubusercontent.com/AhmedAbuelnour/MBs/master/4MB.txt",
+                DownloadPath = @"D:\Downloads",
+                ChunkNumbers = 2,
+                SuggestedFileName = "txt4Mb.txt",
+                ProgressCallback = (e) =>
                 {
                     Console.WriteLine($"Download Speed: {e.DownloadSpeed}");
                     Console.WriteLine($"Percentage: {e.CurrentPercentage}");
                     Console.WriteLine($"Downloaded Progress: {e.DownloadedProgress}");
-                },
-                chunkNumbers: 2);
-
+                }
+            });
 
             return Ok();
         }
