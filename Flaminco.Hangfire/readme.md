@@ -16,7 +16,7 @@ We have 4 service types each one of them, there is a contract represent each typ
 
 ```csharp
 // Example for IQueueServiceJob with provided value
-    public class SendConfirmationService : IQueueServiceJob
+       public class SendConfirmationService : IQueueServiceJob
     {
         private readonly INotificationService _notificationService;
 
@@ -27,38 +27,44 @@ We have 4 service types each one of them, there is a contract represent each typ
 
         public async ValueTask Execute(object? value = default, CancellationToken cancellationToken = default)
         {
-            if (value is SendConfirmationValue sendEmailValue)
+            if (value is IEnumerable<JToken> jTokens)
             {
-                if (sendEmailValue.IsEmail)
-                {
-                    bool result = await _notificationService.SendEmailAsync(new EmailNotificationModel
-                    {
-                        MailFrom = "noreply@example.com",
-                        MailTo = sendEmailValue.Email,
-                        MailSubject = "Verification Code",
-                        IsBodyHtml = true,
-                        DisplayName = "Example",
-                        MailToName = sendEmailValue.MailToName,
-                        MailBody = sendEmailValue.OTP
-                    }, cancellationToken);
+                JArray jArray = new JArray(jTokens);
 
-                    if (result == false)
+                if (jArray.ToObject<SendConfirmationValue[]>() is SendConfirmationValue[] sendEmailValues
+                    && sendEmailValues.FirstOrDefault() is SendConfirmationValue sendEmailValue)
+                {
+                    if (sendEmailValue.IsEmail)
                     {
-                        throw new Exception($"Can't send an email for {sendEmailValue.Email}");
+                        bool result = await _notificationService.SendEmailAsync(new EmailNotificationModel
+                        {
+                            MailFrom = "noreply@selaheltelmeez.com",
+                            MailTo = sendEmailValue.Email,
+                            MailSubject = sendEmailValue.MailSubject,
+                            IsBodyHtml = true,
+                            DisplayName = "سلاح التلميذ",
+                            MailToName = sendEmailValue.MailToName,
+                            MailBody = sendEmailValue.OTP
+                        }, cancellationToken);
+
+                        if (result == false)
+                        {
+                            throw new Exception($"Can't send an email for {sendEmailValue.Email}");
+                        }
                     }
-                }
 
-                if (sendEmailValue.IsMobile)
-                {
-                    bool result = await _notificationService.SendSMSAsync(new SMSNotificationModel
+                    if (sendEmailValue.IsMobile)
                     {
-                        Mobile = sendEmailValue.MobileNumber,
-                        Code = sendEmailValue.OTP
-                    }, cancellationToken);
+                        bool result = await _notificationService.SendSMSAsync(new SMSNotificationModel
+                        {
+                            Mobile = sendEmailValue.MobileNumber,
+                            OTP = sendEmailValue.OTP
+                        }, cancellationToken);
 
-                    if (result == false)
-                    {
-                        throw new Exception($"Can't send a SMS for {sendEmailValue.MobileNumber}");
+                        if (result == false)
+                        {
+                            throw new Exception($"Can't send a SMS for {sendEmailValue.MobileNumber}");
+                        }
                     }
                 }
             }
