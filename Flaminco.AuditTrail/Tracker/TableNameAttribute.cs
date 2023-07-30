@@ -4,10 +4,10 @@
 [AttributeUsage(AttributeTargets.Class)]
 public class TableNameAttribute : Attribute
 {
-    private string _Name;
+    private string _name;
     public TableNameAttribute(string TableName)
     {
-        _Name = TableName;
+        _name = TableName;
     }
-    public string Name => _Name;
+    public string Name => _name;
 }

@@ -1,6 +1,7 @@
 ﻿namespace Flaminco.Hangfire.Abstractions;
 
-public interface IRecurringServiceJob : IServiceJob {
-    string Key { get; set; }
-    string RecurringCron { get; set; }
+public interface IRecurringServiceJob : IServiceJob
+{
+    string Key { get; init; }
+    string RecurringCron { get; init; }
 }

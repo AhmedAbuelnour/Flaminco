@@ -3,7 +3,7 @@
   <PropertyGroup>
 	 <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
-	  <Version>1.0.0</Version>
+	  <Version>0.1.0</Version>
 	  <Authors>Ahmed Abuelnour</Authors>
 	  <Company>Personal</Company>
 	  <Description>A simple hangfire service organizer.</Description>
@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.2" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.3" />
   </ItemGroup>
 
 </Project>

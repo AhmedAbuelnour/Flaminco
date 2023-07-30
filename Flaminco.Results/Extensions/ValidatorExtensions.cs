@@ -6,7 +6,7 @@ namespace Flaminco.Results.Extensions;
 
 public static class ValidatorExtensions
 {
-    public static RouteHandlerBuilder AddValidator<TValue>(this RouteHandlerBuilder handlerBuilder)
+    public static RouteHandlerBuilder AddValidator<TValue>(this RouteHandlerBuilder handlerBuilder) where TValue : class
     {
         handlerBuilder.AddEndpointFilter<ValidatorEndpointFilter<TValue>>();
 

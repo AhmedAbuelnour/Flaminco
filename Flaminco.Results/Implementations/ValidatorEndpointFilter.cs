@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Flaminco.Results.Implementations;
 
-public sealed class ValidatorEndpointFilter<TValue> : IEndpointFilter
+public sealed class ValidatorEndpointFilter<TValue> : IEndpointFilter where TValue : class
 {
     private readonly IValidator<TValue> _validator;
 
@@ -12,9 +12,7 @@ public sealed class ValidatorEndpointFilter<TValue> : IEndpointFilter
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
-        TValue? input = context.GetArgument<TValue>(0);
-
-        if (input is not null)
+        if (context.Arguments.Where(a => a?.GetType() == typeof(TValue))?.FirstOrDefault() is TValue input)
         {
             var validationResult = await _validator.ValidateAsync(input, CancellationToken.None);
 

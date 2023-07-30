@@ -7,23 +7,37 @@ public sealed class DefaultManualMapper : IManualMapper
     private readonly IServiceProvider _serviceProvider;
     public DefaultManualMapper(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
-    public ValueTask<TResponse> Map<TResponse>(IMapProfile<TResponse> profile, CancellationToken cancellationToken = default)
+    public TDestination Map<TSource, TDestination>(TSource source)
     {
-        ArgumentNullException.ThrowIfNull(profile);
+        ArgumentNullException.ThrowIfNull(source);
 
-        Type profileType = typeof(IMapProfileHandler<,>).MakeGenericType(profile.GetType(), typeof(TResponse));
+        Type profileType = typeof(IMapHandler<,>).MakeGenericType(typeof(TSource), typeof(TDestination));
 
         object? handler = _serviceProvider.GetService(profileType);
 
         ArgumentNullException.ThrowIfNull(handler);
 
-        if (handler.GetType().GetMethod("Handler")?.Invoke(handler, new object[] { profile, cancellationToken }) is ValueTask<TResponse> profileMapper)
+        return handler.GetType().GetMethod("Handler")?.Invoke(handler, new object[] { source }) switch
         {
-            return profileMapper;
-        }
-        else
+            TDestination destination => destination,
+            _ => throw new InvalidOperationException($"{nameof(handler)} is not registered")
+        };
+    }
+
+    public Task<TDestination> MapAsync<TSource, TDestination>(TSource source, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        Type profileType = typeof(IMapAsyncHandler<,>).MakeGenericType(typeof(TSource), typeof(TDestination));
+
+        object? handler = _serviceProvider.GetService(profileType);
+
+        ArgumentNullException.ThrowIfNull(handler);
+
+        return handler.GetType().GetMethod("Handler")?.Invoke(handler, new object[] { source, cancellationToken }) switch
         {
-            throw new InvalidOperationException($"{nameof(handler)} is not registered");
-        }
+            Task<TDestination> destination => destination,
+            _ => throw new InvalidOperationException($"{nameof(handler)} is not registered")
+        };
     }
 }

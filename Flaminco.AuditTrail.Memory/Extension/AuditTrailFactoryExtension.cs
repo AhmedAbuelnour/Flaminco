@@ -7,15 +7,15 @@ namespace Flaminco.AuditTrail.Memory.Extension;
 
 public static class AuditTrailFactoryExtension
 {
-    public static IServiceCollection AddAuditTrail(this IServiceCollection services, Type assemblyScanner)
+    public static IServiceCollection AddAuditTrail<TScanner>(this IServiceCollection services)
     {
-        return services.AddAuditTrailMapper(assemblyScanner)
-                       .AddAuditTrailTracker(assemblyScanner)
+        return services.AddAuditTrailMapper<TScanner>()
+                       .AddAuditTrailTracker<TScanner>()
                        .AddMemoryCache();
     }
-    static IServiceCollection AddAuditTrailTracker(this IServiceCollection services, Type assemblyScanner)
+    static IServiceCollection AddAuditTrailTracker<TScanner>(this IServiceCollection services)
     {
-        IEnumerable<Type>? types = from type in assemblyScanner.Assembly.GetTypes()
+        IEnumerable<Type>? types = from type in typeof(TScanner).Assembly.GetTypes()
                                    where typeof(IAuditTrailTracker<,>).IsAssignableFrom(type)
                                    select type;
 

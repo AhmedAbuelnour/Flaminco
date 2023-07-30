@@ -13,8 +13,7 @@ namespace Flaminco.ServiceBus.Abstractions
         private readonly ServiceBusSettings _serviceBusSettings;
         public MessageTopicConsumer(IOptions<ServiceBusSettings> options)
         {
-            if (options.Value is null)
-                throw new ArgumentNullException(nameof(options));
+            ArgumentNullException.ThrowIfNull(options.Value);
 
             _serviceBusSettings = options.Value;
 

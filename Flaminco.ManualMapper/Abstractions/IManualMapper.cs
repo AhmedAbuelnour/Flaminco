@@ -1,7 +1,7 @@
-﻿namespace Flaminco.ManualMapper.Abstractions
+﻿namespace Flaminco.ManualMapper.Abstractions;
+
+public interface IManualMapper
 {
-    public interface IManualMapper
-    {
-        ValueTask<TResponse> Map<TResponse>(IMapProfile<TResponse> profile, CancellationToken cancellationToken = default);
-    }
+    Task<TDestination> MapAsync<TSource, TDestination>(TSource source, CancellationToken cancellationToken = default);
+    TDestination Map<TSource, TDestination>(TSource source);
 }

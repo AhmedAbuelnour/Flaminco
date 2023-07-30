@@ -22,7 +22,7 @@
 
             _busClient = new ServiceBusClient(_serviceBusSettings.ConnectionString);
         }
-        public abstract string QueueOrTopicName { get; set; }
+        public abstract string QueueOrTopicName { get; init; }
         public string ContentType { get; init; } = "application/json";
         public Guid? MessageId { get; init; }
         public Guid? CorrelationId { get; init; }

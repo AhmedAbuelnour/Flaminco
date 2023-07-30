@@ -78,9 +78,7 @@ public sealed class DownloaderClient
                 _totalReadBytes += totalReadBytes;
                 Console.WriteLine($"Total Read Bytes: ${_totalReadBytes}");
                 CurrentProgress(ProgressCallback(profile));
-
             }, token);
-
         });
 
         _stopwatch.Stop();

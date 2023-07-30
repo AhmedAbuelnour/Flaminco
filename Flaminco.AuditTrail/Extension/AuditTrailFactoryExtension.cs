@@ -6,9 +6,9 @@ namespace Flaminco.AuditTrail.Core.Extension;
 
 public static class AuditTrailFactoryExtension
 {
-    public static IServiceCollection AddAuditTrailMapper(this IServiceCollection services, Type assemblyScanner)
+    public static IServiceCollection AddAuditTrailMapper<TScanner>(this IServiceCollection services)
     {
-        IEnumerable<Type>? types = from type in assemblyScanner.Assembly.GetTypes()
+        IEnumerable<Type>? types = from type in typeof(TScanner).Assembly.GetTypes()
                                    where typeof(IAuditTrailMapper).IsAssignableFrom(type)
                                    select type;
 

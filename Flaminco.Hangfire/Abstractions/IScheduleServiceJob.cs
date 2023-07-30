@@ -2,6 +2,7 @@
 
 namespace Flaminco.Hangfire.Abstractions;
 
-public interface IScheduleServiceJob : IServiceJob {
-    TimeSpan Offset { get; set; }
+public interface IScheduleServiceJob : IServiceJob
+{
+    TimeSpan Offset { get; init; }
 }
