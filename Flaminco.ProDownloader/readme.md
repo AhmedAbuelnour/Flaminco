@@ -14,7 +14,7 @@ A Pro downloader which support segmentation, resuming, easy on memory consumtion
 To implement this package is now easier than ever.
 
 ```
- DownloaderClient fileDownloader = new DownloaderClient(httpClientFactory);
+DownloaderClient fileDownloader = new DownloaderClient(httpClientFactory);
 
 await fileDownloader.DownloadAsync(new DownloadOptions
 {
@@ -29,5 +29,6 @@ await fileDownloader.DownloadAsync(new DownloadOptions
         Console.WriteLine($"Downloaded Progress: {e.DownloadedProgress}");
     }
 });
+
 
 ```

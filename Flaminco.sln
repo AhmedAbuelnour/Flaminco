@@ -25,7 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ServiceBus", "Flam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Results", "Flaminco.Results\Flaminco.Results.csproj", "{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlamincoWebApi", "FlamincoWebApi\FlamincoWebApi.csproj", "{D3E519A3-4D4E-45DA-900A-7B67201B86A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlamincoWebApi", "FlamincoWebApi\FlamincoWebApi.csproj", "{D3E519A3-4D4E-45DA-900A-7B67201B86A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Cache", "Flaminco.Cache\Flaminco.Cache.csproj", "{6EF3BAB9-2A72-4F37-9FE7-7D87D63DBAB2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{D3E519A3-4D4E-45DA-900A-7B67201B86A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3E519A3-4D4E-45DA-900A-7B67201B86A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3E519A3-4D4E-45DA-900A-7B67201B86A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EF3BAB9-2A72-4F37-9FE7-7D87D63DBAB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EF3BAB9-2A72-4F37-9FE7-7D87D63DBAB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EF3BAB9-2A72-4F37-9FE7-7D87D63DBAB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EF3BAB9-2A72-4F37-9FE7-7D87D63DBAB2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

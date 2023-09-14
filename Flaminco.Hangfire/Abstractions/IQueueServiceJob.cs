@@ -1,4 +1,5 @@
 ﻿namespace Flaminco.Hangfire.Abstractions;
 
-public interface IQueueServiceJob : IServiceJob {
+public interface IQueueServiceJob : IServiceJob
+{
 }

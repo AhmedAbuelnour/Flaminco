@@ -1,4 +1,5 @@
 using Flaminco.ManualMapper.Extensions;
+using FlamincoWebApi.Controllers;
 
 namespace FlamincoWebApi
 {
@@ -15,6 +16,8 @@ namespace FlamincoWebApi
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddMediatR(e => e.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
             builder.Services.AddManualMapper<Program>();
 
             var app = builder.Build();
@@ -30,6 +33,7 @@ namespace FlamincoWebApi
 
             app.UseAuthorization();
 
+            app.AddEndPoints();
 
             app.MapControllers();
 

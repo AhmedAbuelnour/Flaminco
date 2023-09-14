@@ -20,10 +20,19 @@ namespace FlamincoWebApi
         public string LastName { get; set; }
     }
 
-    public class PersonResponse
+    public class PersonResponse : IMapHandler<Person, PersonResponse>
     {
         public int Age { get; set; }
         public string FullName { get; set; }
+
+        public PersonResponse Handler(Person source)
+        {
+            return new PersonResponse
+            {
+                Age = source.Age,
+                FullName = $"{source.FirstName} {source.LastName}"
+            };
+        }
     }
 
     public class PersonMapper : IMapHandler<Person, PersonResponse>
