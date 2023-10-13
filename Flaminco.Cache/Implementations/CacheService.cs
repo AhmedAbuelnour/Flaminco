@@ -62,22 +62,18 @@ namespace Flaminco.Cache.Implementations
 
         public Task SetAsync<TItem>(RegionKey regionKey, TItem item, CancellationToken cancellationToken = default)
         {
-            byte[] valueJson = JsonSerializer.SerializeToUtf8Bytes(item, new JsonSerializerOptions
+            return _distributedCache.SetAsync(regionKey.ToString(), JsonSerializer.SerializeToUtf8Bytes(item, new JsonSerializerOptions
             {
                 ReferenceHandler = ReferenceHandler.IgnoreCycles
-            });
-
-            return _distributedCache.SetAsync(regionKey.ToString(), valueJson, _cacheOptions, cancellationToken);
+            }), _cacheOptions, cancellationToken);
         }
 
         public Task SetAsync<TItem>(RegionKey regionKey, TItem item, TimeSpan? absoluteExpirationRelativeToNow, TimeSpan? slidingExpiration, CancellationToken cancellationToken = default)
         {
-            byte[] valueJson = JsonSerializer.SerializeToUtf8Bytes(item, new JsonSerializerOptions
+            return _distributedCache.SetAsync(regionKey.ToString(), JsonSerializer.SerializeToUtf8Bytes(item, new JsonSerializerOptions
             {
                 ReferenceHandler = ReferenceHandler.IgnoreCycles
-            });
-
-            return _distributedCache.SetAsync(regionKey.ToString(), valueJson, new DistributedCacheEntryOptions
+            }), new DistributedCacheEntryOptions
             {
                 SlidingExpiration = slidingExpiration,
                 AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow

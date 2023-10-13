@@ -22,12 +22,12 @@ namespace FlamincoWebApi.Controllers
     }
 
     [EndPoint(Template = "/GetPerson", HttpVerb = HttpVerb.Get)]
-    public class GetPersonQuery : IHttpRequest
+    public class GetPersonQuery : IEndPointRequest
     {
 
     }
 
-    public class GetPersonQueryHandler : IHttpRequestHandler<GetPersonQuery>
+    public class GetPersonQueryHandler : IEndPointRequestHandler<GetPersonQuery>
     {
         public async Task<IResult> Handle(GetPersonQuery request, CancellationToken cancellationToken)
         {

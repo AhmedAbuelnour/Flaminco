@@ -2,10 +2,10 @@
 
 namespace Flaminco.ManualMapper.Implementations;
 
-public sealed class DefaultManualMapper : IManualMapper
+public sealed class DefaultMapper : IMapper
 {
     private readonly IServiceProvider _serviceProvider;
-    public DefaultManualMapper(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
+    public DefaultMapper(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
     public TDestination Map<TSource, TDestination>(TSource source)
     {
@@ -40,4 +40,22 @@ public sealed class DefaultManualMapper : IManualMapper
             _ => throw new InvalidOperationException($"{nameof(handler)} is not registered")
         };
     }
+
+    public IAsyncEnumerable<TDestination> MapStream<TSource, TDestination>(TSource source, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        Type profileType = typeof(IMapStreamHandler<,>).MakeGenericType(typeof(TSource), typeof(TDestination));
+
+        object? handler = _serviceProvider.GetService(profileType);
+
+        ArgumentNullException.ThrowIfNull(handler);
+
+        return handler.GetType().GetMethod("Handler")?.Invoke(handler, new object[] { source, cancellationToken }) switch
+        {
+            IAsyncEnumerable<TDestination> destination => destination,
+            _ => throw new InvalidOperationException($"{nameof(handler)} is not registered")
+        };
+    }
+
 }

@@ -21,7 +21,7 @@ namespace Flaminco.ManualMapper.Extensions
                 }
             }
 
-            services.AddScoped<IManualMapper, DefaultManualMapper>();
+            services.AddScoped<IMapper, DefaultMapper>();
 
             return services;
         }

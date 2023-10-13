@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Flaminco.MinimalMediatR.Extensions;
 
 namespace FlamincoWebApi.Controllers
 {
@@ -14,7 +15,7 @@ namespace FlamincoWebApi.Controllers
                 {
                     if (endPoint.HttpVerb == HttpVerb.Get)
                     {
-                        MethodInfo? mediatGet = typeof(Flaminco.MinimalMediatR.MinimalMediatRExtensions).GetMethod("MediateGet");
+                        MethodInfo? mediatGet = typeof(MinimalMediatRExtensions).GetMethod("MediateGet");
 
                         mediatGet.MakeGenericMethod(endpoint).Invoke(null, new object[] { app, endPoint.Template });
                     }

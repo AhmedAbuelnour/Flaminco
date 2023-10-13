@@ -45,8 +45,8 @@ public class PersonMapper : IMapHandler<Person, PersonResponse>
 
  public class PersonController : ControllerBase
  {
-     private readonly IManualMapper _mapper;
-     public PersonController(IManualMapper mapper)
+     private readonly IMapper _mapper;
+     public PersonController(IMapper mapper)
      {
          _mapper = mapper;
      }
