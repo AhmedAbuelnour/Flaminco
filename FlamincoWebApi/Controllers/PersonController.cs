@@ -1,5 +1,6 @@
 using Flaminco.ManualMapper.Abstractions;
 using Flaminco.MinimalMediatR.Abstractions;
+using FlamincoWebApi.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlamincoWebApi.Controllers
@@ -27,10 +28,12 @@ namespace FlamincoWebApi.Controllers
 
     }
 
-    public class GetPersonQueryHandler : IEndPointRequestHandler<GetPersonQuery>
+    public class GetPersonQueryHandler(UserDbContext _dbContext) : IEndPointRequestHandler<GetPersonQuery>
     {
         public async Task<IResult> Handle(GetPersonQuery request, CancellationToken cancellationToken)
         {
+            var users = _dbContext.Set<User>().Where(a => a.Attributes.Length > 3).ToList();
+
             return Results.Ok(new Person
             {
                 FirstName = "Ahmed",
@@ -40,6 +43,23 @@ namespace FlamincoWebApi.Controllers
         }
     }
 
+
+    public interface ClassFeature
+    {
+        static virtual void M() => Console.WriteLine("Default behavior");
+
+        static abstract void Show();
+    }
+    public class Class1 : ClassFeature
+    {
+
+        public static void M() => Console.WriteLine("Default behavior 2");
+
+        public static void Show()
+        {
+            throw new NotImplementedException();
+        }
+    }
 
     [ApiController]
     [Route("[controller]")]

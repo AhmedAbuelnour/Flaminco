@@ -27,7 +27,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Results", "Flaminc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlamincoWebApi", "FlamincoWebApi\FlamincoWebApi.csproj", "{D3E519A3-4D4E-45DA-900A-7B67201B86A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Cache", "Flaminco.Cache\Flaminco.Cache.csproj", "{6EF3BAB9-2A72-4F37-9FE7-7D87D63DBAB2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Cache", "Flaminco.Cache\Flaminco.Cache.csproj", "{6EF3BAB9-2A72-4F37-9FE7-7D87D63DBAB2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Logging", "Flaminco.Logging\Flaminco.Logging.csproj", "{86FB4CD8-2D08-4E0D-B1AB-3EE36B775299}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Validation", "Flamico.Validation\Flaminco.Validation.csproj", "{D0CFA0F8-1496-4948-B583-BD755787FA21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,6 +91,14 @@ Global
 		{6EF3BAB9-2A72-4F37-9FE7-7D87D63DBAB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EF3BAB9-2A72-4F37-9FE7-7D87D63DBAB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EF3BAB9-2A72-4F37-9FE7-7D87D63DBAB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86FB4CD8-2D08-4E0D-B1AB-3EE36B775299}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86FB4CD8-2D08-4E0D-B1AB-3EE36B775299}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86FB4CD8-2D08-4E0D-B1AB-3EE36B775299}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86FB4CD8-2D08-4E0D-B1AB-3EE36B775299}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0CFA0F8-1496-4948-B583-BD755787FA21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0CFA0F8-1496-4948-B583-BD755787FA21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0CFA0F8-1496-4948-B583-BD755787FA21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0CFA0F8-1496-4948-B583-BD755787FA21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

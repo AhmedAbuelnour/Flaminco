@@ -1,7 +1,31 @@
 using Flaminco.ManualMapper.Abstractions;
+using Microsoft.AspNetCore.HttpLogging;
 
 namespace FlamincoWebApi
 {
+    public class HttpLoggerInterceptor : IHttpLoggingInterceptor
+    {
+        public ValueTask OnRequestAsync(HttpLoggingInterceptorContext logContext)
+        {
+            logContext.AddParameter("Username", "ahmed abuelnour");
+
+            return ValueTask.CompletedTask;
+        }
+
+        public ValueTask OnResponseAsync(HttpLoggingInterceptorContext logContext)
+        {
+            if (logContext.IsAnyEnabled(HttpLoggingFields.Response))
+            {
+                logContext.LoggingFields = HttpLoggingFields.All;
+
+                logContext.AddParameter("Username Response", "ahmed abuelnour XXX");
+            }
+
+            return ValueTask.CompletedTask;
+        }
+    }
+
+
     public class WeatherForecast
     {
         public DateOnly Date { get; set; }
@@ -11,6 +35,15 @@ namespace FlamincoWebApi
         public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 
         public string? Summary { get; set; }
+
+        public void Bind<T>(T value)
+        {
+            Console.WriteLine("BINDDDDDDDDDDDD");
+        }
+        public void Bind<T>(T value, int value2)
+        {
+            Console.WriteLine(value);
+        }
     }
 
     public class Person
