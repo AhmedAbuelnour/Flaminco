@@ -1,6 +1,9 @@
 using Flaminco.ManualMapper.Abstractions;
 using Flaminco.MinimalMediatR.Abstractions;
-using FlamincoWebApi.Entities;
+using Flaminco.Pipeline.Abstractions;
+using Flaminco.Pipeline.Attributes;
+using Flaminco.Validation.Extensions;
+using Flaminco.Validation.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlamincoWebApi.Controllers
@@ -28,18 +31,68 @@ namespace FlamincoWebApi.Controllers
 
     }
 
-    public class GetPersonQueryHandler(UserDbContext _dbContext) : IEndPointRequestHandler<GetPersonQuery>
+    public class GetPersonQueryValidation : IValidationHandler<GetPersonQuery>
+    {
+        public Result Handler(GetPersonQuery input)
+        {
+            if (!input.TryDataAnnotationValidate(out Error[] errors))
+            {
+                return Result.Failure(errors);
+            }
+
+            return Result.Success();
+        }
+    }
+
+    public class Pipe
+    {
+        public int Value { get; set; }
+    }
+
+    [KeyedPipeline<Pipe>(Order = 1, KeyName = "TestGroup")]
+    [KeyedPipeline<Pipe>(Order = 2, KeyName = "TestGroup2")]
+    public class FirstPipeline : IPipelineHandler<Pipe>
+    {
+        public ValueTask Handler(Pipe source, CancellationToken cancellationToken = default)
+        {
+            source.Value = 1;
+            return ValueTask.CompletedTask;
+        }
+    }
+
+
+    [KeyedPipeline<Pipe>(Order = 2, KeyName = "TestGroup")]
+    [KeyedPipeline<Pipe>(Order = 1, KeyName = "TestGroup2")]
+    public class SecondPipeline : IPipelineHandler<Pipe>
+    {
+        public ValueTask Handler(Pipe source, CancellationToken cancellationToken = default)
+        {
+            source.Value = 2;
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    [KeyedPipeline<Pipe>(Order = 3, KeyName = "TestGroup2")]
+    public class TestPipeline : IPipelineHandler<Pipe>
+    {
+        public ValueTask Handler(Pipe source, CancellationToken cancellationToken = default)
+        {
+            source.Value = 3;
+            return ValueTask.CompletedTask;
+        }
+    }
+
+
+
+    public class GetPersonQueryHandler(IPipeline _pipeline) : IEndPointRequestHandler<GetPersonQuery>
     {
         public async Task<IResult> Handle(GetPersonQuery request, CancellationToken cancellationToken)
         {
-            var users = _dbContext.Set<User>().Where(a => a.Attributes.Length > 3).ToList();
+            var pipe = new Pipe { Value = 0 };
 
-            return Results.Ok(new Person
-            {
-                FirstName = "Ahmed",
-                LastName = "Ramadan",
-                Age = 16
-            });
+            await _pipeline.ExecuteKeyedPipeline(pipe, "TestGroup2", cancellationToken);
+
+            return Results.Ok(pipe);
         }
     }
 

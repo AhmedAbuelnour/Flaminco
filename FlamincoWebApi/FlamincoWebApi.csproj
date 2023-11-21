@@ -21,7 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Flamico.Validation\Flaminco.Validation.csproj" />
     <ProjectReference Include="..\Flaminco.MinimalMediatR\Flaminco.MinimalMediatR.csproj" />
+    <ProjectReference Include="..\Flaminco.Pipeline\Flaminco.Pipeline.csproj" />
   </ItemGroup>
 
 </Project>

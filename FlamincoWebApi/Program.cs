@@ -1,4 +1,5 @@
 using Flaminco.ManualMapper.Extensions;
+using Flaminco.Pipeline.Extensions;
 using FlamincoWebApi.Controllers;
 using FlamincoWebApi.Entities;
 using Microsoft.AspNetCore.HttpLogging;
@@ -47,6 +48,9 @@ namespace FlamincoWebApi
             });
 
             string serviceName = "TEST Service";
+
+            builder.Services.AddValidation<Program>();
+            builder.Services.AddPipelines<Program>();
 
             builder.Services.AddOpenTelemetry().WithTracing(config =>
             {

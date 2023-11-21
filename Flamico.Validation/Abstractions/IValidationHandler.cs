@@ -2,7 +2,7 @@
 
 namespace Flaminco.ManualMapper.Abstractions;
 
-public interface IValidationHandler<TInput>
+public interface IValidationHandler<TInput> where TInput : notnull
 {
     Result Handler(TInput input);
 }

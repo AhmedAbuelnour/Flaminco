@@ -1,5 +1,4 @@
-﻿using Flaminco.ManualMapper.Abstractions;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace Flaminco.Validation.Models
 {
