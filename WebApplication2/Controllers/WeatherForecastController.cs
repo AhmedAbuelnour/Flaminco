@@ -2,8 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Reflection;
 
-namespace FlamincoWebApi.Controllers
+namespace WebApplication2.Controllers
 {
+
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class MaskedAttribute : Attribute
     {
@@ -19,6 +20,56 @@ namespace FlamincoWebApi.Controllers
         }
     }
 
+    public static class MinimalApiExtensions
+    {
+        public static RouteHandlerBuilder AddMaskFilter(this RouteHandlerBuilder builder)
+        {
+            // This will modify the request pipeline for the specific route to include a default query value
+            builder.AddEndpointFilter<MaskFilter>();
+
+            return builder;
+        }
+    }
+
+
+    public class MaskFilter : IEndpointFilter
+    {
+        public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+        {
+            object? result = await next(context);
+
+            if (result is IValueHttpResult objectResult && objectResult.Value is not null)
+            {
+                MaskProperties(objectResult.Value);
+            }
+
+            return result;
+        }
+
+        private static void MaskProperties(object obj)
+        {
+            IEnumerable<PropertyInfo> properties = obj.GetType().GetProperties().Where(p => p.CanRead && p.CanWrite && p.PropertyType == typeof(string) && Attribute.IsDefined(p, typeof(MaskedAttribute)));
+
+            foreach (PropertyInfo property in properties)
+            {
+                if (property.GetCustomAttribute<MaskedAttribute>() is MaskedAttribute maskedAttr)
+                {
+                    string? originalValue = (string?)property.GetValue(obj);
+                    string? maskedValue = MaskString(originalValue, maskedAttr.Start, maskedAttr.Length, maskedAttr.MaskingChar);
+                    property.SetValue(obj, maskedValue);
+                }
+            }
+        }
+
+        public static string? MaskString(string? input, int start, int length, char maskingChar)
+        {
+            if (input == null) return null;
+
+            if (start < 0 || length < 0 || start + length > input.Length) return input; // Or throw an exception
+
+            return string.Concat(input.AsSpan(0, start), new string(maskingChar, length), input.AsSpan(start + length));
+        }
+    }
 
     public class MaskedAttributeFilter : IAsyncResultFilter
     {
@@ -63,14 +114,17 @@ namespace FlamincoWebApi.Controllers
         public string SensitiveData { get; set; }
     }
 
-    public class PersonController : Controller
+
+    [ApiController]
+    [Route("[controller]")]
+    public class WeatherForecastController : ControllerBase
     {
-        [HttpGet]
+        [HttpGet(Name = "GetWeatherForecast")]
         public IActionResult Get()
         {
-            return Json(new MyModel
+            return Ok(new MyModel
             {
-                SensitiveData = "Ahmed Ramadan"
+                SensitiveData = "123456789"
             });
         }
     }

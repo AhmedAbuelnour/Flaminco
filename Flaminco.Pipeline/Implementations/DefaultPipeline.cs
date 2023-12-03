@@ -47,6 +47,11 @@ public sealed class DefaultPipeline : IPipeline
 
         foreach (IPipelineHandler<TInput> handler in handlers!)
         {
+            if (Attribute.GetCustomAttributes(handler.GetType(), typeof(KeyedPipelineAttribute<TInput>)) is KeyedPipelineAttribute<TInput>[] attributes2)
+            {
+
+            }
+
             if (Attribute.GetCustomAttributes(handler.GetType(), typeof(KeyedPipelineAttribute<TInput>)) is KeyedPipelineAttribute<TInput>[] attributes && attributes.FirstOrDefault(a => a.KeyName.Equals(keyName, StringComparison.CurrentCultureIgnoreCase)) is KeyedPipelineAttribute<TInput> attribute)
             {
                 handlerQueue.Enqueue(handler, attribute.Order);

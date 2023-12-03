@@ -17,7 +17,10 @@ namespace FlamincoWebApi
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(options =>
+            {
+                options.Filters.Add(typeof(MaskedAttributeFilter));
+            });
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -108,18 +111,6 @@ namespace FlamincoWebApi
                 app.UseSwagger();
                 app.UseSwaggerUI();
 
-                using (var scope = app.Services.CreateScope())
-                {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
-
-                    if (dbContext is not null)
-                    {
-                        if (dbContext.Database.IsSqlServer())
-                        {
-                            dbContext.Database.EnsureCreated();
-                        }
-                    }
-                }
             }
 
 
@@ -131,8 +122,6 @@ namespace FlamincoWebApi
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
-            app.AddEndPoints();
 
             app.MapControllers();
 
