@@ -4,7 +4,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	  <Version>2.1.1</Version>
+	  <Version>2.1.2</Version>
 	  <Authors>Ahmed Abuelnour</Authors>
 	  <Company>Personal</Company>
 	  <Description>A Simple MediatR for Minimal APIs</Description>
@@ -16,7 +16,7 @@
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="12.2.0" />
   </ItemGroup>
 
 </Project>

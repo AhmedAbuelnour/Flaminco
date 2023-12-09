@@ -1,5 +1,4 @@
-
-using WebApplication2.Controllers;
+using LowCodeHub.MinimalExtensions.Extensions;
 
 namespace WebApplication2
 {
@@ -16,12 +15,6 @@ namespace WebApplication2
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-
-            builder.Services.AddControllers(options =>
-            {
-                options.Filters.Add(typeof(MaskedAttributeFilter));
-            });
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -35,16 +28,16 @@ namespace WebApplication2
 
             app.UseAuthorization();
 
+            app.MapControllers();
 
             app.MapGet("/Masked", () =>
             {
-                return Results.Ok(new MyModel
+                return Results.Ok(new WeatherForecast2
                 {
-                    SensitiveData = "123456789"
+                    Summary = "123456789"
                 });
             }).AddMaskFilter();
 
-            app.MapControllers();
 
             app.Run();
         }
