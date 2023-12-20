@@ -1,21 +1,20 @@
-using LowCodeHub.MinimalExtensions.Attributes;
+using Flaminco.MinimalMediatR.Abstractions;
+using Flaminco.MinimalMediatR.Cached.Abstractions;
 
 namespace WebApplication2
 {
-    public class WeatherForecast
+    public class GetUsers : ICachedEndPointRequest
     {
-        public DateOnly Date { get; set; }
+        public string Key => "user";
+        public TimeSpan? Expiration => null;
 
-        public int TemperatureC { get; set; }
-
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-
-        [Masked(1, 3)]
-        public string? Summary { get; set; }
     }
 
-    public class WeatherForecast2 : WeatherForecast
+    public class GetUsersHandler : IEndPointRequestHandler<GetUsers>
     {
-        public string TestName { get; set; }
+        public async Task<IResult> Handle(GetUsers request, CancellationToken cancellationToken)
+        {
+            return Results.Ok("Ahmed");
+        }
     }
 }

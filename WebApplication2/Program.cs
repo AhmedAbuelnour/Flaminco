@@ -1,4 +1,5 @@
-using LowCodeHub.MinimalExtensions.Extensions;
+using Flaminco.MinimalMediatR.Cached.Extensions;
+using Flaminco.MinimalMediatR.Extensions;
 
 namespace WebApplication2
 {
@@ -15,6 +16,11 @@ namespace WebApplication2
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddMinimalMediatR<Program>();
+
+            builder.Services.AddMemoryCache();
+
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -30,13 +36,7 @@ namespace WebApplication2
 
             app.MapControllers();
 
-            app.MapGet("/Masked", () =>
-            {
-                return Results.Ok(new WeatherForecast2
-                {
-                    Summary = "123456789"
-                });
-            }).AddMaskFilter();
+            app.MediateGet<GetUsers>("/Masked");
 
 
             app.Run();

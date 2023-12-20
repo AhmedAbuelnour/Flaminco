@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Flaminco.MinimalExtensions\Flaminco.MinimalExtensions.csproj" />
+    <ProjectReference Include="..\Flaminco.MinimalMediatR\Flaminco.MinimalMediatR.csproj" />
   </ItemGroup>
 
 </Project>
