@@ -1,61 +1,49 @@
 ﻿using Flaminco.ManualMapper.Abstractions;
+using Flaminco.ManualMapper.Exceptions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Flaminco.ManualMapper.Implementations;
 
-public sealed class DefaultMapper : IMapper
+public sealed class DefaultMapper(IServiceProvider serviceProvider) : IMapper
 {
-    private readonly IServiceProvider _serviceProvider;
-    public DefaultMapper(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
 
-    public TDestination Map<TSource, TDestination>(TSource source)
+    public TDestination Map<TSource, TDestination>(TSource source) where TDestination : class
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        Type profileType = typeof(IMapHandler<,>).MakeGenericType(typeof(TSource), typeof(TDestination));
+        IMapHandler<TSource, TDestination>? handler = _serviceProvider.GetService<IMapHandler<TSource, TDestination>>();
 
-        object? handler = _serviceProvider.GetService(profileType);
-
-        ArgumentNullException.ThrowIfNull(handler);
-
-        return handler.GetType().GetMethod("Handler")?.Invoke(handler, new object[] { source }) switch
+        return handler switch
         {
-            TDestination destination => destination,
-            _ => throw new InvalidOperationException($"{nameof(handler)} is not registered")
+            null => throw new HandlerNotFoundException<TSource, TDestination>(),
+            _ => handler.Handler(source)
         };
     }
 
-    public Task<TDestination> MapAsync<TSource, TDestination>(TSource source, CancellationToken cancellationToken = default)
+    public Task<TDestination> MapAsync<TSource, TDestination>(TSource source, CancellationToken cancellationToken = default) where TDestination : class
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        Type profileType = typeof(IMapAsyncHandler<,>).MakeGenericType(typeof(TSource), typeof(TDestination));
+        IMapAsyncHandler<TSource, TDestination>? handler = _serviceProvider.GetService<IMapAsyncHandler<TSource, TDestination>>();
 
-        object? handler = _serviceProvider.GetService(profileType);
-
-        ArgumentNullException.ThrowIfNull(handler);
-
-        return handler.GetType().GetMethod("Handler")?.Invoke(handler, new object[] { source, cancellationToken }) switch
+        return handler switch
         {
-            Task<TDestination> destination => destination,
-            _ => throw new InvalidOperationException($"{nameof(handler)} is not registered")
+            null => throw new HandlerNotFoundException<TSource, TDestination>(),
+            _ => handler.Handler(source, cancellationToken)
         };
     }
 
-    public IAsyncEnumerable<TDestination> MapStream<TSource, TDestination>(TSource source, CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<TDestination> MapStream<TSource, TDestination>(TSource source, CancellationToken cancellationToken = default) where TDestination : class
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        Type profileType = typeof(IMapStreamHandler<,>).MakeGenericType(typeof(TSource), typeof(TDestination));
+        IMapStreamHandler<TSource, TDestination>? handler = _serviceProvider.GetService<IMapStreamHandler<TSource, TDestination>>();
 
-        object? handler = _serviceProvider.GetService(profileType);
-
-        ArgumentNullException.ThrowIfNull(handler);
-
-        return handler.GetType().GetMethod("Handler")?.Invoke(handler, new object[] { source, cancellationToken }) switch
+        return handler switch
         {
-            IAsyncEnumerable<TDestination> destination => destination,
-            _ => throw new InvalidOperationException($"{nameof(handler)} is not registered")
+            null => throw new HandlerNotFoundException<TSource, TDestination>(),
+            _ => handler.Handler(source, cancellationToken)
         };
     }
-
 }

@@ -1,3 +1,4 @@
+using Flaminco.ManualMapper.Extensions;
 using Flaminco.MinimalMediatR.Cached.Extensions;
 using Flaminco.MinimalMediatR.Extensions;
 
@@ -20,6 +21,8 @@ namespace WebApplication2
 
             builder.Services.AddMemoryCache();
 
+
+            builder.Services.AddManualMapper<Program>();
 
             var app = builder.Build();
 

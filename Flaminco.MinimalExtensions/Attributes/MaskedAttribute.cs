@@ -2,17 +2,10 @@
 {
 
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class MaskedAttribute : Attribute
+    public class MaskedAttribute(int start, int length, char maskingChar = '*') : Attribute
     {
-        public int Start { get; private set; }
-        public int Length { get; private set; }
-        public char MaskingChar { get; private set; }
-
-        public MaskedAttribute(int start, int length, char maskingChar = '*')
-        {
-            Start = start;
-            Length = length;
-            MaskingChar = maskingChar;
-        }
+        public int Start { get; private set; } = start;
+        public int Length { get; private set; } = length;
+        public char MaskingChar { get; private set; } = maskingChar;
     }
 }

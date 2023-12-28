@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Flaminco.ManualMapper\Flaminco.ManualMapper.csproj" />
     <ProjectReference Include="..\Flaminco.MinimalExtensions\Flaminco.MinimalExtensions.csproj" />
     <ProjectReference Include="..\Flaminco.MinimalMediatR\Flaminco.MinimalMediatR.csproj" />
   </ItemGroup>
