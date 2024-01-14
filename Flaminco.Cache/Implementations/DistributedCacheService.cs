@@ -6,17 +6,16 @@ using System.Text.Json.Serialization;
 
 namespace Flaminco.Cache.Implementations
 {
-
-    public class CacheService : ICacheService
+    public class DistributedCacheService : ICacheService
     {
         private readonly IDistributedCache _distributedCache;
-        private readonly CacheConfiguration? _cacheConfig;
         private readonly DistributedCacheEntryOptions _cacheOptions;
+        private readonly CacheConfiguration? _cacheConfig;
         private readonly JsonSerializerOptions _jsonSerializerOptions = new()
         {
             ReferenceHandler = ReferenceHandler.IgnoreCycles
         };
-        public CacheService(IDistributedCache distributedCache, IOptions<CacheConfiguration> cacheConfig)
+        public DistributedCacheService(IDistributedCache distributedCache, IOptions<CacheConfiguration> cacheConfig)
         {
             _distributedCache = distributedCache;
             _cacheConfig = cacheConfig.Value;
@@ -100,6 +99,30 @@ namespace Flaminco.Cache.Implementations
             return _distributedCache.RemoveAsync(regionKey.ToString(), cancellationToken);
         }
 
-    }
 
+        private DistributedCacheEntryOptions GetCacheOptions()
+        {
+            DistributedCacheEntryOptions options = new DistributedCacheEntryOptions();
+
+            if (_cacheConfig != null)
+            {
+                if (_cacheConfig.SlidingExpiration.HasValue)
+                {
+                    options.SetSlidingExpiration(TimeSpan.FromMinutes(_cacheConfig.SlidingExpiration.Value));
+                }
+
+                options.SetAbsoluteExpiration(TimeSpan.FromMinutes(_cacheConfig.AbsoluteExpiration));
+            }
+            else
+            {
+                // Default configuration if _cacheConfig is null
+                options.SetSlidingExpiration(TimeSpan.FromMinutes(30)); // Default sliding expiration
+
+                options.SetAbsoluteExpiration(TimeSpan.FromMinutes(60)); // Default absolute expiration
+            }
+
+            return options;
+        }
+
+    }
 }

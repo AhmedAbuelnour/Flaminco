@@ -15,12 +15,11 @@ namespace Flaminco.Cache.Extensions
             {
                 ArgumentException.ThrowIfNullOrEmpty(cacheConfiguration.Mechanism);
 
-                services.AddScoped<ICacheService, CacheService>();
-
                 if (cacheConfiguration.Mechanism.Equals("Memory", StringComparison.CurrentCultureIgnoreCase))
                 {
-                    services.AddDistributedMemoryCache();
+                    services.AddMemoryCache();
 
+                    services.AddScoped<ICacheService, MemoryCacheService>();
                 }
                 else if (cacheConfiguration.Mechanism.Equals("Redis", StringComparison.CurrentCultureIgnoreCase))
                 {
@@ -31,6 +30,8 @@ namespace Flaminco.Cache.Extensions
                         options.Configuration = cacheConfiguration.RedisConnectionString;
                         options.InstanceName = cacheConfiguration.InstanceName;
                     });
+
+                    services.AddScoped<ICacheService, DistributedCacheService>();
                 }
                 else
                 {
