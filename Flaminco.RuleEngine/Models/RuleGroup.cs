@@ -1,6 +1,4 @@
-﻿using System.Data;
-
-namespace Flaminco.RuleEngine.Models
+﻿namespace Flaminco.Workflows.Models
 {
     public class RuleGroup
     {

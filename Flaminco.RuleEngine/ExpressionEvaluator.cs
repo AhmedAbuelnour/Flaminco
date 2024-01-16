@@ -1,4 +1,4 @@
-﻿namespace Flaminco.RuleEngine
+﻿namespace Flaminco.Workflows
 {
     using System.Collections.Generic;
     using System.Linq.Dynamic.Core;
@@ -13,7 +13,7 @@
 
         private static readonly Dictionary<string, Delegate> _lambdaCache = [];
 
-        internal static bool? Evaluate(string expression, Dictionary<string, object> parameters)
+        internal static object? Evaluate(string expression, Dictionary<string, object> parameters)
         {
             if (!_lambdaCache.TryGetValue(expression, out Delegate? compiledLambda))
             {
@@ -34,8 +34,9 @@
             // Execute the lambda expression whether it was just compiled or retrieved from cache
             object[] parameterValues = parameters.Select(p => p.Value).ToArray();
 
-            return compiledLambda.DynamicInvoke(parameterValues) as bool?;
+            return compiledLambda.DynamicInvoke(parameterValues);
         }
+
     }
 
 }

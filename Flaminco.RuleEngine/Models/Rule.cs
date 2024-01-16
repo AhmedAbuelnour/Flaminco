@@ -1,4 +1,4 @@
-﻿namespace Flaminco.RuleEngine.Models
+﻿namespace Flaminco.Workflows.Models
 {
     public class Rule
     {

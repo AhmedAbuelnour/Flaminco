@@ -1,47 +1,10 @@
-﻿namespace Flaminco.RuleEngine
+﻿namespace Flaminco.Workflows
 {
-    using Flaminco.RuleEngine.Exceptions;
-    using Flaminco.RuleEngine.Models;
+    using Flaminco.Workflows.Exceptions;
+    using Flaminco.Workflows.Models;
 
     public class Evaluator
     {
-        private static KeyValuePair<string, object?> EvaluateRule(Rule rule)
-        {
-            try
-            {
-                bool? evaluateResult = ExpressionEvaluator.Evaluate(rule.Expression, rule.Inputs);
-
-                if (evaluateResult.HasValue)
-                {
-                    if (rule.OutputType == OutputType.Expression && evaluateResult == true)
-                    {
-                        if (string.IsNullOrWhiteSpace(rule.ExpressionOutput))
-                        {
-                            ArgumentException.ThrowIfNullOrWhiteSpace(nameof(rule.ExpressionOutput));
-                        }
-
-                        return new KeyValuePair<string, object?>(rule.Key, ExpressionEvaluator.Evaluate(rule.ExpressionOutput!, rule.Inputs));
-                    }
-
-                    return new KeyValuePair<string, object?>(rule.Key, evaluateResult == true ? rule.SuccessOutput : rule.FailureOutput);
-                }
-                else
-                {
-                    throw new BooleanEvaluationException(rule.Expression);
-                }
-            }
-            catch
-            {
-                // Handle or log the exception as needed
-                throw;
-            }
-        }
-        private static Dictionary<string, object?> EvaluateRuleGroup(RuleGroup group)
-        {
-            return group.Rules.OrderBy(a => a.Order).Select(EvaluateRule).ToDictionary();
-        }
-
-
         public static Dictionary<string, object?> EvaluateRules(Workflow workflow)
         {
             if (workflow is null) ArgumentException.ThrowIfNullOrEmpty(nameof(workflow));
@@ -52,7 +15,7 @@
 
                 foreach (var rule in workflow.Rules.OrderBy(a => a.Order))
                 {
-                    if (EvaluateRule(rule) is KeyValuePair<string, object?> evaluationResult)
+                    if (Evaluate(rule) is KeyValuePair<string, object?> evaluationResult)
                     {
                         ruleResults.TryAdd(evaluationResult.Key, evaluationResult.Value);
                     }
@@ -92,6 +55,36 @@
                 throw new EmptyRulesException(workflow.Name);
             }
         }
-    }
 
+        private static KeyValuePair<string, object?> Evaluate(Rule rule)
+        {
+            try
+            {
+                if (ExpressionEvaluator.Evaluate(rule.Expression, rule.Inputs) is bool evaluateResult)
+                {
+                    if (rule.OutputType == OutputType.Expression && evaluateResult == true)
+                    {
+                        if (string.IsNullOrWhiteSpace(rule.ExpressionOutput))
+                        {
+                            ArgumentException.ThrowIfNullOrWhiteSpace(nameof(rule.ExpressionOutput));
+                        }
+                        return new KeyValuePair<string, object?>(rule.Key, ExpressionEvaluator.Evaluate(rule.ExpressionOutput!, rule.Inputs));
+                    }
+
+                    return new KeyValuePair<string, object?>(rule.Key, evaluateResult == true ? rule.SuccessOutput : rule.FailureOutput);
+                }
+                else
+                {
+                    throw new BooleanEvaluationException(rule.Expression);
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        private static Dictionary<string, object?> EvaluateRuleGroup(RuleGroup group)
+            => group.Rules.OrderBy(a => a.Order).Select(Evaluate).ToDictionary();
+    }
 }
