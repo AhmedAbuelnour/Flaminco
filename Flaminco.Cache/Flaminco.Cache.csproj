@@ -7,7 +7,7 @@
 	<Version>1.0.3</Version>
 	<Authors>Ahmed Abuelnour</Authors>
 	<Company>Personal</Company>
-	<Description>A simple hangfire service organizer.</Description>
+	<Description>A powerful and simple caching service.</Description>
 	<PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
