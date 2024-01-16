@@ -35,7 +35,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.MinimalExtensions"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Workflows", "Flaminco.Workflows\Flaminco.Workflows.csproj", "{187F5828-269E-4C8F-9F0B-8325E8EE67F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.ConsoleApp", "Flaminco.ConsoleApp\Flaminco.ConsoleApp.csproj", "{1D7A9006-60C2-4E8E-956F-9AF14AA31A77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ConsoleApp", "Flaminco.ConsoleApp\Flaminco.ConsoleApp.csproj", "{1D7A9006-60C2-4E8E-956F-9AF14AA31A77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Pagination", "Flaminco.Pagination\Flaminco.Pagination.csproj", "{4AA11A3F-3CCC-4547-92B7-0CE63023037D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -111,6 +113,10 @@ Global
 		{1D7A9006-60C2-4E8E-956F-9AF14AA31A77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D7A9006-60C2-4E8E-956F-9AF14AA31A77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D7A9006-60C2-4E8E-956F-9AF14AA31A77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4AA11A3F-3CCC-4547-92B7-0CE63023037D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AA11A3F-3CCC-4547-92B7-0CE63023037D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AA11A3F-3CCC-4547-92B7-0CE63023037D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AA11A3F-3CCC-4547-92B7-0CE63023037D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
