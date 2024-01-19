@@ -31,9 +31,9 @@ namespace Flaminco.Cache.Implementations
 
         public async Task<TItem?> TryGetAsync<TItem>(RegionKey regionKey, CancellationToken cancellationToken = default)
         {
-            if (await _distributedCache.GetAsync(regionKey.ToString(), cancellationToken) is byte[] cachedValue)
+            if (await _distributedCache.GetAsync(regionKey.ToString(), cancellationToken) is byte[] cachedBytes)
             {
-                return JsonSerializer.Deserialize<TItem>(new ReadOnlySpan<byte>(cachedValue))!;
+                return JsonSerializer.Deserialize<TItem>(new ReadOnlySpan<byte>(cachedBytes), _jsonSerializerOptions)!;
             }
 
             return default;
@@ -41,9 +41,9 @@ namespace Flaminco.Cache.Implementations
 
         public async Task<TItem> GetOrCreateAsync<TItem>(RegionKey regionKey, Func<CancellationToken, Task<TItem>> createCallback, CancellationToken cancellationToken = default)
         {
-            if (await _distributedCache.GetAsync(regionKey.ToString(), cancellationToken) is byte[] cachedValue)
+            if (await TryGetAsync<TItem>(regionKey, cancellationToken) is TItem cachedItem)
             {
-                return JsonSerializer.Deserialize<TItem>(new ReadOnlySpan<byte>(cachedValue))!;
+                return cachedItem;
             }
             else
             {
@@ -55,14 +55,13 @@ namespace Flaminco.Cache.Implementations
 
                 return callbackResult;
             }
-
         }
 
         public async Task<TItem> GetOrCreateAsync<TItem>(RegionKey regionKey, Func<CancellationToken, Task<TItem>> createCallback, TimeSpan? absoluteExpirationRelativeToNow, TimeSpan? slidingExpiration, CancellationToken cancellationToken = default)
         {
-            if (await _distributedCache.GetAsync(regionKey.ToString(), cancellationToken) is byte[] cachedValue)
+            if (await TryGetAsync<TItem>(regionKey, cancellationToken) is TItem cachedItem)
             {
-                return JsonSerializer.Deserialize<TItem>(new ReadOnlySpan<byte>(cachedValue))!;
+                return cachedItem;
             }
             else
             {
@@ -97,31 +96,6 @@ namespace Flaminco.Cache.Implementations
         public Task RemoveAsync(RegionKey regionKey, CancellationToken cancellationToken = default)
         {
             return _distributedCache.RemoveAsync(regionKey.ToString(), cancellationToken);
-        }
-
-
-        private DistributedCacheEntryOptions GetCacheOptions()
-        {
-            DistributedCacheEntryOptions options = new DistributedCacheEntryOptions();
-
-            if (_cacheConfig != null)
-            {
-                if (_cacheConfig.SlidingExpiration.HasValue)
-                {
-                    options.SetSlidingExpiration(TimeSpan.FromMinutes(_cacheConfig.SlidingExpiration.Value));
-                }
-
-                options.SetAbsoluteExpiration(TimeSpan.FromMinutes(_cacheConfig.AbsoluteExpiration));
-            }
-            else
-            {
-                // Default configuration if _cacheConfig is null
-                options.SetSlidingExpiration(TimeSpan.FromMinutes(30)); // Default sliding expiration
-
-                options.SetAbsoluteExpiration(TimeSpan.FromMinutes(60)); // Default absolute expiration
-            }
-
-            return options;
         }
 
     }
