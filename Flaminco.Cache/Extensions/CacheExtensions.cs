@@ -9,6 +9,8 @@ namespace Flaminco.Cache.Extensions
     {
         public static IServiceCollection AddCache(this IServiceCollection services, IConfiguration Configuration)
         {
+            services.AddSingleton<CacheKeyService>();
+
             services.AddOptions<CacheConfiguration>().Bind(Configuration.GetSection(nameof(CacheConfiguration)));
 
             if (Configuration.GetSection(nameof(CacheConfiguration)).Get<CacheConfiguration>() is CacheConfiguration cacheConfiguration)

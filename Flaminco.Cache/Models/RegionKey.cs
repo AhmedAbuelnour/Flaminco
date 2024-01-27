@@ -1,9 +1,9 @@
 ﻿namespace Flaminco.Cache.Models
 {
-    public class RegionKey
+    public record struct RegionKey
     {
         public required string Region { get; set; }
         public required string Key { get; set; }
-        public override string ToString() => $"{Region}:{Key}";
+        public override readonly string ToString() => $"{Region}:{Key}";
     }
 }

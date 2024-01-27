@@ -4,17 +4,12 @@
 	  <TargetFramework>net8.0</TargetFramework>
 	  <ImplicitUsings>enable</ImplicitUsings>
 	  <Nullable>enable</Nullable>
-	  <Version>0.0.2</Version>
+	  <Version>0.0.3</Version>
 	  <Authors>Ahmed Abuelnour</Authors>
 	  <Company>Personal</Company>
 	  <Description>A simple pagination solution</Description>
 	  <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
 	  <Copyright>MIT</Copyright>
-
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
-  </ItemGroup>
 
 </Project>

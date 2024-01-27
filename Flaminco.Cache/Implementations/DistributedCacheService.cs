@@ -11,11 +11,14 @@ namespace Flaminco.Cache.Implementations
         private readonly IDistributedCache _distributedCache;
         private readonly DistributedCacheEntryOptions _cacheOptions;
         private readonly CacheConfiguration? _cacheConfig;
+        private readonly CacheKeyService _keyService;
         private readonly JsonSerializerOptions _jsonSerializerOptions = new()
         {
             ReferenceHandler = ReferenceHandler.IgnoreCycles
         };
-        public DistributedCacheService(IDistributedCache distributedCache, IOptions<CacheConfiguration> cacheConfig)
+        public DistributedCacheService(IDistributedCache distributedCache,
+                                       IOptions<CacheConfiguration> cacheConfig,
+                                       CacheKeyService keyService)
         {
             _distributedCache = distributedCache;
             _cacheConfig = cacheConfig.Value;
@@ -27,9 +30,11 @@ namespace Flaminco.Cache.Implementations
                 SlidingExpiration = _cacheConfig.SlidingExpiration.HasValue ? TimeSpan.FromMinutes(_cacheConfig.SlidingExpiration.Value) : null,
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_cacheConfig.AbsoluteExpiration)
             };
+            _keyService = keyService;
         }
 
-        public async Task<TItem?> TryGetAsync<TItem>(RegionKey regionKey, CancellationToken cancellationToken = default)
+        public async Task<TItem?> TryGetAsync<TItem>(RegionKey regionKey,
+                                                     CancellationToken cancellationToken = default)
         {
             if (await _distributedCache.GetAsync(regionKey.ToString(), cancellationToken) is byte[] cachedBytes)
             {
@@ -39,7 +44,9 @@ namespace Flaminco.Cache.Implementations
             return default;
         }
 
-        public async Task<TItem> GetOrCreateAsync<TItem>(RegionKey regionKey, Func<CancellationToken, Task<TItem>> createCallback, CancellationToken cancellationToken = default)
+        public async Task<TItem> GetOrCreateAsync<TItem>(RegionKey regionKey,
+                                                         Func<CancellationToken, Task<TItem>> createCallback,
+                                                         CancellationToken cancellationToken = default)
         {
             if (await TryGetAsync<TItem>(regionKey, cancellationToken) is TItem cachedItem)
             {
@@ -57,7 +64,11 @@ namespace Flaminco.Cache.Implementations
             }
         }
 
-        public async Task<TItem> GetOrCreateAsync<TItem>(RegionKey regionKey, Func<CancellationToken, Task<TItem>> createCallback, TimeSpan? absoluteExpirationRelativeToNow, TimeSpan? slidingExpiration, CancellationToken cancellationToken = default)
+        public async Task<TItem> GetOrCreateAsync<TItem>(RegionKey regionKey,
+                                                         Func<CancellationToken, Task<TItem>> createCallback,
+                                                         TimeSpan? absoluteExpirationRelativeToNow,
+                                                         TimeSpan? slidingExpiration,
+                                                         CancellationToken cancellationToken = default)
         {
             if (await TryGetAsync<TItem>(regionKey, cancellationToken) is TItem cachedItem)
             {
@@ -75,16 +86,26 @@ namespace Flaminco.Cache.Implementations
             }
         }
 
-        public Task SetAsync<TItem>(RegionKey regionKey, TItem item, CancellationToken cancellationToken = default)
+        public Task SetAsync<TItem>(RegionKey regionKey,
+                                    TItem item,
+                                    CancellationToken cancellationToken = default)
         {
             byte[] valueJson = JsonSerializer.SerializeToUtf8Bytes(item, _jsonSerializerOptions);
+
+            _keyService.Add(regionKey);
 
             return _distributedCache.SetAsync(regionKey.ToString(), valueJson, _cacheOptions, cancellationToken);
         }
 
-        public Task SetAsync<TItem>(RegionKey regionKey, TItem item, TimeSpan? absoluteExpirationRelativeToNow, TimeSpan? slidingExpiration, CancellationToken cancellationToken = default)
+        public Task SetAsync<TItem>(RegionKey regionKey,
+                                    TItem item,
+                                    TimeSpan? absoluteExpirationRelativeToNow,
+                                    TimeSpan? slidingExpiration,
+                                    CancellationToken cancellationToken = default)
         {
             byte[] valueJson = JsonSerializer.SerializeToUtf8Bytes(item, _jsonSerializerOptions);
+
+            _keyService.Add(regionKey);
 
             return _distributedCache.SetAsync(regionKey.ToString(), valueJson, new DistributedCacheEntryOptions
             {
@@ -93,10 +114,22 @@ namespace Flaminco.Cache.Implementations
             }, cancellationToken);
         }
 
-        public Task RemoveAsync(RegionKey regionKey, CancellationToken cancellationToken = default)
+        public Task RemoveAsync(RegionKey regionKey,
+                                CancellationToken cancellationToken = default)
         {
+            _keyService.Remove(regionKey);
+
             return _distributedCache.RemoveAsync(regionKey.ToString(), cancellationToken);
         }
 
+        public async Task RemoveAllAsync(CancellationToken cancellationToken = default)
+        {
+            foreach (RegionKey key in _keyService.GetKeys())
+            {
+                await _distributedCache.RemoveAsync(key.ToString(), cancellationToken);
+            }
+
+            _keyService.ClearKeys();
+        }
     }
 }

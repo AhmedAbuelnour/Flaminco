@@ -1,7 +1,7 @@
 ﻿using Flaminco.Pagination.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Flaminco.Pagination.Implementations
+namespace Flaminco.Pagination.Extensions.Extensions
 {
     public static class PagedListExtensions
     {
@@ -10,9 +10,9 @@ namespace Flaminco.Pagination.Implementations
             return new PagedList<TItem>
             {
                 Page = page,
+                PageSize = pageSize,
                 Items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken),
                 TotalCount = await query.CountAsync(cancellationToken),
-                PageSize = pageSize,
             };
         }
 
