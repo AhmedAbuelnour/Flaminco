@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Nullable>enable</Nullable>
+		<Version>1.0.0</Version>
+		<Authors>Ahmed Abuelnour</Authors>
+		<Company>Personal</Company>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Description>
+			The library offers an abstract class designed to simplify the creation of background services that execute tasks at regular intervals. This framework is built upon .NET's BackgroundService and provides a structured way to implement periodic tasks such as cleanup operations, data processing, or any scheduled background work.
+		</Description>
+		<PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
+		<Copyright>
+			Copyright (c) 2024, Ahmed Abuelnour
+		</Copyright>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath=""/>
+	</ItemGroup>
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+</Project>

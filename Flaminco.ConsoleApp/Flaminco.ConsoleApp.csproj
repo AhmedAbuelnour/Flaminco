@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Flaminco.Resultify\Flaminco.Resultify.csproj" />
     <ProjectReference Include="..\Flaminco.Workflows\Flaminco.Workflows.csproj" />
   </ItemGroup>
 

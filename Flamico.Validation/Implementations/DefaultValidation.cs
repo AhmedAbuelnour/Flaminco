@@ -1,6 +1,8 @@
 ﻿using Flaminco.ManualMapper.Abstractions;
 using Flaminco.Validation.Abstractions;
+using Flaminco.Validation.Exceptions;
 using Flaminco.Validation.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Flaminco.ManualMapper.Implementations;
 
@@ -10,37 +12,29 @@ public sealed class DefaultValidation : IValidation
     public DefaultValidation(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
 
-    public Result Validate<TInput>(TInput input)
+    public Result Validate<TInput>(TInput input) where TInput : notnull
     {
         ArgumentNullException.ThrowIfNull(input);
 
-        Type profileType = typeof(IValidationHandler<>).MakeGenericType(typeof(TInput));
+        IValidationHandler<TInput>? handler = _serviceProvider.GetService<IValidationHandler<TInput>>();
 
-        object? handler = _serviceProvider.GetService(profileType);
-
-        ArgumentNullException.ThrowIfNull(handler);
-
-        return handler.GetType().GetMethod("Handler")?.Invoke(handler, new object[] { input }) switch
+        return handler switch
         {
-            Result destination => destination,
-            _ => throw new InvalidOperationException($"{nameof(handler)} is not registered")
+            null => throw new ValidationHandlerNotRegisteredException<IValidationHandler<TInput>>(),
+            _ => handler.Handler(input)
         };
     }
 
-    public Task<Result> ValidateAsync<TInput>(TInput input, CancellationToken cancellationToken = default)
+    public Task<Result> ValidateAsync<TInput>(TInput input, CancellationToken cancellationToken = default) where TInput : notnull
     {
         ArgumentNullException.ThrowIfNull(input);
 
-        Type profileType = typeof(IValidationAsyncHandler<>).MakeGenericType(typeof(TInput));
+        IValidationAsyncHandler<TInput>? handler = _serviceProvider.GetService<IValidationAsyncHandler<TInput>>();
 
-        object? handler = _serviceProvider.GetService(profileType);
-
-        ArgumentNullException.ThrowIfNull(handler);
-
-        return handler.GetType().GetMethod("Handler")?.Invoke(handler, new object[] { input, cancellationToken }) switch
+        return handler switch
         {
-            Task<Result> destination => destination,
-            _ => throw new InvalidOperationException($"{nameof(handler)} is not registered")
+            null => throw new ValidationHandlerNotRegisteredException<IValidationAsyncHandler<TInput>>(),
+            _ => handler.Handler(input, cancellationToken)
         };
     }
 }
