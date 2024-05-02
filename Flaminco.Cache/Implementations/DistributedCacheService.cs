@@ -1,4 +1,5 @@
-﻿using Flaminco.Cache.Models;
+﻿using Flaminco.Cache.Abstracts;
+using Flaminco.Cache.Models;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
@@ -14,7 +15,8 @@ namespace Flaminco.Cache.Implementations
         private readonly CacheKeyService _keyService;
         private readonly JsonSerializerOptions _jsonSerializerOptions = new()
         {
-            ReferenceHandler = ReferenceHandler.IgnoreCycles
+            ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            WriteIndented = false, // for more compact json
         };
         public DistributedCacheService(IDistributedCache distributedCache,
                                        IOptions<CacheConfiguration> cacheConfig,

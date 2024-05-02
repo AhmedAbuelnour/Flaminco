@@ -1,4 +1,5 @@
-﻿using Flaminco.Cache.Implementations;
+﻿using Flaminco.Cache.Abstracts;
+using Flaminco.Cache.Implementations;
 using Flaminco.Cache.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

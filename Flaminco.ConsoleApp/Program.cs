@@ -1,11 +1,30 @@
 ﻿using Flaminco.Resultify;
+using Flaminco.StateMachine;
+using System.Text.Json;
 
 namespace Flaminco.ConsoleApp
 {
+
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
+
+            Machine machine = new Machine();
+
+            State startState = machine.NewStartState("initial");
+
+            startState.OnEntry<LogStateMahineEnterance>();
+
+            State newState = machine.NewState("newState");
+
+            State stopState = machine.NewStopState("stop");
+
+
+            await machine.StartAsync();
+
+
+
 
             List<Result> result = new List<Result>
             {
@@ -17,12 +36,13 @@ namespace Flaminco.ConsoleApp
             };
 
 
-            //    ErrorCollection errorCollection = ErrorCollection.FromResults(result, "Generia", "Gpo");
+
+            ErrorCollection errorCollection = result.ToErrorCollection("Generia", "Gpo");
 
 
-            //     var xx = JsonSerializer.Serialize(Result.Failure(errorCollection));
+            var xx = JsonSerializer.Serialize(errorCollection);
 
-            //    Console.WriteLine(xx);
+            Console.WriteLine(xx);
 
             //int[] XArray = [1, 2, 3];
 

@@ -1,6 +1,6 @@
 ﻿using Flaminco.Cache.Models;
 
-namespace Flaminco.Cache
+namespace Flaminco.Cache.Abstracts
 {
     public interface ICacheService
     {

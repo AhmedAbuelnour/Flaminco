@@ -1,4 +1,5 @@
-﻿using Flaminco.Cache.Models;
+﻿using Flaminco.Cache.Abstracts;
+using Flaminco.Cache.Models;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -10,13 +11,10 @@ namespace Flaminco.Cache.Implementations
         private readonly IMemoryCache _memoryCache;
         private readonly MemoryCacheEntryOptions _cacheOptions;
         private readonly CacheConfiguration? _cacheConfig;
-        private readonly CacheKeyService _keyService;
         public MemoryCacheService(IMemoryCache memoryCache,
-                                  IOptions<CacheConfiguration> cacheConfig,
-                                  CacheKeyService keyService)
+                                  IOptions<CacheConfiguration> cacheConfig)
         {
             _memoryCache = memoryCache;
-            _keyService = keyService;
             _cacheConfig = cacheConfig.Value;
             _cacheOptions = _cacheConfig is null ? new MemoryCacheEntryOptions
             {
@@ -40,8 +38,6 @@ namespace Flaminco.Cache.Implementations
         {
             _memoryCache.Remove(regionKey.ToString());
 
-            _keyService.Remove(regionKey);
-
             return Task.CompletedTask;
         }
 
@@ -50,8 +46,6 @@ namespace Flaminco.Cache.Implementations
                                     CancellationToken cancellationToken = default)
         {
             _memoryCache.Set(regionKey.ToString(), value, _cacheOptions);
-
-            _keyService.Add(regionKey);
 
             return Task.CompletedTask;
         }
@@ -68,8 +62,6 @@ namespace Flaminco.Cache.Implementations
                 AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow
             });
 
-            _keyService.Add(regionKey);
-
             return Task.CompletedTask;
         }
 
@@ -80,8 +72,6 @@ namespace Flaminco.Cache.Implementations
             return _memoryCache.GetOrCreateAsync(regionKey.ToString(), (entity) =>
             {
                 entity.SetOptions(_cacheOptions);
-
-                _keyService.Add(regionKey);
 
                 return createCallback(cancellationToken);
             })!;
@@ -101,20 +91,16 @@ namespace Flaminco.Cache.Implementations
                     AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow
                 });
 
-                _keyService.Add(regionKey);
-
                 return createCallback(cancellationToken);
             })!;
         }
 
         public Task RemoveAllAsync(CancellationToken cancellationToken = default)
         {
-            foreach (RegionKey key in _keyService.GetKeys())
+            if (_memoryCache is MemoryCache concreteMemoryCache)
             {
-                _memoryCache.Remove(key.ToString());
+                concreteMemoryCache.Clear();
             }
-
-            _keyService.ClearKeys();
 
             return Task.CompletedTask;
         }

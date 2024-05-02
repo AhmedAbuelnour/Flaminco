@@ -38,18 +38,11 @@ namespace Flaminco.PeriodicTask
         /// </summary>
         protected abstract bool IsEnabled { get; set; }
         /// <summary>
-        /// Specifies the period between consecutive executions of the background service. This period defines how often the
+        /// Specifies the Period between consecutive executions of the background service. This period defines how often the
         /// service will run, starting from the completion of the last execution. Derived classes must override this property
         /// to set the frequency of execution according to the service's needs.
         /// </summary>
         protected abstract TimeSpan Period { get; }
-        /// <summary>
-        /// Records the timestamp of the last successful execution of the background service. This can be used to calculate
-        /// the initial delay before the service runs for the first time and to ensure that the service runs at the correct
-        /// intervals. Derived classes must manage this property, typically setting it after each successful execution.
-        /// </summary>
-        protected abstract DateTime? LastRunOn { get; set; }
-
         /// <summary>
         /// Contains the logic that the background service will execute at each scheduled interval. This method is called
         /// by the ExecuteAsync method according to the service's period and enabled status. Derived classes must implement
@@ -73,15 +66,6 @@ namespace Flaminco.PeriodicTask
         /// <returns>A Task representing the asynchronous operation, allowing the background service to perform its work indefinitely until stopped.</returns>
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            // Calculate how long to wait until the service should next run
-            TimeSpan initialDelay = GetCalculateInitialDelay();
-
-            // If there's time remaining until the next scheduled execution, wait for that duration
-            if (initialDelay > TimeSpan.Zero)
-            {
-                await Task.Delay(initialDelay, stoppingToken);
-            }
-
             using (PeriodicTimer timer = new(Period))
             {
                 while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
@@ -107,14 +91,6 @@ namespace Flaminco.PeriodicTask
                     }
                 }
             }
-        }
-        private TimeSpan GetCalculateInitialDelay()
-        {
-            if (!LastRunOn.HasValue) return TimeSpan.Zero;
-
-            TimeSpan timeSinceLastRun = DateTime.UtcNow - LastRunOn.Value;
-
-            return timeSinceLastRun < Period ? Period - timeSinceLastRun : TimeSpan.Zero;
         }
     }
 }

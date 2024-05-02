@@ -21,7 +21,7 @@ public class TokenHandlerManager
         audience: _configuration.Audience,
         notBefore: DateTime.UtcNow,
         claims: userProfileClaims.Select(claim => new Claim(claim.Key, claim.Value))
-                                 .Union(new Claim[] { new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) }),
+                                 .Union([new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())]),
         expires: DateTime.UtcNow.Add(_configuration.AccessTokenExpiration),
         signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Convert.FromBase64String(_configuration.Key)), SecurityAlgorithms.HmacSha256Signature));
         if (_configuration.ClearCliamTypeMap)

@@ -12,7 +12,7 @@ public static class ModuleExtension
                                    where !type.IsAbstract && typeof(IModule).IsAssignableFrom(type) && type != typeof(IModule) && type.IsPublic
                                    select type;
 
-        foreach (Type? type in types ?? Array.Empty<Type>())
+        foreach (Type? type in types ?? [])
         {
             services.AddSingleton(typeof(IModule), type);
         }

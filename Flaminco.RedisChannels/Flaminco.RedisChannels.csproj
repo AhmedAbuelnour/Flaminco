@@ -4,15 +4,12 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<Nullable>enable</Nullable>
-		<Version>2.1.0</Version>
+		<Version>0.0.1</Version>
 		<Authors>Ahmed Abuelnour</Authors>
 		<Company>Personal</Company>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Description>
-			The library provides a robust mechanism for handling operation results and errors within your applications, facilitating clear and consistent error handling and result management. This documentation outlines the usage and features of the `Result` and `Error` classes included in the library.
+			The library offers an abstract class designed to simplify the creation and consuming Redis Pub/Sub feature.
 		</Description>
 		<PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
 		<Copyright>
@@ -20,8 +17,11 @@
 		</Copyright>
 	</PropertyGroup>
 
+	
 	<ItemGroup>
-		<None Include="README.md" Pack="true" PackagePath=""/>
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+		<PackageReference Include="StackExchange.Redis" Version="2.7.33" />
 	</ItemGroup>
+
 
 </Project>

@@ -13,7 +13,7 @@ namespace Flaminco.ManualMapper.Extensions
                                            where !type.IsAbstract && type.GetInterfaces().Any(i => i.IsGenericType && (i.GetGenericTypeDefinition() == typeof(IMapHandler<,>) || i.GetGenericTypeDefinition() == typeof(IMapAsyncHandler<,>) || i.GetGenericTypeDefinition() == typeof(IMapStreamHandler<,>)))
                                            select type.GetTypeInfo();
 
-            foreach (TypeInfo? typeInfo in types ?? Array.Empty<TypeInfo>())
+            foreach (TypeInfo? typeInfo in types ?? [])
             {
                 foreach (var implementedInterface in typeInfo.ImplementedInterfaces)
                 {
