@@ -15,7 +15,7 @@ namespace Flaminco.RedisChannels.Extensions
     {
         public static IServiceCollection AddRedisChannels<TPublisherScanner>(this IServiceCollection services, string redisConnection)
         {
-            if (!string.IsNullOrEmpty(redisConnection))
+            if (string.IsNullOrEmpty(redisConnection))
             {
                 throw new ArgumentNullException(redisConnection, "Redis connection can't be null");
             }

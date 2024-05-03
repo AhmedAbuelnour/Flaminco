@@ -13,12 +13,18 @@ namespace WebApplication1.BackgroundServices
         }
         protected override RedisChannel Channel { get => RedisChannel.Literal("test-channel"); }
 
-        protected override ValueTask Callback(RedisChannel channel, RedisValue value)
+        protected override ValueTask<bool> Callback(RedisChannel channel, RedisValue value, CancellationToken cancellationToken)
         {
+            try
+            {
 
-            Console.WriteLine($"SubscribeCallback Received message: {value}");
-
-            return ValueTask.CompletedTask;
+                return ValueTask.FromResult(true);
+            }
+            catch
+            {
+                return ValueTask.FromResult(false);
+            }
         }
+
     }
 }

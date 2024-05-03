@@ -7,7 +7,7 @@ namespace WebApplication1.Publishers
 {
     public class TESTRedisPublisher : ChannelPublisher
     {
-        public override RedisChannel Channel => RedisChannel.Literal("test-channel");
+        protected override RedisChannel Channel => RedisChannel.Literal("test-channel");
         public TESTRedisPublisher(IOptions<RedisChannelConfiguration> options) : base(options)
         {
 
