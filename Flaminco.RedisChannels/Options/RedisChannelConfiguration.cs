@@ -1,8 +1,8 @@
-﻿using StackExchange.Redis;
-
-namespace Flaminco.RedisChannels.Options
+﻿namespace Flaminco.RedisChannels.Options
 {
-    public class RedisChannelConfiguration
+    using StackExchange.Redis;
+
+    public sealed class RedisChannelConfiguration
     {
         public required IConnectionMultiplexer ConnectionMultiplexer { get; set; }
     }

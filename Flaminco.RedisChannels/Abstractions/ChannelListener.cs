@@ -1,10 +1,9 @@
-﻿using Flaminco.RedisChannels.Options;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using StackExchange.Redis;
-
-namespace Flaminco.RedisChannels.Subscribers
+﻿namespace Flaminco.RedisChannels.Abstractions
 {
+    using Flaminco.RedisChannels.Options;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Options;
+    using StackExchange.Redis;
     public abstract class ChannelListener : BackgroundService
     {
         protected abstract RedisChannel Channel { get; }

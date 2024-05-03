@@ -1,11 +1,8 @@
 using Flaminco.Cache.Extensions;
-using Flaminco.RedisChannels.Options;
-using Flaminco.RedisChannels.Subscribers;
+using Flaminco.RedisChannels.Extensions;
 using Flaminco.StateMachine;
-using StackExchange.Redis;
 using WebApplication1.BackgroundServices;
 using WebApplication1.Controllers;
-using WebApplication1.Publishers;
 
 namespace WebApplication1
 {
@@ -27,14 +24,9 @@ namespace WebApplication1
 
             builder.Services.AddScoped<Counter>();
 
-            builder.Services.AddScoped<ChannelPublisher, TESTRedisPublisher>();
+            builder.Services.AddRedisChannels<Program>("172.17.7.4:6379");
 
             builder.Services.AddCache(builder.Configuration);
-
-            builder.Services.Configure<RedisChannelConfiguration>(opt =>
-            {
-                opt.ConnectionMultiplexer = ConnectionMultiplexer.Connect("172.17.7.4:6379");
-            });
 
             builder.Services.AddHostedService<ChannelLisnterBackgroundService>();
 

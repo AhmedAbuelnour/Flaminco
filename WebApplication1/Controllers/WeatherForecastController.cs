@@ -1,5 +1,6 @@
-using Flaminco.RedisChannels.Subscribers;
+using Flaminco.RedisChannels.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using WebApplication1.Publishers;
 
 namespace WebApplication1.Controllers
 {
@@ -7,8 +8,8 @@ namespace WebApplication1.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private readonly ChannelPublisher _cacheService;
-        public WeatherForecastController(ChannelPublisher cacheService)
+        private readonly IChannelPublisherLocator _cacheService;
+        public WeatherForecastController(IChannelPublisherLocator cacheService)
         {
             _cacheService = cacheService;
         }
@@ -16,10 +17,13 @@ namespace WebApplication1.Controllers
         [HttpGet(Name = "GetWeatherForecast")]
         public async Task<string?> Get()
         {
-            await _cacheService.PublishAsync(new Counter
+            if (_cacheService.GetPublisher<TESTRedisPublisher>() is TESTRedisPublisher redisPublisher)
             {
-                Count = 5
-            });
+                await redisPublisher.PublishAsync(new Counter
+                {
+                    Count = 5
+                });
+            }
 
             return "HEHEHE";
         }

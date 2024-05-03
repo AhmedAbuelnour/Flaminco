@@ -1,13 +1,14 @@
-﻿using Flaminco.RedisChannels.Options;
-using Microsoft.Extensions.Options;
-using StackExchange.Redis;
-using System.Text.Json;
-
-namespace Flaminco.RedisChannels.Subscribers
+﻿namespace Flaminco.RedisChannels.Abstractions
 {
+    using Flaminco.RedisChannels.Options;
+    using Microsoft.Extensions.Options;
+    using StackExchange.Redis;
+    using System.Text.Json;
+
     public abstract class ChannelPublisher
     {
-        protected abstract RedisChannel Channel { get; }
+        public abstract RedisChannel Channel { get; }
+
         private readonly IConnectionMultiplexer _connectionMultiplexer;
         protected ChannelPublisher(IOptions<RedisChannelConfiguration> options)
         {
