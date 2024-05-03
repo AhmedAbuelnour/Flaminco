@@ -15,6 +15,11 @@ namespace Flaminco.RedisChannels.Extensions
     {
         public static IServiceCollection AddRedisChannels<TPublisherScanner>(this IServiceCollection services, string redisConnection)
         {
+            if (!string.IsNullOrEmpty(redisConnection))
+            {
+                throw new ArgumentNullException(redisConnection, "Redis connection can't be null");
+            }
+
             services.Configure<RedisChannelConfiguration>(opt =>
             {
                 opt.ConnectionMultiplexer = ConnectionMultiplexer.Connect(redisConnection);
@@ -22,7 +27,7 @@ namespace Flaminco.RedisChannels.Extensions
 
             services.AddPublishers<TPublisherScanner>();
 
-            services.AddSingleton<IChannelPublisherLocator, ChannelPublisherLocator>();
+            services.AddSingleton<IPublisherLocator, PublisherLocator>();
 
             return services;
         }

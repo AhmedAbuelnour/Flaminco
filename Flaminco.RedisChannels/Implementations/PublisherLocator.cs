@@ -5,7 +5,7 @@
     using System;
     using System.Linq;
 
-    public sealed class ChannelPublisherLocator(IServiceProvider serviceProvider) : IChannelPublisherLocator
+    public sealed class PublisherLocator(IServiceProvider serviceProvider) : IPublisherLocator
     {
         public ChannelPublisher? GetPublisher<TPublisher>() where TPublisher : ChannelPublisher
         {

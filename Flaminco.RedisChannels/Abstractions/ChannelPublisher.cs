@@ -7,7 +7,7 @@
 
     public abstract class ChannelPublisher
     {
-        public abstract RedisChannel Channel { get; }
+        protected abstract RedisChannel Channel { get; }
 
         private readonly IConnectionMultiplexer _connectionMultiplexer;
         protected ChannelPublisher(IOptions<RedisChannelConfiguration> options)

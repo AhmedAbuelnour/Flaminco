@@ -1,6 +1,6 @@
 ﻿namespace Flaminco.RedisChannels.Abstractions
 {
-    public interface IChannelPublisherLocator
+    public interface IPublisherLocator
     {
         ChannelPublisher? GetPublisher<TPublisher>() where TPublisher : ChannelPublisher;
     }

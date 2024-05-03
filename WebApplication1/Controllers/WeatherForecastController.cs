@@ -8,8 +8,8 @@ namespace WebApplication1.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private readonly IChannelPublisherLocator _cacheService;
-        public WeatherForecastController(IChannelPublisherLocator cacheService)
+        private readonly IPublisherLocator _cacheService;
+        public WeatherForecastController(IPublisherLocator cacheService)
         {
             _cacheService = cacheService;
         }

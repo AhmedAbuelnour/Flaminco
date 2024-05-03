@@ -7,7 +7,7 @@
     public abstract class ChannelListener : BackgroundService
     {
         protected abstract RedisChannel Channel { get; }
-        protected abstract ValueTask Callback(RedisChannel channel, RedisValue value);
+        protected abstract ValueTask Callback(RedisChannel channel, RedisValue value, CancellationToken cancellationToken = default);
 
         protected virtual CommandFlags CommandFlags { get; } = CommandFlags.None;
 
@@ -31,7 +31,7 @@
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             // Initialize the callback delegate
-            Action<RedisChannel, RedisValue> _callbackDelegate = async (channel, value) => await Callback(channel, value);
+            Action<RedisChannel, RedisValue> _callbackDelegate = async (channel, value) => await Callback(channel, value, stoppingToken);
 
             // Create a TaskCompletionSource that will complete when the token is cancelled.
             TaskCompletionSource<bool> unsubscribeCompletionSource = new TaskCompletionSource<bool>();
