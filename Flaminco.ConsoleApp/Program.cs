@@ -1,5 +1,4 @@
 ﻿using Flaminco.Resultify;
-using Flaminco.StateMachine;
 using System.Text.Json;
 
 namespace Flaminco.ConsoleApp
@@ -10,18 +9,6 @@ namespace Flaminco.ConsoleApp
         static async Task Main(string[] args)
         {
 
-            Machine machine = new Machine();
-
-            State startState = machine.NewStartState("initial");
-
-            startState.OnEntry<LogStateMahineEnterance>();
-
-            State newState = machine.NewState("newState");
-
-            State stopState = machine.NewStopState("stop");
-
-
-            await machine.StartAsync();
 
 
 

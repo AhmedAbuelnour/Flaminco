@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Flaminco.Cache\Flaminco.Cache.csproj" />
-    <ProjectReference Include="..\Flaminco.RedisChannels\Flaminco.RedisChannels.csproj" />
+    <ProjectReference Include="..\Flaminco.RediPolly\Flaminco.RediPolly.csproj" />
     <ProjectReference Include="..\Flaminco.StateMachine\Flaminco.StateMachine.csproj" />
   </ItemGroup>
 

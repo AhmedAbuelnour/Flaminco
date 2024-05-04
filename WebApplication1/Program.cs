@@ -1,5 +1,5 @@
 using Flaminco.Cache.Extensions;
-using Flaminco.RedisChannels.Extensions;
+using Flaminco.RediPolly.Extensions;
 using Flaminco.StateMachine;
 using WebApplication1.BackgroundServices;
 using WebApplication1.Controllers;
@@ -24,11 +24,11 @@ namespace WebApplication1
 
             builder.Services.AddScoped<Counter>();
 
-            builder.Services.AddRedisChannels<Program>("172.17.7.4:6379");
+            builder.Services.AddRediPolly<Program>("172.17.7.4:6379");
 
             builder.Services.AddCache(builder.Configuration);
 
-            builder.Services.AddHostedService<ChannelLisnterBackgroundService>();
+            builder.Services.AddHostedService<ChannelListenerExample>();
 
             var app = builder.Build();
 
