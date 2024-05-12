@@ -45,6 +45,10 @@ Implement listeners and publishers using provided base classes
             try
             {
                 // Your Logic goes here
+
+                // For Resilient messages only make sure to call MarkAsCompleted
+                // MarkAsCompleted(value);
+
                 return ValueTask.FromResult(true); // turn off the retry
             }
             catch
@@ -82,6 +86,15 @@ Implement listeners and publishers using provided base classes
             if (_locator.GetPublisher<PublishAnyMessage>() is PublishAnyMessage redisPublisher)
             {
                 await redisPublisher.PublishAsync(new Counter
+                {
+                    Count = 5
+                });
+
+                // Or you can take advantage of resilient channel by having a reference to the message in redis until it is consumed by the the listener
+                // your message modole should implement an `IResilientMessage` interfcae
+                // you can impelement your custom handler for the cases that you want to republish or delete with a direct access to your redis store.
+                // The Resilient Messages will be stored in 'RediPolly:{Channel}:{ResilientKey}'
+                await redisPublisher.ResilientPublishAsync(new Counter
                 {
                     Count = 5
                 });

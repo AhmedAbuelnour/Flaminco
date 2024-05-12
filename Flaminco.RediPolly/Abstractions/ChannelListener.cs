@@ -37,6 +37,24 @@
         protected abstract ValueTask<bool> Callback(RedisChannel channel, RedisValue value, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Asynchronously marks a message as completed by removing its corresponding key from the Redis store.
+        /// </summary>
+        /// <typeparam name="TMessage">The type of the message, constrained to implement <see cref="IResilientMessage"/>.</typeparam>
+        /// <param name="message">The message to mark as completed, which must implement the <see cref="IResilientMessage"/> interface.</param>
+        /// <returns>
+        /// A representing the asynchronous operation, which returns true if the key was successfully deleted from the Redis store, otherwise false.
+        /// </returns>
+        protected async ValueTask<bool> MarkAsCompleted<TMessage>(TMessage message) where TMessage : IResilientMessage
+        {
+            if (options.Value.ConnectionMultiplexer.GetDatabase() is IDatabase database)
+            {
+                return await database.KeyDeleteAsync($"RediPolly:{Channel}:{message.ResilientKey}");
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Executes the background service logic.
         /// </summary>
         /// <param name="stoppingToken">The cancellation token.</param>

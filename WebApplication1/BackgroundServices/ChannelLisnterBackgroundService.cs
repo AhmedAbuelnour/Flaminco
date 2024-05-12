@@ -3,6 +3,8 @@ using Flaminco.RediPolly.Options;
 using Microsoft.Extensions.Options;
 using Polly;
 using StackExchange.Redis;
+using System.Text.Json;
+using WebApplication1.Controllers;
 
 namespace WebApplication1.BackgroundServices
 {
@@ -12,16 +14,22 @@ namespace WebApplication1.BackgroundServices
 
         // Returning true means don't call the retry policy as i'm managing the call even if it is actually failed. 
         // Returning false means run the retry policy even if it is actually worked.
-        protected override ValueTask<bool> Callback(RedisChannel channel, RedisValue value, CancellationToken cancellationToken)
+        protected override async ValueTask<bool> Callback(RedisChannel channel, RedisValue value, CancellationToken cancellationToken)
         {
             try
             {
                 // Your Logic goes here
-                return ValueTask.FromResult(true); // turn off the retry
+
+                Counter counter = JsonSerializer.Deserialize<Counter>(value);
+
+                await MarkAsCompleted(counter);
+
+                Console.WriteLine(counter.Count);
+                return true; // turn off the retry
             }
             catch
             {
-                return ValueTask.FromResult(false); // turn on the retry policy
+                return false; // turn on the retry policy
             }
         }
 

@@ -37,6 +37,30 @@
 
             return Task.CompletedTask;
         }
+
+        /// <summary>
+        /// Publishes a resilient message to the Redis channel which keep track of this message in the RediPolly channel.
+        /// </summary>
+        /// <typeparam name="TMessage">The type of the message to publish.</typeparam>
+        /// <param name="message">The message to publish.</param>
+        /// <param name="jsonOptions">The options for JSON serialization.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public Task ResilientPublishAsync<TMessage>(TMessage message, JsonSerializerOptions? jsonOptions = null) where TMessage : IResilientMessage
+        {
+            if (options.Value.ConnectionMultiplexer.GetSubscriber() is ISubscriber subscriber)
+            {
+                byte[] messageBytes = JsonSerializer.SerializeToUtf8Bytes(message, jsonOptions);
+
+                if (options.Value.ConnectionMultiplexer.GetDatabase() is IDatabase database)
+                {
+                    database.StringSetAsync($"RediPolly:{Channel}:{message.ResilientKey}", messageBytes, expiry: options.Value.ResilientExpiry);
+                }
+
+                return subscriber.PublishAsync(Channel, messageBytes, CommandFlags.None);
+            }
+
+            return Task.CompletedTask;
+        }
     }
 
 }
