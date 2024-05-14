@@ -4,17 +4,14 @@ using Microsoft.Extensions.Hosting;
 namespace Flaminco.Migration.HostedService
 {
     /// <summary>
-    /// Using Hosted Service, to block the application to accept any requests until the migration successfuly done,
+    /// Using Hosted Service, to block the application to accept any requests until the migration successfully done,
     /// And if the migration didn't complete successfully it will not let the app to work.
     /// </summary>
-    public class MigrationHostedService<TScriptScanner> : IHostedService
+    public class MigrationHostedService<TScriptScanner>(IMigrationService migrationService) : IHostedService
     {
-        private readonly IMigrationService _migrationService;
-        public MigrationHostedService(IMigrationService migrationService) => _migrationService = migrationService;
-
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _migrationService.Migrate<TScriptScanner>();
+            migrationService.Migrate<TScriptScanner>();
 
             return Task.CompletedTask;
         }

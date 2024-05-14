@@ -1,137 +1,17 @@
 ﻿using Flaminco.Cache.Abstracts;
-using Flaminco.Cache.Models;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Flaminco.Cache.Implementations
 {
-    public class DistributedCacheService : ICacheService
+    public class DefaultHybridCache : IHybridCache
     {
-        private readonly IDistributedCache _distributedCache;
-        private readonly DistributedCacheEntryOptions _cacheOptions;
-        private readonly CacheConfiguration? _cacheConfig;
-        private readonly CacheKeyService _keyService;
-        private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+        private readonly HybridCache _hybridCache;
+
+        public DefaultHybridCache(HybridCache hybridCache)
         {
-            ReferenceHandler = ReferenceHandler.IgnoreCycles,
-            WriteIndented = false, // for more compact json
-        };
-        public DistributedCacheService(IDistributedCache distributedCache,
-                                       IOptions<CacheConfiguration> cacheConfig,
-                                       CacheKeyService keyService)
-        {
-            _distributedCache = distributedCache;
-            _cacheConfig = cacheConfig.Value;
-            _cacheOptions = _cacheConfig is null ? new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60)
-            } : new DistributedCacheEntryOptions
-            {
-                SlidingExpiration = _cacheConfig.SlidingExpiration.HasValue ? TimeSpan.FromMinutes(_cacheConfig.SlidingExpiration.Value) : null,
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_cacheConfig.AbsoluteExpiration)
-            };
-            _keyService = keyService;
+            _hybridCache = hybridCache;
         }
 
-        public async Task<TItem?> TryGetAsync<TItem>(RegionKey regionKey,
-                                                     CancellationToken cancellationToken = default)
-        {
-            if (await _distributedCache.GetAsync(regionKey.ToString(), cancellationToken) is byte[] cachedBytes)
-            {
-                return JsonSerializer.Deserialize<TItem>(new ReadOnlySpan<byte>(cachedBytes), _jsonSerializerOptions)!;
-            }
 
-            return default;
-        }
-
-        public async Task<TItem> GetOrCreateAsync<TItem>(RegionKey regionKey,
-                                                         Func<CancellationToken, Task<TItem>> createCallback,
-                                                         CancellationToken cancellationToken = default)
-        {
-            if (await TryGetAsync<TItem>(regionKey, cancellationToken) is TItem cachedItem)
-            {
-                return cachedItem;
-            }
-            else
-            {
-                TItem? callbackResult = await createCallback(cancellationToken);
-
-                ArgumentNullException.ThrowIfNull(nameof(callbackResult));
-
-                await SetAsync(regionKey, callbackResult, cancellationToken);
-
-                return callbackResult;
-            }
-        }
-
-        public async Task<TItem> GetOrCreateAsync<TItem>(RegionKey regionKey,
-                                                         Func<CancellationToken, Task<TItem>> createCallback,
-                                                         TimeSpan? absoluteExpirationRelativeToNow,
-                                                         TimeSpan? slidingExpiration,
-                                                         CancellationToken cancellationToken = default)
-        {
-            if (await TryGetAsync<TItem>(regionKey, cancellationToken) is TItem cachedItem)
-            {
-                return cachedItem;
-            }
-            else
-            {
-                TItem? callbackResult = await createCallback(cancellationToken);
-
-                ArgumentNullException.ThrowIfNull(nameof(callbackResult));
-
-                await SetAsync(regionKey, callbackResult, absoluteExpirationRelativeToNow, slidingExpiration, cancellationToken);
-
-                return callbackResult;
-            }
-        }
-
-        public Task SetAsync<TItem>(RegionKey regionKey,
-                                    TItem item,
-                                    CancellationToken cancellationToken = default)
-        {
-            byte[] valueJson = JsonSerializer.SerializeToUtf8Bytes(item, _jsonSerializerOptions);
-
-            _keyService.Add(regionKey);
-
-            return _distributedCache.SetAsync(regionKey.ToString(), valueJson, _cacheOptions, cancellationToken);
-        }
-
-        public Task SetAsync<TItem>(RegionKey regionKey,
-                                    TItem item,
-                                    TimeSpan? absoluteExpirationRelativeToNow,
-                                    TimeSpan? slidingExpiration,
-                                    CancellationToken cancellationToken = default)
-        {
-            byte[] valueJson = JsonSerializer.SerializeToUtf8Bytes(item, _jsonSerializerOptions);
-
-            _keyService.Add(regionKey);
-
-            return _distributedCache.SetAsync(regionKey.ToString(), valueJson, new DistributedCacheEntryOptions
-            {
-                SlidingExpiration = slidingExpiration,
-                AbsoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow
-            }, cancellationToken);
-        }
-
-        public Task RemoveAsync(RegionKey regionKey,
-                                CancellationToken cancellationToken = default)
-        {
-            _keyService.Remove(regionKey);
-
-            return _distributedCache.RemoveAsync(regionKey.ToString(), cancellationToken);
-        }
-
-        public async Task RemoveAllAsync(CancellationToken cancellationToken = default)
-        {
-            foreach (RegionKey key in _keyService.GetKeys())
-            {
-                await _distributedCache.RemoveAsync(key.ToString(), cancellationToken);
-            }
-
-            _keyService.ClearKeys();
-        }
     }
 }

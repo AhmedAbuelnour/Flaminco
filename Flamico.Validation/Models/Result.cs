@@ -18,7 +18,7 @@
 
         public IReadOnlyList<Error> Errors { get; }
 
-        public static Result Success() => new(true, Enumerable.Empty<Error>());
+        public static Result Success() => new(true, []);
 
         public static Result Failure(IEnumerable<Error> errors) => new(false, errors);
 

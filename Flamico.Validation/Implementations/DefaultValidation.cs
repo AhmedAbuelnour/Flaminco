@@ -6,17 +6,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Flaminco.ManualMapper.Implementations;
 
-public sealed class DefaultValidation : IValidation
+public sealed class DefaultValidation(IServiceProvider serviceProvider) : IValidation
 {
-    private readonly IServiceProvider _serviceProvider;
-    public DefaultValidation(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
-
-
     public Result Validate<TInput>(TInput input) where TInput : notnull
     {
         ArgumentNullException.ThrowIfNull(input);
 
-        IValidationHandler<TInput>? handler = _serviceProvider.GetService<IValidationHandler<TInput>>();
+        IValidationHandler<TInput>? handler = serviceProvider.GetService<IValidationHandler<TInput>>();
 
         return handler switch
         {
@@ -29,7 +25,7 @@ public sealed class DefaultValidation : IValidation
     {
         ArgumentNullException.ThrowIfNull(input);
 
-        IValidationAsyncHandler<TInput>? handler = _serviceProvider.GetService<IValidationAsyncHandler<TInput>>();
+        IValidationAsyncHandler<TInput>? handler = serviceProvider.GetService<IValidationAsyncHandler<TInput>>();
 
         return handler switch
         {

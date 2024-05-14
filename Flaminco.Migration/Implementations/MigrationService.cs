@@ -4,18 +4,11 @@ using Flaminco.Migration.Abstractions;
 
 namespace Flaminco.Migration.Implementations
 {
-    public class DbUpMigrationService : IMigrationService
+    public class DbUpMigrationService(string connectionString) : IMigrationService
     {
-        private readonly string _connectionString;
-
-        public DbUpMigrationService(string connectionString)
-        {
-            _connectionString = connectionString;
-        }
-
         public void Migrate<TScriptScanner>()
         {
-            UpgradeEngine upgrader = DeployChanges.To.SqlDatabase(_connectionString)
+            UpgradeEngine upgrader = DeployChanges.To.SqlDatabase(connectionString)
                                                      .WithScriptsEmbeddedInAssembly(typeof(TScriptScanner).Assembly)
                                                      .LogToConsole()
                                                      .Build();
