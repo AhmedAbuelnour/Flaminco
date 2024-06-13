@@ -1,15 +1,16 @@
-﻿using Flaminco.Keycloak.Exceptions;
+﻿using Flaminco.Keycloak.Constants;
+using Flaminco.Keycloak.Exceptions;
 using Flaminco.Keycloak.Models;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 
-namespace Flaminco.Keycloak.Services
+namespace Flaminco.Keycloak.Clients
 {
-    public sealed class KeycloakService(IHttpClientFactory httpClientFactory, ILogger<KeycloakService> logger) : IKeycloakService
+    public sealed class KeycloakClient(IHttpClientFactory httpClientFactory, ILogger<KeycloakClient> logger) : IKeycloakClient
     {
-        private readonly HttpClient _httpClient = httpClientFactory.CreateClient("KeycloakClient");
+        private readonly HttpClient _httpClient = httpClientFactory.CreateClient(Constant.KeycloakClient);
 
         public async Task AddUserToGroupAsync(string userId, string groupName, CancellationToken cancellationToken = default)
         {

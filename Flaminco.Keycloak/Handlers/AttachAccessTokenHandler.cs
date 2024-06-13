@@ -1,4 +1,5 @@
-﻿using Flaminco.Keycloak.Exceptions;
+﻿using Flaminco.Keycloak.Constants;
+using Flaminco.Keycloak.Exceptions;
 using Flaminco.Keycloak.Models;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
@@ -10,7 +11,7 @@ namespace Flaminco.Keycloak.Handlers
     {
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            HttpResponseMessage tokenResponse = await _httpClientFactory.CreateClient("AccessKeycloakClient").PostAsync($"realms/{_keycloakOptions.Value.Realm}/protocol/openid-connect/token", new FormUrlEncodedContent(new Dictionary<string, string>
+            HttpResponseMessage tokenResponse = await _httpClientFactory.CreateClient(Constant.KeycloakAccessTokenClient).PostAsync($"realms/{_keycloakOptions.Value.Realm}/protocol/openid-connect/token", new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 { "grant_type", "client_credentials" },
                 { "client_id", _keycloakOptions.Value.Credentials.ClientId },

@@ -1,9 +1,8 @@
-﻿
-using Flaminco.Keycloak.Models;
+﻿using Flaminco.Keycloak.Models;
 
-namespace Flaminco.Keycloak.Services
+namespace Flaminco.Keycloak.Clients
 {
-    public interface IKeycloakService
+    public interface IKeycloakClient
     {
         Task AddAttributesToUserAsync(string userId, Dictionary<string, IEnumerable<object>> attributes, CancellationToken cancellationToken = default);
         Task AddUserToGroupAsync(string userId, string groupName, CancellationToken cancellationToken = default);

@@ -1,7 +1,8 @@
 ﻿using Flaminco.Keycloak.ClaimsTransformations;
+using Flaminco.Keycloak.Clients;
+using Flaminco.Keycloak.Constants;
 using Flaminco.Keycloak.Handlers;
 using Flaminco.Keycloak.Models;
-using Flaminco.Keycloak.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -18,12 +19,9 @@ namespace Flaminco.Keycloak.Extensions
         {
             KeycloakOptions keycloakOptions = new();
 
-            IConfigurationSection configurationSection = configuration.GetSection(sectionName);
+            configuration.GetSection(sectionName).Bind(keycloakOptions);
 
-            configurationSection.Bind(keycloakOptions);
-
-            services.Configure<KeycloakOptions>(configurationSection);
-
+            services.Configure<KeycloakOptions>(configuration.GetSection(sectionName));
 
             services.AddAuthentication(options =>
             {
@@ -86,7 +84,7 @@ namespace Flaminco.Keycloak.Extensions
         {
             services.AddTransient<AttachAccessTokenHandler>();
 
-            services.AddHttpClient("AccessKeycloakClient", (serviceProvider, client) =>
+            services.AddHttpClient(Constant.KeycloakAccessTokenClient, (serviceProvider, client) =>
             {
                 KeycloakOptions settings = serviceProvider.GetRequiredService<IOptions<KeycloakOptions>>().Value;
 
@@ -95,7 +93,7 @@ namespace Flaminco.Keycloak.Extensions
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             });
 
-            services.AddHttpClient("KeycloakClient", (serviceProvider, client) =>
+            services.AddHttpClient(Constant.KeycloakClient, (serviceProvider, client) =>
             {
                 KeycloakOptions settings = serviceProvider.GetRequiredService<IOptions<KeycloakOptions>>().Value;
 
@@ -105,7 +103,7 @@ namespace Flaminco.Keycloak.Extensions
 
             }).AddHttpMessageHandler<AttachAccessTokenHandler>();
 
-            services.AddScoped<IKeycloakService, KeycloakService>();
+            services.AddScoped<IKeycloakClient, KeycloakClient>();
 
             return services;
         }

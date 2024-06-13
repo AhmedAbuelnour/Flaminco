@@ -29,9 +29,6 @@ namespace WebApplication1.Controllers
             await hybridCache.RemoveTagAsync("v1");
 
 
-
-            Console.WriteLine(vau);
-
             if (_locator.GetPublisher<PublishAnyMessage>() is PublishAnyMessage redisPublisher)
             {
                 await redisPublisher.ResilientPublishAsync(new Counter
