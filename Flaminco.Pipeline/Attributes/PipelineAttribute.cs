@@ -10,7 +10,7 @@ public sealed class PipelineAttribute<TInput> : Attribute
 public sealed class KeyedPipelineAttribute<TInput> : Attribute
 {
     public required int Order { get; init; }
-    public required string KeyName { get; set; }
+    public required string Key { get; set; }
 
 }
 

@@ -7,7 +7,7 @@ namespace Flaminco.Migration.Extensions
 {
     public static class MigrationExtension
     {
-        public static IServiceCollection AddMigration<TScriptScanner>(this IServiceCollection services, string connectionString)
+        public static IServiceCollection AddMigration<TScriptScanner>(this IServiceCollection services, string connectionString) where TScriptScanner : class
         {
             services.AddSingleton<IMigrationService>(new DbUpMigrationService(connectionString));
 

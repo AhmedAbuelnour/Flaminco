@@ -6,7 +6,11 @@ namespace Flaminco.Migration.Implementations
 {
     public class DbUpMigrationService(string connectionString) : IMigrationService
     {
-        public void Migrate<TScriptScanner>()
+        /// <summary>
+        /// Executes the database migration scripts embedded in the specified assembly.
+        /// </summary>
+        /// <typeparam name="TScriptScanner">The type used to locate the assembly containing the migration scripts.</typeparam>
+        public void Migrate<TScriptScanner>() where TScriptScanner : class
         {
             UpgradeEngine upgrader = DeployChanges.To.SqlDatabase(connectionString)
                                                      .WithScriptsEmbeddedInAssembly(typeof(TScriptScanner).Assembly)
@@ -17,7 +21,7 @@ namespace Flaminco.Migration.Implementations
 
             if (!result.Successful)
             {
-                throw new InvalidOperationException("Database migration failed", result.Error);
+                throw result.Error;
             }
         }
     }

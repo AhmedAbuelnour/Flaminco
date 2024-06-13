@@ -14,5 +14,7 @@ public class JWTConfigurationOptions
     public bool ValidateIssuer { get; set; } = true;
     public bool ValidateAudience { get; set; } = true;
     public TimeSpan ClockSkew { get; set; } = TimeSpan.Zero;
+    public string? Authority { get; set; }
+    public string? RoleClaimType { get; set; }
 }
 

@@ -18,14 +18,11 @@ namespace Flaminco.Pagination.Extensions
 
         public static async Task<PagedList<TItem>> ToPagedList<TItem>(this IQueryable<TItem> query, CancellationToken cancellationToken = default)
         {
-            int totalCount = await query.CountAsync(cancellationToken);
-
             return new PagedList<TItem>
             {
                 Page = 1,
-                PageSize = totalCount,
                 Items = await query.ToListAsync(cancellationToken),
-                TotalCount = totalCount,
+                TotalCount = await query.CountAsync(cancellationToken),
             };
         }
     }

@@ -18,12 +18,16 @@ public static class TokenHandlerExtension
 
         services.Configure<JWTConfigurationOptions>(configurationSection);
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-
-       .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
        {
            options.RequireHttpsMetadata = jwtOptions.RequireHttpsMetadata;
            options.SaveToken = jwtOptions.SaveTokenInAuthProperties;
+           options.Audience = jwtOptions.Audience;
+           options.Authority = jwtOptions.Authority;
            options.TokenValidationParameters = new TokenValidationParameters
            {
                ValidateIssuerSigningKey = jwtOptions.ValidateIssuerSigningKey,
@@ -33,16 +37,33 @@ public static class TokenHandlerExtension
                ValidAudience = jwtOptions.Audience,
                ValidIssuer = jwtOptions.Issuer,
                IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(jwtOptions.Key)),
-               ClockSkew = jwtOptions.ClockSkew
+               ClockSkew = jwtOptions.ClockSkew,
+               RoleClaimType = jwtOptions.RoleClaimType,
+
            };
            options.Events = new JwtBearerEvents
            {
+               OnMessageReceived = context =>
+               {
+                   if (!string.IsNullOrEmpty(context.Request.Query["access_token"]))
+                   {
+                       // Read the token out of the query string
+                       context.Token = context.Request.Query["access_token"];
+                   }
+                   return Task.CompletedTask;
+               },
                OnAuthenticationFailed = context =>
                {
                    if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
                    {
-                       context.Response.Headers.Add("Token-Expired", "true");
+                       context.Response.Headers["Token-Expired"] = "true";
                    }
+
+                   if (context.Exception.GetType() == typeof(SecurityTokenValidationException))
+                   {
+                       context.Response.Headers["Token-Validation"] = "false";
+                   }
+
                    return Task.CompletedTask;
                }
            };

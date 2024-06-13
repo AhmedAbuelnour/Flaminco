@@ -34,7 +34,7 @@ public sealed class DefaultPipeline : IPipeline
         }
     }
 
-    public async ValueTask ExecuteKeyedPipeline<TInput>(TInput source, string keyName, CancellationToken cancellationToken = default) where TInput : class
+    public async ValueTask ExecuteKeyedPipeline<TInput>(TInput source, string key, CancellationToken cancellationToken = default) where TInput : class
     {
         IEnumerable<IPipelineHandler<TInput>>? handlers = _serviceProvider.GetServices<IPipelineHandler<TInput>>();
 
@@ -47,7 +47,7 @@ public sealed class DefaultPipeline : IPipeline
 
         foreach (IPipelineHandler<TInput> handler in handlers!)
         {
-            if (Attribute.GetCustomAttributes(handler.GetType(), typeof(KeyedPipelineAttribute<TInput>)) is KeyedPipelineAttribute<TInput>[] attributes && attributes.FirstOrDefault(a => a.KeyName.Equals(keyName, StringComparison.CurrentCultureIgnoreCase)) is KeyedPipelineAttribute<TInput> attribute)
+            if (Attribute.GetCustomAttributes(handler.GetType(), typeof(KeyedPipelineAttribute<TInput>)) is KeyedPipelineAttribute<TInput>[] attributes && attributes.FirstOrDefault(a => a.Key.Equals(key, StringComparison.CurrentCultureIgnoreCase)) is KeyedPipelineAttribute<TInput> attribute)
             {
                 handlerQueue.Enqueue(handler, attribute.Order);
             }
