@@ -9,7 +9,7 @@ namespace Flaminco.Keycloak.ClaimsTransformations
     /// </summary>
     /// <param name="roleClaimType">Type of the role claim.</param>
     /// <param name="audience">The audience.</param>
-    public class KeycloakRolesClaimsTransformation(string roleClaimType, string audience) : IClaimsTransformation
+    internal sealed class KeycloakRolesClaimsTransformation(string roleClaimType, string audience) : IClaimsTransformation
     {
 
         /// <summary>
@@ -37,13 +37,13 @@ namespace Flaminco.Keycloak.ClaimsTransformations
                 return Task.FromResult(result);
             }
 
-            using var resourceAccess = JsonDocument.Parse(resourceAccessValue);
+            using JsonDocument resourceAccess = JsonDocument.Parse(resourceAccessValue);
 
             JsonElement clientRoles = resourceAccess.RootElement.GetProperty(audience).GetProperty("roles");
 
             foreach (var role in clientRoles.EnumerateArray())
             {
-                var value = role.GetString();
+                string? value = role.GetString();
 
                 if (!string.IsNullOrWhiteSpace(value))
                 {

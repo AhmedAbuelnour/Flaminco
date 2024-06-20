@@ -1,6 +1,6 @@
 ﻿namespace Flaminco.Keycloak.Exceptions
 {
-    public class AccessTokenGenerateException() : Exception("We could not generate an access token")
+    internal sealed class AccessTokenGenerateException() : Exception("We could not generate an access token")
     {
     }
 }

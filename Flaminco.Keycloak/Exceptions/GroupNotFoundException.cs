@@ -1,6 +1,6 @@
 ﻿namespace Flaminco.Keycloak.Exceptions
 {
-    public class GroupNotFoundException(string groupName) : Exception($"Group Name: {groupName} not found")
+    internal sealed class GroupNotFoundException(string groupName) : Exception($"Group Name: {groupName} not found")
     {
     }
 }
