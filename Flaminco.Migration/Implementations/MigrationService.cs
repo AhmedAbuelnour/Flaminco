@@ -1,28 +1,38 @@
 ﻿using DbUp;
+using DbUp.Builder;
 using DbUp.Engine;
 using Flaminco.Migration.Abstractions;
+using Flaminco.Migration.Extensions;
+using Flaminco.Migration.Options;
 
 namespace Flaminco.Migration.Implementations
 {
-    public class DbUpMigrationService(string connectionString) : IMigrationService
+    internal class DbUpMigrationService(MigrationOptions _migrationOptions) : IMigrationService
     {
-        /// <summary>
-        /// Executes the database migration scripts embedded in the specified assembly.
-        /// </summary>
-        /// <typeparam name="TScriptScanner">The type used to locate the assembly containing the migration scripts.</typeparam>
+        /// <inheritdoc/>
         public void Migrate<TScriptScanner>() where TScriptScanner : class
         {
-            UpgradeEngine upgrader = DeployChanges.To.SqlDatabase(connectionString)
-                                                     .WithScriptsEmbeddedInAssembly(typeof(TScriptScanner).Assembly)
-                                                     .LogToConsole()
-                                                     .Build();
+            EnsureDatabase.For.SqlDatabase(_migrationOptions.ConnectionString);
 
-            DatabaseUpgradeResult result = upgrader.PerformUpgrade();
+            UpgradeEngineBuilder upgradeEngineBuilder = DeployChanges.To.SqlDatabase(_migrationOptions.ConnectionString).LogToConsole();
 
-            if (!result.Successful)
+            upgradeEngineBuilder = _migrationOptions.Directories?.Any() ?? false
+                ? upgradeEngineBuilder.WithScriptsEmbeddedInDirectories(typeof(TScriptScanner).Assembly, _migrationOptions.Directories)
+                : upgradeEngineBuilder.WithScriptsEmbeddedInAssembly(typeof(TScriptScanner).Assembly);
+
+
+            UpgradeEngine upgrader = upgradeEngineBuilder.Build();
+
+            if (upgrader.IsUpgradeRequired())
             {
-                throw result.Error;
+                DatabaseUpgradeResult databaseUpgradeResult = upgrader.PerformUpgrade();
+
+                if (!databaseUpgradeResult.Successful)
+                {
+                    throw databaseUpgradeResult.Error;
+                }
             }
         }
+
     }
 }

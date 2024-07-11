@@ -1,48 +1,20 @@
-using Flaminco.CacheKeys;
-using Flaminco.RediPolly.Abstractions;
+using Flaminco.ImmutableLookups.Abstractions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Hybrid;
-using WebApplication1.Publishers;
+using WebApplication1.Entities;
 
 namespace WebApplication1.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class Example(IPublisherLocator _locator)
+    public class Example(IImmutableLookupQuery<WorkflowStatus, int> lookupQuery)
     {
         [HttpGet]
-        [Route("publish")]
-        public async Task Publish(HybridCache hybridCache)
+        public async Task GetLookups()
         {
-            string dummyValue = await hybridCache.GetOrCreateAsync<string>(new CacheKey
-            {
-                Region = "Lookup",
-                Key = "Categories",
-                Tags = ["v1", "api"]
-            }, async (x) =>
-            {
-                Console.WriteLine("Get from data store");
-                return "dummy value";
-            }, tags: ["tag1", "tag2"]);
+            var lookups = await lookupQuery.GetByModuleAsync("Oss_submissions");
 
-            // incase you need to remove all cached items by tag
-            await hybridCache.RemoveTagAsync("v1");
-
-
-            if (_locator.GetPublisher<PublishAnyMessage>() is PublishAnyMessage redisPublisher)
-            {
-                await redisPublisher.ResilientPublishAsync(new Counter
-                {
-                    Count = 5
-                });
-            }
         }
     }
 
 
-    public class Counter : IResilientMessage
-    {
-        public int Count { get; set; }
-        public Guid ResilientKey { get; set; } = Guid.Parse("e3b4482b-3871-4127-8f1e-135f7a9d7ec8");
-    }
 }

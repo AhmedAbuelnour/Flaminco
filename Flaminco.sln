@@ -37,7 +37,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RediPolly", "Flami
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.CacheKeys", "Flaminco.CacheKey\Flaminco.CacheKeys.csproj", "{6D15071B-BE81-484D-8DDC-B61AB21B1A45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Keycloak", "Flaminco.Keycloak\Flaminco.Keycloak.csproj", "{D4E2C683-0674-4914-9A69-7817468BCDC3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Keycloak", "Flaminco.Keycloak\Flaminco.Keycloak.csproj", "{D4E2C683-0674-4914-9A69-7817468BCDC3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ImmutableLookups", "Flaminco.ImmutableLookups\Flaminco.ImmutableLookups.csproj", "{815D5EF8-1AD1-41F2-9E5D-9A3E5DAAE884}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -117,6 +119,10 @@ Global
 		{D4E2C683-0674-4914-9A69-7817468BCDC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4E2C683-0674-4914-9A69-7817468BCDC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4E2C683-0674-4914-9A69-7817468BCDC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{815D5EF8-1AD1-41F2-9E5D-9A3E5DAAE884}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{815D5EF8-1AD1-41F2-9E5D-9A3E5DAAE884}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{815D5EF8-1AD1-41F2-9E5D-9A3E5DAAE884}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{815D5EF8-1AD1-41F2-9E5D-9A3E5DAAE884}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

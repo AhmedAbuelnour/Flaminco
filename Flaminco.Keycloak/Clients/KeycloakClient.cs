@@ -15,13 +15,7 @@ namespace Flaminco.Keycloak.Clients
     {
         private readonly HttpClient _httpClient = httpClientFactory.CreateClient(Constant.KeycloakClient);
 
-        /// <summary>
-        /// Adds a specified user to a specified group in Keycloak.
-        /// </summary>
-        /// <param name="userId">The ID of the user to add to the group.</param>
-        /// <param name="groupName">The name of the group to add the user to.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task AddUserToGroupAsync(string userId, string groupName, CancellationToken cancellationToken = default)
         {
             IEnumerable<KeycloakGroup> groups = await GetGroupsAsync(cancellationToken);
@@ -42,13 +36,7 @@ namespace Flaminco.Keycloak.Clients
             }
         }
 
-        /// <summary>
-        /// Removes a specified user from a specified group in Keycloak.
-        /// </summary>
-        /// <param name="userId">The ID of the user to remove from the group.</param>
-        /// <param name="groupName">The name of the group to remove the user from.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task RemoveUserFromGroupAsync(string userId, string groupName, CancellationToken cancellationToken = default)
         {
             IEnumerable<KeycloakGroup> groups = await GetGroupsAsync(cancellationToken);
@@ -69,11 +57,7 @@ namespace Flaminco.Keycloak.Clients
             }
         }
 
-        /// <summary>
-        /// Retrieves all groups from Keycloak.
-        /// </summary>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation, containing a collection of Keycloak groups.</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<KeycloakGroup>> GetGroupsAsync(CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Retrieving groups");
@@ -85,12 +69,7 @@ namespace Flaminco.Keycloak.Clients
             return await response.Content.ReadFromJsonAsync<IEnumerable<KeycloakGroup>>(cancellationToken) ?? [];
         }
 
-        /// <summary>
-        /// Disables a specified user in Keycloak.
-        /// </summary>
-        /// <param name="userId">The ID of the user to disable.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task DisableUserAsync(string userId, CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Disabling user {UserId}", userId);
@@ -105,12 +84,7 @@ namespace Flaminco.Keycloak.Clients
             logger.LogInformation("User {UserId} disabled", userId);
         }
 
-        /// <summary>
-        /// Enables a specified user in Keycloak.
-        /// </summary>
-        /// <param name="userId">The ID of the user to enable.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task EnableUserAsync(string userId, CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Enabling user {UserId}", userId);
@@ -125,12 +99,7 @@ namespace Flaminco.Keycloak.Clients
             logger.LogInformation("User {UserId} enabled", userId);
         }
 
-        /// <summary>
-        /// Deletes a specified user from Keycloak.
-        /// </summary>
-        /// <param name="userId">The ID of the user to delete.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task DeleteUserAsync(string userId, CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Deleting user {UserId}", userId);
@@ -142,12 +111,7 @@ namespace Flaminco.Keycloak.Clients
             logger.LogInformation("User {UserId} deleted", userId);
         }
 
-        /// <summary>
-        /// Retrieves account information for a specified user from Keycloak.
-        /// </summary>
-        /// <param name="userId">The ID of the user to retrieve information for.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation, containing the user's account information, or null if the user is not found.</returns>
+        /// <inheritdoc/>
         public async Task<KeycloakUser?> GetUserAccountInfoAsync(string userId, CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Retrieving user account info for {UserId}", userId);
@@ -159,12 +123,7 @@ namespace Flaminco.Keycloak.Clients
             return await response.Content.ReadFromJsonAsync<KeycloakUser>(cancellationToken);
         }
 
-        /// <summary>
-        /// Retrieves all users from a specified group in Keycloak.
-        /// </summary>
-        /// <param name="groupName">The name of the group to retrieve users from.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation, containing a collection of users in the group.</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<KeycloakUser>> GetUsersFromGroupAsync(string groupName, CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Retrieving users from group {GroupName}", groupName);
@@ -186,11 +145,7 @@ namespace Flaminco.Keycloak.Clients
 
         }
 
-        /// <summary>
-        /// Retrieves all users from Keycloak.
-        /// </summary>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation, containing a collection of Keycloak users.</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<KeycloakUser>> GetAllUsersAsync(CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Retrieving all users");
@@ -202,13 +157,7 @@ namespace Flaminco.Keycloak.Clients
             return await response.Content.ReadFromJsonAsync<IEnumerable<KeycloakUser>>(cancellationToken) ?? [];
         }
 
-        /// <summary>
-        /// Adds attributes to a specified user in Keycloak.
-        /// </summary>
-        /// <param name="userId">The ID of the user to add attributes to.</param>
-        /// <param name="attributes">A dictionary of attributes to add, where the key is the attribute name and the value is a collection of attribute values.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task AddAttributesToUserAsync(string userId, Dictionary<string, IEnumerable<object>> attributes, CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Adding attributes to user {UserId}", userId);
@@ -223,13 +172,7 @@ namespace Flaminco.Keycloak.Clients
             logger.LogInformation("Attributes added to user {UserId}", userId);
         }
 
-        /// <summary>
-        /// Updates the username of a specified user in Keycloak.
-        /// </summary>
-        /// <param name="userId">The ID of the user to update.</param>
-        /// <param name="userName">The new username of the user.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task UpdateUsernameAsync(string userId, string userName, CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Updating username for user {UserId}", userId);
@@ -245,13 +188,7 @@ namespace Flaminco.Keycloak.Clients
             logger.LogInformation("Username updated for user {UserId}", userId);
         }
 
-        /// <summary>
-        /// Updates the email of a specified user in Keycloak.
-        /// </summary>
-        /// <param name="userId">The ID of the user to update.</param>
-        /// <param name="email">The new email address of the user.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
+        /// <inheritdoc/>
         public async Task UpdateEmailAsync(string userId, string email, CancellationToken cancellationToken = default)
         {
             logger.LogInformation("Updating username for user {UserId}", userId);
@@ -266,5 +203,36 @@ namespace Flaminco.Keycloak.Clients
 
             logger.LogInformation("Username updated for user {UserId}", userId);
         }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<KeycloakUser>> GetUsersByAttributeAsync(string attributeName, string attributeValue, CancellationToken cancellationToken = default)
+        {
+            logger.LogInformation("Get Users by attribute name {name}, and attribute value {value} ", attributeName, attributeValue);
+
+            HttpResponseMessage response = await _httpClient.GetAsync($"users?attributes.{attributeName}={attributeValue}", cancellationToken);
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<IEnumerable<KeycloakUser>>(cancellationToken) ?? [];
+        }
+
+        /// <inheritdoc/>
+        public async Task<KeycloakUser?> GetUserByAttributeAsync(string attributeName, string attributeValue, CancellationToken cancellationToken = default)
+        {
+            return (await GetUsersByAttributeAsync(attributeName, attributeValue, cancellationToken)).FirstOrDefault();
+        }
+
+        /// <inheritdoc/>
+        public async Task<KeycloakUser?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
+        {
+            logger.LogInformation("Get User by email {email}", email);
+
+            HttpResponseMessage response = await _httpClient.GetAsync($"users?email={email}", cancellationToken);
+
+            response.EnsureSuccessStatusCode();
+
+            return (await response.Content.ReadFromJsonAsync<IEnumerable<KeycloakUser>>(cancellationToken) ?? []).FirstOrDefault();
+        }
+
     }
 }

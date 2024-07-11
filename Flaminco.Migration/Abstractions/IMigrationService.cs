@@ -1,6 +1,6 @@
 ﻿namespace Flaminco.Migration.Abstractions
 {
-    public interface IMigrationService
+    internal interface IMigrationService
     {
         /// <summary>
         /// Executes the database migration scripts embedded in the specified assembly.
