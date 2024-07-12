@@ -7,11 +7,16 @@ namespace Flaminco.Migration.HostedService
     /// Using Hosted Service, to block the application to accept any requests until the migration successfully done,
     /// And if the migration didn't complete successfully it will not let the app to work.
     /// </summary>
-    internal class MigrationHostedService<TScriptScanner>(IMigrationService migrationService) : IHostedService where TScriptScanner : class
+    internal class MigrationHostedService<TScriptScanner> : IHostedService where TScriptScanner : class
     {
+        private readonly IMigrationService _migrationService;
+        public MigrationHostedService(IMigrationService migrationService)
+        {
+            _migrationService = migrationService;
+        }
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            migrationService.Migrate<TScriptScanner>();
+            _migrationService.Migrate<TScriptScanner>();
 
             return Task.CompletedTask;
         }

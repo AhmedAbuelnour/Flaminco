@@ -1,5 +1,0 @@
-﻿CREATE PROC get_my_name
-AS
-BEGIN
-	SELECT 'MY NAME'
-END

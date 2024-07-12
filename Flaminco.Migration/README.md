@@ -8,6 +8,7 @@
 * Supports organizing scripts into directories with prioritized execution order.
 * Integrated with IHostedService to ensure migrations are run before the application starts accepting requests.
 * Leverage `appsettings.json` for configuration.
+* Supports for always executing migration scripts.
 
 ## Installation
 
@@ -31,6 +32,7 @@ builder.Services.AddMigration<Program>(options =>
 {
     options.ConnectionString = "Server=localhost;****";
     options.Directories = ["WebApplication1.Scripts.Tables","WebApplication1.Scripts.StoredProcedures"];
+    options.AlwaysExexuteDirectories = ["WebApplication1.Scripts.StoredProcedures"]; // means run the scripts inside these directories each time the upgrader run.
 });
 ```
 
@@ -41,6 +43,9 @@ Using Configuration from `appsettings.json`
     "ConnectionString": "Server=localhost;****",
     "Directories": [
       "WebApplication1.Scripts.Tables",
+      "WebApplication1.Scripts.StoredProcedures"
+    ],
+    "AlwaysExecuteDirectories": [
       "WebApplication1.Scripts.StoredProcedures"
     ]
   }

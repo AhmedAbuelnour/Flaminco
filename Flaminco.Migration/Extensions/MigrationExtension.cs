@@ -59,13 +59,14 @@ namespace Flaminco.Migration.Extensions
         /// <summary>
         /// Configures the UpgradeEngineBuilder to use scripts embedded in the specified directories within the assembly.
         /// </summary>
-        internal static UpgradeEngineBuilder WithScriptsEmbeddedInDirectories(this UpgradeEngineBuilder builder, Assembly assembly, string[] directories)
+        internal static UpgradeEngineBuilder WithScriptsEmbeddedInDirectories(this UpgradeEngineBuilder builder, Assembly assembly, string[] directories, Func<string, bool> filter)
         {
             string[] files = assembly.GetManifestResourceNames();
 
             foreach (string directory in directories)
             {
                 builder.WithScripts(files.Where(name => name.StartsWith(directory) && name.EndsWith(".sql"))
+                                         .Where(filter)
                                          .OrderBy(name => name)
                                          .Select(name =>
                                           {
@@ -77,6 +78,47 @@ namespace Flaminco.Migration.Extensions
             }
 
             return builder.WithFilter(new DirectoryScriptFilter(directories));
+        }
+
+        /// <summary>
+        /// Configures the UpgradeEngineBuilder to use scripts embedded in the specified directories within the assembly.
+        /// </summary>
+        internal static UpgradeEngineBuilder WithScriptsEmbeddedInDirectories(this UpgradeEngineBuilder builder, Assembly assembly, string[] directories)
+        {
+            string[] files = assembly.GetManifestResourceNames();
+
+            foreach (string directory in directories)
+            {
+                builder.WithScripts(files.Where(name => name.StartsWith(directory) && name.EndsWith(".sql"))
+                                         .OrderBy(name => name)
+                                         .Select(name =>
+                                         {
+                                             using var stream = assembly.GetManifestResourceStream(name)!;
+                                             using var reader = new StreamReader(stream);
+                                             var scriptContent = reader.ReadToEnd();
+                                             return new SqlScript(name, scriptContent);
+                                         }));
+            }
+
+            return builder.WithFilter(new DirectoryScriptFilter(directories));
+        }
+
+
+
+        /// <summary>
+        /// Run the upgrader to migrate the scripts.
+        /// </summary>
+        internal static void RunUpgrader(this UpgradeEngine upgradeEngine)
+        {
+            if (upgradeEngine.IsUpgradeRequired())
+            {
+                DatabaseUpgradeResult databaseUpgradeResult = upgradeEngine.PerformUpgrade();
+
+                if (!databaseUpgradeResult.Successful)
+                {
+                    throw databaseUpgradeResult.Error;
+                }
+            }
         }
     }
 }

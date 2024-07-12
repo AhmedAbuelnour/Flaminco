@@ -3,8 +3,12 @@ using DbUp.Support;
 
 namespace Flaminco.Migration.Implementations
 {
-    internal class DirectoryScriptFilter(string[] _directories) : IScriptFilter
+    internal class DirectoryScriptFilter : IScriptFilter
     {
+        private readonly string[] _directories;
+
+        public DirectoryScriptFilter(string[] directories) => _directories = directories;
+
         public IEnumerable<SqlScript> Filter(IEnumerable<SqlScript> sorted, HashSet<string> executedScriptNames, ScriptNameComparer comparer)
         {
             return sorted
