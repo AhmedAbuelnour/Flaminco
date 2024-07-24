@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>net8.0</TargetFramework>
+	  <ImplicitUsings>enable</ImplicitUsings>
+	  <Nullable>enable</Nullable>
+	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	  <Nullable>enable</Nullable>
+	  <Version>1.0.0</Version>
+	  <Authors>Ahmed Abuelnour</Authors>
+	  <Company>Personal</Company>
+	  <Description>
+		  The Flaminco.OperationResults package provides a standardized way to represent the outcome of operations in your applications. It includes classes for encapsulating both successful and failed operation results, along with any associated errors. This package aims to simplify error handling and result processing in a consistent and clear manner.
+	  </Description>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
+	  <Copyright>
+		  Copyright (c) 2024, Ahmed Abuelnour
+	  </Copyright>
+  </PropertyGroup>
+
+</Project>

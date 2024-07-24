@@ -1,5 +1,7 @@
+using Flaminco.CacheKeys;
 using Flaminco.ImmutableLookups.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Hybrid;
 using WebApplication1.Entities;
 
 namespace WebApplication1.Controllers
@@ -8,10 +10,17 @@ namespace WebApplication1.Controllers
     [Route("[controller]")]
     public class Example(IImmutableLookupQuery<WorkflowStatus, int> lookupQuery)
     {
-        [HttpGet]
-        public async Task GetLookups()
+        private static CacheKey LookupsOsssubmission = new CacheKey
         {
-            var lookups = await lookupQuery.GetByModuleAsync("Oss_submissions");
+            Region = "Lookups",
+            Key = "oss_submissions",
+            Tags = ["lookups", "submissions"]
+        };
+
+        [HttpGet]
+        public async Task GetLookups(HybridCache hybridCache, CancellationToken cancellationToken)
+        {
+            List<WorkflowStatus> workflowStatuses = await hybridCache.GetOrCreateAsync(LookupsOsssubmission, async (token) => await lookupQuery.GetByModuleAsync("Oss_submissions", token), tags: LookupsOsssubmission.Tags, token: cancellationToken);
 
         }
     }
