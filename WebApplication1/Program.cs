@@ -1,8 +1,6 @@
 using Flaminco.Migration.Extensions;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
-using Microsoft.Identity.Web;
 
 namespace WebApplication1
 {
@@ -50,9 +48,6 @@ namespace WebApplication1
             {
                 options.UseSqlServer("Server=localhost;Initial Catalog=LookupDbs;Persist Security Info=False;User ID=sa;Password=sa;MultipleActiveResultSets=False;TrustServerCertificate=true");
             });
-
-            builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-      .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 
             var app = builder.Build();
 

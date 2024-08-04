@@ -41,7 +41,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Keycloak", "Flamin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ImmutableLookups", "Flaminco.ImmutableLookups\Flaminco.ImmutableLookups.csproj", "{815D5EF8-1AD1-41F2-9E5D-9A3E5DAAE884}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.OperationResults", "Flaminco.OperationResults\Flaminco.OperationResults.csproj", "{E4E49E42-8350-4580-8EA2-DF9811F63912}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.OperationResults", "Flaminco.OperationResults\Flaminco.OperationResults.csproj", "{E4E49E42-8350-4580-8EA2-DF9811F63912}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.SLA", "Flaminco.SLA\Flaminco.SLA.csproj", "{AD0F7C53-1AF6-494C-AA1C-FE53AE639BBA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -129,6 +131,10 @@ Global
 		{E4E49E42-8350-4580-8EA2-DF9811F63912}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4E49E42-8350-4580-8EA2-DF9811F63912}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4E49E42-8350-4580-8EA2-DF9811F63912}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD0F7C53-1AF6-494C-AA1C-FE53AE639BBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD0F7C53-1AF6-494C-AA1C-FE53AE639BBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD0F7C53-1AF6-494C-AA1C-FE53AE639BBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD0F7C53-1AF6-494C-AA1C-FE53AE639BBA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

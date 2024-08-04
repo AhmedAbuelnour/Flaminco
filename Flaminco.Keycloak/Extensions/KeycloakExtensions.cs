@@ -81,6 +81,7 @@ namespace Flaminco.Keycloak.Extensions
                     ValidateIssuerSigningKey = true,
                     ValidateIssuer = true,
                     ValidateAudience = true,
+                    ValidateLifetime = true,
                     ValidAudience = keycloakOptions.Audience,
                     RoleClaimType = keycloakOptions.RoleClaimType,
                     NameClaimType = keycloakOptions.NameClaimType,
