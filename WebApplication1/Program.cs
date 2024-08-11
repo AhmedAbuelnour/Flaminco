@@ -1,6 +1,8 @@
 using Flaminco.Migration.Extensions;
+using Flaminco.RabbitMQ.AMQP.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
+using WebApplication1.HostedServices;
 
 namespace WebApplication1
 {
@@ -17,10 +19,10 @@ namespace WebApplication1
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddStackExchangeRedisCache(options =>
-            {
-                options.Configuration = "127.0.0.1:6379";
-            });
+            //builder.Services.AddStackExchangeRedisCache(options =>
+            //{
+            //    options.Configuration = "127.0.0.1:6379";
+            //});
 
             //AddHybridCache configures a two-level (L1 and L2)
             //caching mechanism where both in-memory (L1) and distributed (L2) caches are used. By default, if only AddStackExchangeRedisCache is configured, the application will utilize L2 caching alongside L1 caching.
@@ -43,11 +45,20 @@ namespace WebApplication1
 
             builder.Services.AddMigration<Program>(builder.Configuration);
 
+            builder.Services.AddAMQPClient<Program>(options =>
+            {
+                options.ConnectionString = "amqp://localhost:5672/";
+            });
+
+            builder.Services.AddHostedService<HelloHostedServices>();
+
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer("Server=localhost;Initial Catalog=LookupDbs;Persist Security Info=False;User ID=sa;Password=sa;MultipleActiveResultSets=False;TrustServerCertificate=true");
             });
+
+
 
             var app = builder.Build();
 
@@ -71,9 +82,6 @@ namespace WebApplication1
             app.UseAuthorization();
 
             app.MapControllers();
-
-            // Seed the OpenIddict client data
-            OpenIddictSeedData.SeedAsync(app.Services).Wait();
 
             app.Run();
         }

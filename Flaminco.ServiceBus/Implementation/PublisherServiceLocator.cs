@@ -5,29 +5,21 @@
     using System;
     using System.Linq;
 
-    public class ServiceBusLocator : IServiceBusLocator
+    public class ServiceBusLocator(IServiceProvider _serviceProvider) : IServiceBusLocator
     {
-        private readonly IServiceProvider _serviceProvider;
-
-        public ServiceBusLocator(IServiceProvider serviceProvider)
+        public MessagePublisher GetPublisher<TPublisher>() where TPublisher : MessagePublisher
         {
-            _serviceProvider = serviceProvider;
+            return _serviceProvider.GetServices<MessagePublisher>().Single(a => a.GetType() == typeof(TPublisher));
         }
 
-
-        public MessagePublisher? GetPublisher<TPublisher>() where TPublisher : MessagePublisher
+        public MessageQueueConsumer GetQueueConsumer<TConsumer>() where TConsumer : MessageQueueConsumer
         {
-            return _serviceProvider.GetServices<MessagePublisher>()?.FirstOrDefault(a => a.GetType() == typeof(TPublisher));
+            return _serviceProvider.GetServices<MessageQueueConsumer>().Single(a => a.GetType() == typeof(TConsumer));
         }
 
-        public MessageQueueConsumer? GetQueueConsumer<TConsumer>() where TConsumer : MessageQueueConsumer
+        public MessageTopicConsumer GetTopicConsumer<TConsumer>() where TConsumer : MessageTopicConsumer
         {
-            return _serviceProvider.GetServices<MessageQueueConsumer>()?.FirstOrDefault(a => a.GetType() == typeof(TConsumer));
-        }
-
-        public MessageTopicConsumer? GetTopicConsumer<TConsumer>() where TConsumer : MessageTopicConsumer
-        {
-            return _serviceProvider.GetServices<MessageTopicConsumer>()?.FirstOrDefault(a => a.GetType() == typeof(TConsumer));
+            return _serviceProvider.GetServices<MessageTopicConsumer>().Single(a => a.GetType() == typeof(TConsumer));
         }
     }
 }

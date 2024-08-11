@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+	  <ImplicitUsings>enable</ImplicitUsings>
+	  <Nullable>enable</Nullable>
+	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	  <Nullable>enable</Nullable>
+	  <Version>1.0.0</Version>
+	  <Authors>Ahmed Abuelnour</Authors>
+	  <Company>Personal</Company>
+	  <Description>
+		  Flaminco.RabbitMQ.AMQP is a .NET library that simplifies the integration of RabbitMQ AMQP 1.0 in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with RabbitMQ queues.
+	  </Description>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
+	  <Copyright>
+		  Copyright (c) 2024, Ahmed Abuelnour
+	  </Copyright>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath=""/>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AMQPNetLite.Core" Version="2.4.11" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
+	</ItemGroup>
+
+</Project>
