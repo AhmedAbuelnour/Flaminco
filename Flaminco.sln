@@ -39,13 +39,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.CacheKeys", "Flami
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Keycloak", "Flaminco.Keycloak\Flaminco.Keycloak.csproj", "{D4E2C683-0674-4914-9A69-7817468BCDC3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ImmutableLookups", "Flaminco.ImmutableLookups\Flaminco.ImmutableLookups.csproj", "{815D5EF8-1AD1-41F2-9E5D-9A3E5DAAE884}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.OperationResults", "Flaminco.OperationResults\Flaminco.OperationResults.csproj", "{E4E49E42-8350-4580-8EA2-DF9811F63912}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.SLA", "Flaminco.SLA\Flaminco.SLA.csproj", "{AD0F7C53-1AF6-494C-AA1C-FE53AE639BBA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.RabbitMQ.AMQP", "Flaminco.RabbitMQ.Amqp\Flaminco.RabbitMQ.AMQP.csproj", "{A9C96AE9-A1A5-433C-8244-D025B7C0D197}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RabbitMQ.AMQP", "Flaminco.RabbitMQ.Amqp\Flaminco.RabbitMQ.AMQP.csproj", "{A9C96AE9-A1A5-433C-8244-D025B7C0D197}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ImmutableStates", "Flaminco.ImmutableState\Flaminco.ImmutableStates.csproj", "{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -125,14 +123,6 @@ Global
 		{D4E2C683-0674-4914-9A69-7817468BCDC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4E2C683-0674-4914-9A69-7817468BCDC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4E2C683-0674-4914-9A69-7817468BCDC3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{815D5EF8-1AD1-41F2-9E5D-9A3E5DAAE884}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{815D5EF8-1AD1-41F2-9E5D-9A3E5DAAE884}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{815D5EF8-1AD1-41F2-9E5D-9A3E5DAAE884}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{815D5EF8-1AD1-41F2-9E5D-9A3E5DAAE884}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E4E49E42-8350-4580-8EA2-DF9811F63912}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E4E49E42-8350-4580-8EA2-DF9811F63912}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E4E49E42-8350-4580-8EA2-DF9811F63912}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E4E49E42-8350-4580-8EA2-DF9811F63912}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AD0F7C53-1AF6-494C-AA1C-FE53AE639BBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AD0F7C53-1AF6-494C-AA1C-FE53AE639BBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD0F7C53-1AF6-494C-AA1C-FE53AE639BBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -141,6 +131,10 @@ Global
 		{A9C96AE9-A1A5-433C-8244-D025B7C0D197}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9C96AE9-A1A5-433C-8244-D025B7C0D197}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9C96AE9-A1A5-433C-8244-D025B7C0D197}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

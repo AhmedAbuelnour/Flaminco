@@ -1,4 +1,4 @@
-﻿using Flaminco.ImmutableLookups;
+﻿using Flaminco.ImmutableLookups.Entity;
 
 namespace WebApplication1.Entities
 {
