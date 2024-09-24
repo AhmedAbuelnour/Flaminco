@@ -1,7 +1,5 @@
-﻿
-using Flaminco.RabbitMQ.AMQP.Abstractions;
+﻿using Flaminco.RabbitMQ.AMQP.Abstractions;
 using WebApplication1.Consumers;
-using WebApplication1.Controllers;
 
 namespace WebApplication1.HostedServices
 {
@@ -15,12 +13,12 @@ namespace WebApplication1.HostedServices
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                Person? message = await messageConsumer.ConsumeAsync<Person>(stoppingToken);
+                string? message = await messageConsumer.ConsumeAsync<string>(stoppingToken);
 
                 if (message != null)
                 {
 
-                    Console.WriteLine("Consumed Message is : {0}", message.Age);
+                    Console.WriteLine("Consumed Message is : {0}", message);
                 }
                 else
                 {

@@ -1,29 +1,33 @@
 using Flaminco.RabbitMQ.AMQP.Abstractions;
+using Flaminco.RazorInk.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Publishers;
 
 namespace WebApplication1.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class Example(IAMQPLocator _amqpLocator)
+    [Route("api/pdf")]
+    public class PdfController : ControllerBase
     {
-        [HttpGet]
-        public async Task PushMessage(CancellationToken cancellationToken)
+        private readonly IRazorInkPdfGenerator _pdfGenerator;
+        private readonly IAMQPLocator _amqpLocator;
+        public PdfController(IRazorInkPdfGenerator pdfGenerator, IAMQPLocator amqpLocator)
         {
-            await using MessagePublisher helloPublisher = _amqpLocator.GetPublisher<PersonPublisher>();
+            _pdfGenerator = pdfGenerator;
+            _amqpLocator = amqpLocator;
+        }
 
-            await helloPublisher.PublishAsync(new Person
+        [HttpPost("generate")]
+        public async Task<IActionResult> GeneratePdf()
+        {
+
+            if (_amqpLocator.GetPublisher<PersonPublisher>() is PersonPublisher publisher)
             {
-                Name = "Ahmed Abuelnour",
-                Age = 30
-            }, cancellationToken);
+                await publisher.PublishAsync("Hellos");
+            }
+
+            return Ok();
         }
     }
 
-    public class Person
-    {
-        public string Name { get; set; }
-        public int Age { get; set; }
-    }
 }

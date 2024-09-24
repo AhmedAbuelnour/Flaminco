@@ -1,36 +1,24 @@
-﻿using Flaminco.ManualMapper.Abstractions;
+﻿using ErrorOr;
 using Flaminco.Validation.Abstractions;
 using Flaminco.Validation.Exceptions;
-using Flaminco.Validation.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Flaminco.ManualMapper.Implementations;
 
-public sealed class DefaultValidation(IServiceProvider serviceProvider) : IValidation
+/// <summary>
+/// Default implementation of the <see cref="IValidation"/> interface.
+/// </summary>
+/// <remarks>
+/// Initializes a new instance of the <see cref="DefaultValidation"/> class.
+/// </remarks>
+/// <param name="serviceProvider">The service provider for resolving validation handlers.</param>
+internal sealed class DefaultValidation(IServiceProvider serviceProvider) : IValidation
 {
-    public Result Validate<TInput>(TInput input) where TInput : notnull
+    /// <inheritdoc />
+    public ValueTask<ErrorOr<Success>> Validate<TInput>(TInput input, CancellationToken cancellationToken = default) where TInput : notnull
     {
         ArgumentNullException.ThrowIfNull(input);
 
-        IValidationHandler<TInput>? handler = serviceProvider.GetService<IValidationHandler<TInput>>();
-
-        return handler switch
-        {
-            null => throw new ValidationHandlerNotRegisteredException<IValidationHandler<TInput>>(),
-            _ => handler.Handler(input)
-        };
-    }
-
-    public Task<Result> ValidateAsync<TInput>(TInput input, CancellationToken cancellationToken = default) where TInput : notnull
-    {
-        ArgumentNullException.ThrowIfNull(input);
-
-        IValidationAsyncHandler<TInput>? handler = serviceProvider.GetService<IValidationAsyncHandler<TInput>>();
-
-        return handler switch
-        {
-            null => throw new ValidationHandlerNotRegisteredException<IValidationAsyncHandler<TInput>>(),
-            _ => handler.Handler(input, cancellationToken)
-        };
+        return serviceProvider.GetService<IValidationHandler<TInput>>()?.Handler(input, cancellationToken) ?? throw new ValidationHandlerNotRegisteredException<IValidationHandler<TInput>>();
     }
 }

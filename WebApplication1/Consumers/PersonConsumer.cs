@@ -4,12 +4,8 @@ using Microsoft.Extensions.Options;
 
 namespace WebApplication1.Consumers
 {
-    public class PersonConsumer : MessageConsumer
+    public class PersonConsumer(IOptions<AddressSettings> _addressSettings) : MessageConsumer(_addressSettings)
     {
-        public PersonConsumer(IOptions<AddressSettings> _addressSettings) : base(_addressSettings)
-        {
-        }
-
         protected override ValueTask<string> GetKeyAsync(CancellationToken cancellationToken = default)
         {
             // a key or name for this current consumer, which is used for logs 
