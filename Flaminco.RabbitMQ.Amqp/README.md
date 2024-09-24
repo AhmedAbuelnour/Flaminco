@@ -25,7 +25,7 @@ First, you need to configure the AMQP client in your application's `Startup` or 
 ```csharp
 builder.Services.AddAMQPClient<Program>(options =>
 {
-    options.ConnectionString = "amqp://localhost:5672/";
+    options.ConnectionString = "amqp://guest:guest@localhost:5672";
 });
 ```
 
@@ -34,25 +34,15 @@ builder.Services.AddAMQPClient<Program>(options =>
 Implement a custom publisher by extending the `MessagePublisher` class. The publisher defines the queue(s) to which it will send messages:
 
 ```csharp
-public class PersonPublisher : MessagePublisher
-{
-    public PersonPublisher(IOptions<AddressSettings> _addressSettings) : base(_addressSettings)
+    public class PersonPublisher : MessagePublisher
     {
-    }
+        public PersonPublisher(IOptions<AddressSettings> addressSettings) : base(addressSettings)
+        {
+        }
 
-    protected override ValueTask<string> GetKeyAsync(CancellationToken cancellationToken = default)
-    {
-        // A key or name for this current publisher, which is used for logs.
-        return ValueTask.FromResult(nameof(PersonPublisher));
+        protected override string Name => nameof(PersonPublisher);
+        protected override string[] Queues => ["HelloQueue"];
     }
-
-    protected override ValueTask<string[]> GetQueuesAsync(CancellationToken cancellationToken = default)
-    {
-        // The queue name which this publisher will send the messages to.
-        // This publisher can send the same message to multiple queues for different consumers.
-        return ValueTask.FromResult<string[]>(new[] { "HelloQueue" });
-    }
-}
 ```
 
 ### Step 3: Send a Message
@@ -81,60 +71,47 @@ Now, you can use your custom publisher to send a message to the specified queue:
 Implement a custom consumer by extending the `MessageConsumer` class. The consumer defines the queue from which it will receive messages:
 
 ```csharp
-public class PersonConsumer : MessageConsumer
-{
-    public PersonConsumer(IOptions<AddressSettings> _addressSettings) : base(_addressSettings)
+    public class PersonConsumer : MessageConsumer
     {
-    }
+        public PersonConsumer(IOptions<AddressSettings> addressSettings, IPublisher publisher) : base(addressSettings, publisher)
+        {
+        }
 
-    protected override ValueTask<string> GetKeyAsync(CancellationToken cancellationToken = default)
-    {
-        // A key or name for this current consumer, which is used for logs.
-        return ValueTask.FromResult(nameof(PersonConsumer));
+        protected override string Name => nameof(PersonConsumer);
+        protected override string Queue => "HelloQueue";
     }
-
-    protected override ValueTask<string> GetQueueAsync(CancellationToken cancellationToken = default)
-    {
-        // The queue name which this consumer will receive the messages from.
-        return ValueTask.FromResult("HelloQueue");
-    }
-}
 ```
 
-### Step 5: Implement a Hosted Service for Continuous Message Consumption
+### Step 5: Implement a message handler
 
-To consume messages continuously, you can implement a hosted service. This service will run in the background and process messages from the specified queue:
+IMessageFaultHandler is Optional to handle the cases where the consumer couldn't deal with the incoming message
 
 ```csharp
-public class PersonConsumerService(IAMQPLocator _amqpLocator) : BackgroundService
-{
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+
+    public class PersonMessageHandler : IMessageReceivedHandler<Person>, IMessageFaultHandler
     {
-        // create single consumer for Person, and reuse it.
-        await using MessageConsumer messageConsumer = _amqpLocator.GetConsumer<PersonConsumer>();
-
-        Console.WriteLine("Consumer initialized successfully.");
-
-        while (!stoppingToken.IsCancellationRequested)
+        public async Task Handle(MessageReceivedEvent<Person> notification, CancellationToken cancellationToken)
         {
-            Person? message = await messageConsumer.ConsumeAsync<Person>(stoppingToken);
+            Console.WriteLine($"I got a new message saying: {notification.Message}");
+        }
 
-            if (message != null)
-            {
-                Console.WriteLine("Consumed Message is : {0}", message.Name);
-            }
+        public async Task Handle(MessageFaultEvent notification, CancellationToken cancellationToken)
+        {
+            Console.WriteLine($"fault message from: {notification.Name}, and queue: {notification.Queue}");
         }
     }
-}
 ```
 
-### Step 6: Register the Hosted Service in the Dependency Injection Container
+### Step 6: Register the consumers to be marked as background service
 
-Finally, register your hosted service in the dependency injection container in your `Startup` or `Program` class:
+Finally, register your consumers in the dependency injection container in your `Startup` or `Program` class:
 
 ```csharp
-builder.Services.AddHostedService<PersonConsumerService>();
+    builder.Services.AddAMQPConsumer<PersonConsumer,Person>();
 ```
+
+
+
 
 ### Step 7: Run the Application
 

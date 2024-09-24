@@ -8,9 +8,18 @@ namespace Flaminco.RabbitMQ.AMQP.Abstractions
     /// <summary>
     /// Represents an abstract base class for publishing messages to a message queue.
     /// </summary>
-    /// <param name="_addressSettings">The address settings used to configure the connection to the message broker.</param>
-    public abstract class MessagePublisher(IOptions<AddressSettings> _addressSettings) : IAsyncDisposable
+    public abstract class MessagePublisher : IAsyncDisposable
     {
+        private readonly IOptions<AddressSettings> _addressSettings;
+        /// <summary>
+        /// Represents an abstract base class for publishing messages to a message queue.
+        /// </summary>
+        /// <param name="addressSettings">The address settings used to configure the connection to the message broker.</param>
+        protected MessagePublisher(IOptions<AddressSettings> addressSettings)
+        {
+            _addressSettings = addressSettings;
+        }
+
         private Connection? _connection;
         private Session? _session;
         private bool IsClosed { get => (_connection?.IsClosed ?? true) || (_session?.IsClosed ?? true); }
@@ -19,20 +28,16 @@ namespace Flaminco.RabbitMQ.AMQP.Abstractions
         /// Provides default serialization options for JSON, configured with web defaults.
         /// </summary>
         private readonly JsonSerializerOptions DefaultSerializeOptions = new(JsonSerializerDefaults.Web);
-        /// <summary>
-        /// Retrieves the key for the message asynchronously.
-        /// </summary>
-        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-        /// <returns>A task representing the asynchronous operation that returns the key as a string.</returns>
-        protected abstract ValueTask<string> GetKeyAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Retrieves the queues name for the message asynchronously. it supports sending same message to multiple queues so different consumers can receive the same message.
+        /// Gets the unique name of the message publisher, used to identify the publisher when sending messages to the queue.
         /// </summary>
-        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-        /// <returns>A task representing the asynchronous operation that returns the queue name as a string.</returns>
-        protected abstract ValueTask<string[]> GetQueuesAsync(CancellationToken cancellationToken = default);
+        protected abstract string Name { get; }
 
+        /// <summary>
+        /// Gets the list of queue names where the message will be published.
+        /// </summary>
+        protected abstract string[] Queues { get; }
         /// <summary>
         /// The time to wait for the task to complete for each message in a queue, default is 60 seconds
         /// </summary>
@@ -61,13 +66,11 @@ namespace Flaminco.RabbitMQ.AMQP.Abstractions
                 await ConnectAsync();
             }
 
-            string key = await GetKeyAsync(cancellationToken);
-
             Message AMQPMessage = new(JsonSerializer.SerializeToUtf8Bytes(message, options: DefaultSerializeOptions));
 
-            foreach (string queue in await GetQueuesAsync(cancellationToken))
+            foreach (string queue in Queues)
             {
-                SenderLink sender = new(_session, key, queue);
+                SenderLink sender = new(_session, Name, queue);
 
                 await sender.SendAsync(AMQPMessage, TimeOut);
 

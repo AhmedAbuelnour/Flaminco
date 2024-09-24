@@ -1,30 +1,27 @@
 ﻿using Flaminco.RabbitMQ.AMQP.Abstractions;
 using Flaminco.RabbitMQ.AMQP.Options;
+using MediatR;
 using Microsoft.Extensions.Options;
 
 namespace WebApplication1.Publishers
 {
+    public class HelloConsumer : MessageConsumer
+    {
+        public HelloConsumer(IOptions<AddressSettings> addressSettings, IPublisher publisher) : base(addressSettings, publisher)
+        {
+        }
+
+        protected override string Name => nameof(HelloConsumer);
+        protected override string Queue => "HelloQueue";
+    }
+
     public class PersonPublisher : MessagePublisher
     {
-
-        public PersonPublisher(IOptions<AddressSettings> _addressSettings) : base(_addressSettings)
+        public PersonPublisher(IOptions<AddressSettings> addressSettings) : base(addressSettings)
         {
-
         }
 
-        protected override ValueTask<string> GetKeyAsync(CancellationToken cancellationToken = default)
-        {
-            // a key or name for this current publisher, which is used for logs 
-
-            return ValueTask.FromResult(nameof(PersonPublisher));
-        }
-
-        protected override ValueTask<string[]> GetQueuesAsync(CancellationToken cancellationToken = default)
-        {
-            // the queue name which this publisher will send the messages to.
-            // this publisher can send same message to multiple queues for different consumers.
-
-            return ValueTask.FromResult<string[]>(["HelloQueue"]);
-        }
+        protected override string Name => nameof(PersonPublisher);
+        protected override string[] Queues => ["HelloQueue"];
     }
 }

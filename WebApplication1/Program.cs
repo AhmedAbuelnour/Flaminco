@@ -1,7 +1,7 @@
 using Flaminco.RabbitMQ.AMQP.Extensions;
 using Flaminco.RazorInk.Extensions;
 using Microsoft.EntityFrameworkCore;
-using WebApplication1.HostedServices;
+using WebApplication1.Publishers;
 
 namespace WebApplication1
 {
@@ -61,8 +61,7 @@ namespace WebApplication1
                 options.ConnectionString = "amqp://guest:guest@localhost:5672";
             });
 
-            builder.Services.AddHostedService<HelloHostedServices>();
-
+            builder.Services.AddAMQPConsumer<HelloConsumer, string>();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {

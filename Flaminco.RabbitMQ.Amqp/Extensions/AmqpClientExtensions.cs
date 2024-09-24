@@ -27,8 +27,23 @@ namespace Flaminco.RabbitMQ.AMQP.Extensions
 
             services.AddImplementations<MessageConsumer>(typeof(TScanner));
 
+            services.AddMediatR(a => a.RegisterServicesFromAssemblyContaining<TScanner>());
+
             return services;
         }
+
+        /// <summary>
+        /// Registers the AMQP consumer as a hosted service in the dependency injection container.
+        /// </summary>
+        /// <typeparam name="TConsumer">The type of the consumer that processes the AMQP messages. Must inherit from <see cref="MessageConsumer"/>.</typeparam>
+        /// <typeparam name="TMessage">The type of the message that the consumer will handle. Must be a non-nullable type.</typeparam>
+        /// <param name="services">The <see cref="IServiceCollection"/> to add the hosted service to.</param>
+        /// <returns>The modified <see cref="IServiceCollection"/> for chaining additional service registrations.</returns>
+        public static IServiceCollection AddAMQPConsumer<TConsumer, TMessage>(this IServiceCollection services) where TConsumer : MessageConsumer where TMessage : notnull
+        {
+            return services.AddHostedService<AMQPBackgroundService<TConsumer, TMessage>>();
+        }
+
 
         private static void AddImplementations<TAbstract>(this IServiceCollection services, Type scannerType)
         {
@@ -37,6 +52,7 @@ namespace Flaminco.RabbitMQ.AMQP.Extensions
                 services.AddSingleton(typeof(TAbstract), type);
             }
         }
+
     }
 
 }
