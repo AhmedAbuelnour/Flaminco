@@ -7,7 +7,7 @@ namespace Flaminco.RabbitMQ.AMQP.Events
     /// Represents an event triggered when a fault or error occurs while processing a message from the queue.
     /// This event provides information about the consumer, queue, and the message that caused the fault.
     /// </summary>
-    public sealed class MessageFaultEvent : INotification
+    public sealed class MessageFaultEvent<TMessage> : INotification
     {
         /// <summary>
         /// Gets or sets the name of the message consumer where the fault occurred.
@@ -28,6 +28,6 @@ namespace Flaminco.RabbitMQ.AMQP.Events
     /// <summary>
     /// Defines a handler for processing fault events that occur during message consumption.
     /// </summary>
-    public interface IMessageFaultHandler : INotificationHandler<MessageFaultEvent>;
+    public interface IMessageFaultHandler<TMessage> : INotificationHandler<MessageFaultEvent<TMessage>>;
 
 }

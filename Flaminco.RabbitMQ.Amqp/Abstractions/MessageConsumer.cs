@@ -12,7 +12,7 @@ namespace Flaminco.RabbitMQ.AMQP.Abstractions
     /// </summary>
     public abstract class MessageConsumer : IAsyncDisposable
     {
-        private readonly IOptions<AddressSettings> _addressSettings;
+        private readonly IOptions<AMQPClientSettings> _addressSettings;
         private readonly IPublisher _publisher;
         private Connection? _connection;
         private Session? _session;
@@ -23,7 +23,7 @@ namespace Flaminco.RabbitMQ.AMQP.Abstractions
         /// </summary>
         /// <param name="addressSettings">The address settings used to configure the connection to the message broker.</param>
         /// <param name="publisher">The event publisher for notifying when a message is received or when a fault occurs.</param>
-        protected MessageConsumer(IOptions<AddressSettings> addressSettings, IPublisher publisher)
+        protected MessageConsumer(IOptions<AMQPClientSettings> addressSettings, IPublisher publisher)
         {
             _addressSettings = addressSettings;
             _publisher = publisher;
@@ -80,7 +80,7 @@ namespace Flaminco.RabbitMQ.AMQP.Abstractions
 
             Message message = await _receiver!.ReceiveAsync(TimeOut);
 
-            if (message?.Body is byte[] body && JsonSerializer.Deserialize<TMessage>(body, options: DefaultSerializeOptions) is TMessage receivedMessage)
+            if (message?.Body is byte[] body && DeserializeSafely<TMessage>(body) is TMessage receivedMessage)
             {
                 _receiver.Accept(message);
 
@@ -93,7 +93,7 @@ namespace Flaminco.RabbitMQ.AMQP.Abstractions
             {
                 _receiver.Reject(message);
 
-                await _publisher.Publish(new MessageFaultEvent
+                await _publisher.Publish(new MessageFaultEvent<TMessage>
                 {
                     Name = Name,
                     Queue = Queue,
@@ -118,6 +118,18 @@ namespace Flaminco.RabbitMQ.AMQP.Abstractions
             if (_connection is not null)
             {
                 await _connection!.CloseAsync();
+            }
+        }
+
+        private T? DeserializeSafely<T>(byte[] body)
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<T>(body, options: DefaultSerializeOptions);
+            }
+            catch
+            {
+                return default;
             }
         }
     }

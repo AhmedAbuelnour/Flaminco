@@ -1,21 +1,21 @@
-﻿using Amqp;
-using Flaminco.RabbitMQ.AMQP.Options;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
-
-namespace Flaminco.RabbitMQ.AMQP.Abstractions
+﻿namespace Flaminco.RabbitMQ.AMQP.Abstractions
 {
+    using Amqp;
+    using Flaminco.RabbitMQ.AMQP.Options;
+    using Microsoft.Extensions.Options;
+    using System.Text.Json;
+
     /// <summary>
     /// Represents an abstract base class for publishing messages to a message queue.
     /// </summary>
     public abstract class MessagePublisher : IAsyncDisposable
     {
-        private readonly IOptions<AddressSettings> _addressSettings;
+        private readonly IOptions<AMQPClientSettings> _addressSettings;
         /// <summary>
         /// Represents an abstract base class for publishing messages to a message queue.
         /// </summary>
         /// <param name="addressSettings">The address settings used to configure the connection to the message broker.</param>
-        protected MessagePublisher(IOptions<AddressSettings> addressSettings)
+        protected MessagePublisher(IOptions<AMQPClientSettings> addressSettings)
         {
             _addressSettings = addressSettings;
         }
@@ -65,6 +65,7 @@ namespace Flaminco.RabbitMQ.AMQP.Abstractions
             {
                 await ConnectAsync();
             }
+
 
             Message AMQPMessage = new(JsonSerializer.SerializeToUtf8Bytes(message, options: DefaultSerializeOptions));
 

@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Hosting;
-
-namespace Flaminco.RabbitMQ.AMQP.Abstractions
+﻿namespace Flaminco.RabbitMQ.AMQP.Abstractions
 {
+    using Microsoft.Extensions.Hosting;
+
     internal class AMQPBackgroundService<TConsumer, TMessage>(IAMQPLocator _amqpLocator) : BackgroundService where TConsumer : MessageConsumer where TMessage : notnull
     {
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

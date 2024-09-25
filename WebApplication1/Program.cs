@@ -61,7 +61,7 @@ namespace WebApplication1
                 options.ConnectionString = "amqp://guest:guest@localhost:5672";
             });
 
-            builder.Services.AddAMQPConsumer<HelloConsumer, string>();
+            builder.Services.AddAMQPService<HelloConsumer, string>();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {

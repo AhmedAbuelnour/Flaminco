@@ -36,7 +36,7 @@ Implement a custom publisher by extending the `MessagePublisher` class. The publ
 ```csharp
     public class PersonPublisher : MessagePublisher
     {
-        public PersonPublisher(IOptions<AddressSettings> addressSettings) : base(addressSettings)
+        public PersonPublisher(IOptions<AMQPClientSettings> clientSettings) : base(clientSettings)
         {
         }
 
@@ -73,7 +73,7 @@ Implement a custom consumer by extending the `MessageConsumer` class. The consum
 ```csharp
     public class PersonConsumer : MessageConsumer
     {
-        public PersonConsumer(IOptions<AddressSettings> addressSettings, IPublisher publisher) : base(addressSettings, publisher)
+        public PersonConsumer(IOptions<AMQPClientSettings> clientSettings, IPublisher publisher) : base(clientSettings, publisher)
         {
         }
 
@@ -84,18 +84,18 @@ Implement a custom consumer by extending the `MessageConsumer` class. The consum
 
 ### Step 5: Implement a message handler
 
-IMessageFaultHandler is Optional to handle the cases where the consumer couldn't deal with the incoming message
+IMessageFaultHandler is Optional to handle the cases where the consumer couldn't deal with the incoming message, and of course you can have multiple handlers for the same message.
 
 ```csharp
 
-    public class PersonMessageHandler : IMessageReceivedHandler<Person>, IMessageFaultHandler
+    public class PersonMessageHandler : IMessageReceivedHandler<Person>, IMessageFaultHandler<Person>
     {
         public async Task Handle(MessageReceivedEvent<Person> notification, CancellationToken cancellationToken)
         {
             Console.WriteLine($"I got a new message saying: {notification.Message}");
         }
 
-        public async Task Handle(MessageFaultEvent notification, CancellationToken cancellationToken)
+        public async Task Handle(MessageFaultEvent<Person> notification, CancellationToken cancellationToken)
         {
             Console.WriteLine($"fault message from: {notification.Name}, and queue: {notification.Queue}");
         }
@@ -107,10 +107,8 @@ IMessageFaultHandler is Optional to handle the cases where the consumer couldn't
 Finally, register your consumers in the dependency injection container in your `Startup` or `Program` class:
 
 ```csharp
-    builder.Services.AddAMQPConsumer<PersonConsumer,Person>();
+    builder.Services.AddAMQPService<PersonConsumer,Person>();
 ```
-
-
 
 
 ### Step 7: Run the Application

@@ -7,7 +7,7 @@ namespace WebApplication1.Publishers
 {
     public class HelloConsumer : MessageConsumer
     {
-        public HelloConsumer(IOptions<AddressSettings> addressSettings, IPublisher publisher) : base(addressSettings, publisher)
+        public HelloConsumer(IOptions<AMQPClientSettings> addressSettings, IPublisher publisher) : base(addressSettings, publisher)
         {
         }
 
@@ -17,7 +17,7 @@ namespace WebApplication1.Publishers
 
     public class PersonPublisher : MessagePublisher
     {
-        public PersonPublisher(IOptions<AddressSettings> addressSettings) : base(addressSettings)
+        public PersonPublisher(IOptions<AMQPClientSettings> addressSettings) : base(addressSettings)
         {
         }
 

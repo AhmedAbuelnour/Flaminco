@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents the configuration settings for the AMQP connection, including the connection string.
     /// </summary>
-    public class AddressSettings
+    public class AMQPClientSettings
     {
         /// <summary>
         /// Gets or sets the connection string used to connect to the AMQP message broker.

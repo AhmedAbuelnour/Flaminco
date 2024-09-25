@@ -1,7 +1,7 @@
-﻿using MediatR;
-
-namespace Flaminco.RabbitMQ.AMQP.Events
+﻿namespace Flaminco.RabbitMQ.AMQP.Events
 {
+    using MediatR;
+
     /// <summary>
     /// Represents an event triggered when a message is successfully received from the queue.
     /// </summary>
