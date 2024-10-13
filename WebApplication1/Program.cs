@@ -1,7 +1,6 @@
 using Flaminco.RabbitMQ.AMQP.Extensions;
 using Flaminco.RazorInk.Extensions;
 using Microsoft.EntityFrameworkCore;
-using WebApplication1.Publishers;
 
 namespace WebApplication1
 {
@@ -56,18 +55,24 @@ namespace WebApplication1
             // AMQP 0.9 
 
             // AMQP 1.0
-            builder.Services.AddAMQPClient<Program>(options =>
+            builder.Services.AddAMQPClient<Program>(a =>
             {
-                options.ConnectionString = "amqp://guest:guest@localhost:5672";
+                a.Host = "amqp://localhost:5672";
+                a.Username = "guest";
+                a.Password = "guest";
+
             });
 
-            builder.Services.AddAMQPService<HelloConsumer, string>();
+            // Register the sender
+
+
+            // builder.Services.AddAMQPService<HelloConsumer, string>();
+            //builder.Services.AddAMQPService<HelloConsumer2, string>();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer("Server=localhost;Initial Catalog=LookupDbs;Persist Security Info=False;User ID=sa;Password=sa;MultipleActiveResultSets=False;TrustServerCertificate=true");
             });
-
 
 
             var app = builder.Build();

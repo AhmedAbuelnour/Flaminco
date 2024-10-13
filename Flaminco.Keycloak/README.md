@@ -90,6 +90,7 @@ Add the Keycloak configuration to your `appsettings.json` file:
     "AuthUrl": "http://localhost:8080",
     "Realm": "UserTracker-DEV",
     "Audience": "Backend",
+    "Issuer":"issuer name",
     "RequireHttpsMetadata": "false",
     "RoleClaimType": "roles",
     "NameClaimType": "name",

@@ -16,6 +16,11 @@
         public string Realm { get; set; }
 
         /// <summary>
+        /// Gets or sets the Issuer for token validation.
+        /// </summary>
+        public string Issuer { get; set; }
+
+        /// <summary>
         /// Gets or sets the audience for token validation.
         /// </summary>
         public string Audience { get; set; }
@@ -68,6 +73,12 @@
             {
                 throw new ArgumentException("Audience must be set in the Keycloak options.");
             }
+
+            if (string.IsNullOrEmpty(Issuer))
+            {
+                throw new ArgumentException("Issuer must be set in the Keycloak options.");
+            }
+
             if (Credentials == null)
             {
                 throw new ArgumentException("Credentials must be set in the Keycloak options.");

@@ -82,6 +82,7 @@ namespace Flaminco.Keycloak.Extensions
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidAudience = keycloakOptions.Audience,
+                    ValidIssuer = keycloakOptions.Issuer,
                     RoleClaimType = keycloakOptions.RoleClaimType,
                     NameClaimType = keycloakOptions.NameClaimType,
                     ClockSkew = keycloakOptions.ClockSkew ?? TimeSpan.FromSeconds(15),

@@ -1,4 +1,4 @@
-﻿namespace Flaminco.RabbitMQ.AMQP.Abstractions
+﻿namespace Flaminco.AzureBus.AMQP.Abstractions
 {
 
     /// <summary>

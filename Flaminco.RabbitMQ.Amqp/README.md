@@ -25,24 +25,25 @@ First, you need to configure the AMQP client in your application's `Startup` or 
 ```csharp
 builder.Services.AddAMQPClient<Program>(options =>
 {
-    options.ConnectionString = "amqp://guest:guest@localhost:5672";
+    options.Host = "amqp://guest:guest@localhost:5672";
+    options.Username = "guest";
+    options.Password = "guest";
 });
 ```
 
 ### Step 2: Create a Message Publisher
 
-Implement a custom publisher by extending the `MessagePublisher` class. The publisher defines the queue(s) to which it will send messages:
+Implement a custom publisher by extending the `MessagePublisher` class. The publisher defines the queue to which it will send messages:
 
 ```csharp
-    public class PersonPublisher : MessagePublisher
+public class PersonPublisher : MessagePublisher
+{
+    public PersonPublisher(ISendEndpointProvider sendEndpointProvider) : base(sendEndpointProvider)
     {
-        public PersonPublisher(IOptions<AMQPClientSettings> clientSettings) : base(clientSettings)
-        {
-        }
-
-        protected override string Name => nameof(PersonPublisher);
-        protected override string[] Queues => ["HelloQueue"];
     }
+
+    protected override string Queue => "HelloQueue";
+}
 ```
 
 ### Step 3: Send a Message
@@ -50,20 +51,18 @@ Implement a custom publisher by extending the `MessagePublisher` class. The publ
 Now, you can use your custom publisher to send a message to the specified queue:
 
 ```csharp
-  public class Example(IAMQPLocator _amqpLocator)
+public class Example(PersonPublisher _personPublisher)
+{
+    [HttpGet]
+    public async Task PushMessage(CancellationToken cancellationToken)
     {
-        [HttpGet]
-        public async Task PushMessage(CancellationToken cancellationToken)
+        await _personPublisher.PublishAsync(new Person
         {
-            await using MessagePublisher helloPublisher = _amqpLocator.GetPublisher<PersonPublisher>();
-
-            await helloPublisher.PublishAsync(new Person
-            {
-                Name = "Ahmed Abuelnour",
-                Age = 30
-            }, cancellationToken);
-        }
+            Name = "Ahmed Abuelnour",
+            Age = 30
+        }, cancellationToken);
     }
+}
 ```
 
 ### Step 4: Create a Message Consumer
@@ -71,47 +70,19 @@ Now, you can use your custom publisher to send a message to the specified queue:
 Implement a custom consumer by extending the `MessageConsumer` class. The consumer defines the queue from which it will receive messages:
 
 ```csharp
-    public class PersonConsumer : MessageConsumer
+public class PersonConsumer : MessageConsumer<Person>
+{
+    public override string Queue => "HelloQueue";
+
+    public override Task Consume(ConsumeContext<Person> context)
     {
-        public PersonConsumer(IOptions<AMQPClientSettings> clientSettings, IPublisher publisher) : base(clientSettings, publisher)
-        {
-        }
-
-        protected override string Name => nameof(PersonConsumer);
-        protected override string Queue => "HelloQueue";
+        Console.WriteLine($"Received message: {context.Message.Name}, Age: {context.Message.Age}");
+        return Task.CompletedTask;
     }
+}
 ```
 
-### Step 5: Implement a message handler
-
-IMessageFaultHandler is Optional to handle the cases where the consumer couldn't deal with the incoming message, and of course you can have multiple handlers for the same message.
-
-```csharp
-
-    public class PersonMessageHandler : IMessageReceivedHandler<Person>, IMessageFaultHandler<Person>
-    {
-        public async Task Handle(MessageReceivedEvent<Person> notification, CancellationToken cancellationToken)
-        {
-            Console.WriteLine($"I got a new message saying: {notification.Message}");
-        }
-
-        public async Task Handle(MessageFaultEvent<Person> notification, CancellationToken cancellationToken)
-        {
-            Console.WriteLine($"fault message from: {notification.Name}, and queue: {notification.Queue}");
-        }
-    }
-```
-
-### Step 6: Register the consumers to be marked as background service
-
-Finally, register your consumers in the dependency injection container in your `Startup` or `Program` class:
-
-```csharp
-    builder.Services.AddAMQPService<PersonConsumer,Person>();
-```
-
-
-### Step 7: Run the Application
+### Step 5: Run the Application
 
 Build and run your application. The consumer will continuously listen for messages on the specified queue, while the publisher sends messages to that queue.
 
@@ -122,3 +93,4 @@ If you encounter any issues or have suggestions for improvements, please feel fr
 ## License
 
 This project is licensed under the MIT License.
+

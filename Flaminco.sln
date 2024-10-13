@@ -45,11 +45,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RabbitMQ.AMQP", "F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ImmutableStates", "Flaminco.ImmutableState\Flaminco.ImmutableStates.csproj", "{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Garnet.Server.Background", "Flaminco.Garnet.Server.Background\Flaminco.Garnet.Server.Background.csproj", "{BE28F397-6E89-4388-AF5C-9A542A97D0F8}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GarnetWorker", "GarnetWorker\GarnetWorker.csproj", "{63DD5B18-6524-4230-870E-3FA7EBE31E98}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RazorInk", "Flaminco.RazorInk\Flaminco.RazorInk.csproj", "{ED9E5E19-4977-43B5-BAF8-9771896D3CBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.AzureBus.AMQP", "Flaminco.AzureBus.AMQP\Flaminco.AzureBus.AMQP.csproj", "{FBC830D0-EA93-41EC-830C-915691FD56F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -141,10 +141,6 @@ Global
 		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BE28F397-6E89-4388-AF5C-9A542A97D0F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE28F397-6E89-4388-AF5C-9A542A97D0F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BE28F397-6E89-4388-AF5C-9A542A97D0F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BE28F397-6E89-4388-AF5C-9A542A97D0F8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{63DD5B18-6524-4230-870E-3FA7EBE31E98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{63DD5B18-6524-4230-870E-3FA7EBE31E98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63DD5B18-6524-4230-870E-3FA7EBE31E98}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -153,6 +149,10 @@ Global
 		{ED9E5E19-4977-43B5-BAF8-9771896D3CBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED9E5E19-4977-43B5-BAF8-9771896D3CBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED9E5E19-4977-43B5-BAF8-9771896D3CBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBC830D0-EA93-41EC-830C-915691FD56F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBC830D0-EA93-41EC-830C-915691FD56F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBC830D0-EA93-41EC-830C-915691FD56F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBC830D0-EA93-41EC-830C-915691FD56F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

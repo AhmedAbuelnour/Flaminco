@@ -1,7 +1,6 @@
-﻿using Amqp;
-using MediatR;
+﻿using MediatR;
 
-namespace Flaminco.RabbitMQ.AMQP.Events
+namespace Flaminco.AzureBus.AMQP.Events
 {
     /// <summary>
     /// Represents an event triggered when a fault or error occurs while processing a message from the queue.
@@ -20,9 +19,9 @@ namespace Flaminco.RabbitMQ.AMQP.Events
         public required string Queue { get; set; }
 
         /// <summary>
-        /// Gets or sets the message that caused the fault, if available.
+        /// Gets or sets the exception that caused the fault, if available.
         /// </summary>
-        public required Message? Message { get; set; }
+        public required Exception? Exception { get; set; }
     }
 
     /// <summary>

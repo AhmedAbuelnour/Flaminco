@@ -1,4 +1,4 @@
-﻿namespace Flaminco.RabbitMQ.AMQP.Events
+﻿namespace Flaminco.AzureBus.AMQP.Events
 {
     using MediatR;
 

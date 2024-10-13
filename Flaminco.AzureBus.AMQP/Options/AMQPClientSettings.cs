@@ -1,4 +1,4 @@
-﻿namespace Flaminco.RabbitMQ.AMQP.Options
+﻿namespace Flaminco.AzureBus.AMQP.Options
 {
     /// <summary>
     /// Represents the configuration settings for the AMQP connection, including the connection string.
