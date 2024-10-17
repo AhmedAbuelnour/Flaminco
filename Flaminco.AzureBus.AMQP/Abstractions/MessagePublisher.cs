@@ -1,71 +1,118 @@
 ﻿namespace Flaminco.AzureBus.AMQP.Abstractions
 {
-    using Azure.Messaging.ServiceBus;
-    using Flaminco.AzureBus.AMQP.Options;
-    using Microsoft.Extensions.Options;
-    using System.Text.Json;
+    using Flaminco.AzureBus.AMQP.Models;
+    using MassTransit;
 
     /// <summary>
     /// Represents an abstract base class for publishing messages to a message queue.
     /// </summary>
-    /// <remarks>
-    /// Represents an abstract base class for publishing messages to a message queue.
-    /// </remarks>
-    /// <param name="_addressSettings">The address settings used to configure the connection to the message broker.</param>
-    public abstract class MessagePublisher(IOptions<AMQPClientSettings> _addressSettings) : IAsyncDisposable
+    /// <param name="sendEndpointProvider">The endpoint provider used to send messages to a specific queue.</param>
+    public abstract class MessagePublisher(ISendEndpointProvider sendEndpointProvider)
     {
-        private readonly ServiceBusClient _busClient = new(_addressSettings.Value.ConnectionString);
-
         /// <summary>
-        /// Provides default serialization options for JSON, configured with web defaults.
-        /// </summary>
-        private readonly JsonSerializerOptions DefaultSerializeOptions = new(JsonSerializerDefaults.Web);
-
-        /// <summary>
-        /// Gets the unique name of the message publisher, used to identify the publisher when sending messages to the queue.
-        /// </summary>
-        protected abstract string Name { get; }
-
-        /// <summary>
-        /// Gets the queue name where the message will be published.
+        /// Gets the name of the queue where the message will be published.
         /// </summary>
         protected abstract string Queue { get; }
 
+        /// <summary>
+        /// Gets the queue type if it is topic or not.
+        /// </summary>
+        protected abstract bool IsTopic { get; }
 
         /// <summary>
-        /// Gets the subscription name where the message will be published.
+        /// Publishes a message to the specified queue using MassTransit.
         /// </summary>
-        protected abstract string? Subscription { get; }
-
-        /// <summary>
-        /// Publishes a message asynchronously to the configured queue.
-        /// </summary>
-        /// <typeparam name="TMessage">The type of the message to publish.</typeparam>
-        /// <param name="message">The message to send.</param>
-        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-        /// <returns>A task representing the asynchronous publish operation.</returns>
-        public async Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default)
+        /// <typeparam name="TMessage">The type of the message being published. Must implement <see cref="IMessage"/>.</typeparam>
+        /// <param name="message">The message to be published.</param>
+        /// <param name="options">Optional parameters to customize the message sending process.</param>
+        /// <param name="cancellationToken">Optional cancellation token to cancel the publish operation.</param>
+        /// <returns>A task that represents the asynchronous publish operation.</returns>
+        public async Task PublishAsync<TMessage>(TMessage message, MessagePublishOptions? options = default, CancellationToken cancellationToken = default) where TMessage : class, IMessage
         {
-            ServiceBusMessage serviceBusMessage = new()
-            {
-                Body = BinaryData.FromObjectAsJson(message, DefaultSerializeOptions),
-                ContentType = "application/json",
+            ISendEndpoint endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri(IsTopic ? $"topic:{Queue}" : $"queue:{Queue}"));
 
-            };
-
-            foreach (string queue in Queues)
-            {
-                await _busClient.CreateSender(queue, new ServiceBusSenderOptions
-                {
-                    Identifier = Name,
-                }).SendMessageAsync(serviceBusMessage, cancellationToken);
-            }
+            await endpoint.Send(message, context => AttachProperties(context, options), cancellationToken);
         }
 
         /// <summary>
-        /// Performs the task needed to clean up resources used by the Azure.Messaging.ServiceBus.ServiceBusClient, including ensuring that the client itself has been closed
+        /// Publishes a message to the specified queue using MassTransit.
         /// </summary>
-        /// <returns>A task to be resolved on when the operation has completed.</returns>
-        public ValueTask DisposeAsync() => _busClient.DisposeAsync();
+        /// <typeparam name="TMessage">The type of the message being published. Must implement <see cref="IMessage"/>.</typeparam>
+        /// <param name="message">The message to be published.</param>
+        /// <param name="cancellationToken">Optional cancellation token to cancel the publish operation.</param>
+        /// <returns>A task that represents the asynchronous publish operation.</returns>
+        public async Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default) where TMessage : class, IMessage
+        {
+            ISendEndpoint endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri(IsTopic ? $"topic:{Queue}" : $"queue:{Queue}"));
+
+            await endpoint.Send(message, cancellationToken);
+        }
+
+
+        private static void AttachProperties<TMessage>(SendContext<TMessage> context, MessagePublishOptions? options) where TMessage : class, IMessage
+        {
+            if (options == null)
+            {
+                return;
+            }
+            // Apply properties if they are passed
+
+            foreach (var property in options.ApplicationProperties ?? [])
+            {
+                context.Headers.Set(property.Key, property.Value);
+            }
+
+
+            if (options.MessageId.HasValue == true)
+            {
+                context.MessageId = options.MessageId;
+            }
+
+            if (options.CorrelationId.HasValue == true)
+            {
+                context.CorrelationId = options.CorrelationId;
+            }
+
+            if (options.TimeToLive.HasValue == true)
+            {
+                context.TimeToLive = options.TimeToLive.Value;
+            }
+
+            if (options.ScheduledEnqueueTimeUtc.HasValue == true)
+            {
+                context.SetScheduledEnqueueTime(options.ScheduledEnqueueTimeUtc.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(options.PartitionKey))
+            {
+                context.SetPartitionKey(options.PartitionKey);
+            }
+
+            if (!string.IsNullOrWhiteSpace(options.SessionId))
+            {
+                context.SetSessionId(options.SessionId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(options.ReplyTo))
+            {
+                context.SetReplyTo(options.ReplyTo);
+            }
+
+            if (!string.IsNullOrWhiteSpace(options.ReplyToSessionId))
+            {
+                context.SetReplyToSessionId(options.ReplyToSessionId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(options.Subject))
+            {
+                context.SetLabel(options.Subject);
+            }
+
+            if (!string.IsNullOrWhiteSpace(options.ContentType))
+            {
+                context.ContentType = new System.Net.Mime.ContentType(options.ContentType);
+            }
+        }
     }
+
 }

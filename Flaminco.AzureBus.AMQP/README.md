@@ -1,6 +1,6 @@
 # Flaminco.AzureBus.AMQP
 
-Flaminco.AzureBus.AMQP is a .NET library that simplifies the integration of AzureBus AMQP 1.0 in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with AzureBus queues.
+Flaminco.AzureBus.AMQP is a .NET library that simplifies the integration of Azure Bus in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with AzureBus queues.
 
 ## Installation
 
@@ -34,15 +34,14 @@ builder.Services.AddAMQPClient<Program>(options =>
 Implement a custom publisher by extending the `MessagePublisher` class. The publisher defines the queue(s) to which it will send messages:
 
 ```csharp
-    public class PersonPublisher : MessagePublisher
+public class PersonPublisher : MessagePublisher
+{
+    public PersonPublisher(ISendEndpointProvider sendEndpointProvider) : base(sendEndpointProvider)
     {
-        public PersonPublisher(IOptions<AMQPClientSettings> clientSettings) : base(clientSettings)
-        {
-        }
-
-        protected override string Name => nameof(PersonPublisher);
-        protected override string[] Queues => ["HelloQueue"];
     }
+
+    protected override string Queue => "HelloQueue";
+}
 ```
 
 ### Step 3: Send a Message
@@ -50,20 +49,24 @@ Implement a custom publisher by extending the `MessagePublisher` class. The publ
 Now, you can use your custom publisher to send a message to the specified queue:
 
 ```csharp
-  public class Example(IAMQPLocator _amqpLocator)
-    {
-        [HttpGet]
-        public async Task PushMessage(CancellationToken cancellationToken)
-        {
-            await using MessagePublisher helloPublisher = _amqpLocator.GetPublisher<PersonPublisher>();
+public class Person : IMessage
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
 
-            await helloPublisher.PublishAsync(new Person
-            {
-                Name = "Ahmed Abuelnour",
-                Age = 30
-            }, cancellationToken);
-        }
+public class Example(PersonPublisher _personPublisher)
+{
+    [HttpGet]
+    public async Task PushMessage(CancellationToken cancellationToken)
+    {
+        await _personPublisher.PublishAsync(new Person
+        {
+            Name = "Ahmed Abuelnour",
+            Age = 30
+        }, cancellationToken);
     }
+}
 ```
 
 ### Step 4: Create a Message Consumer
@@ -71,54 +74,83 @@ Now, you can use your custom publisher to send a message to the specified queue:
 Implement a custom consumer by extending the `MessageConsumer` class. The consumer defines the queue from which it will receive messages:
 
 ```csharp
-    public class PersonConsumer : MessageConsumer
+
+// For queue consumers
+
+[QueueConsumer(queue: "HelloQueue")]
+public class PersonConsumer : MessageConsumer<Person>
+{
+    public override Task Consume(ConsumeContext<Person> context)
     {
-        public PersonConsumer(IOptions<AMQPClientSettings> clientSettings, IPublisher publisher) : base(clientSettings, publisher)
-        {
-        }
-
-        protected override string Name => nameof(PersonConsumer);
-        protected override string Queue => "HelloQueue";
+        Console.WriteLine($"Received message: {context.Message.Name}, Age: {context.Message.Age}");
+        return Task.CompletedTask;
     }
-```
 
-### Step 5: Implement a message handler
+   public override Task Consume(ConsumeContext<Fault<MessageBox>> context)
+   {
+       return base.Consume(context);
+   }
+}
 
-IMessageFaultHandler is Optional to handle the cases where the consumer couldn't deal with the incoming message, and of course you can have multiple handlers for the same message.
+// For topic consumers
 
-```csharp
-
-    public class PersonMessageHandler : IMessageReceivedHandler<Person>, IMessageFaultHandler<Person>
+[TopicConsumer(topic: "HelloQueue", subscription: nameof(PersonConsumer))]
+public class PersonConsumer : MessageConsumer<Person>
+{
+    public override Task Consume(ConsumeContext<Person> context)
     {
-        public async Task Handle(MessageReceivedEvent<Person> notification, CancellationToken cancellationToken)
-        {
-            Console.WriteLine($"I got a new message saying: {notification.Message}");
-        }
-
-        public async Task Handle(MessageFaultEvent<Person> notification, CancellationToken cancellationToken)
-        {
-            Console.WriteLine($"fault message from: {notification.Name}, and queue: {notification.Queue}");
-        }
+        Console.WriteLine($"Received message: {context.Message.Name}, Age: {context.Message.Age}");
+        return Task.CompletedTask;
     }
+
+   public override Task Consume(ConsumeContext<Fault<MessageBox>> context)
+   {
+       return base.Consume(context);
+   }
+}
+
+// For filter based topic consumer
+
+// you can define sql filter
+public class SqlFilterProvider : IRuleFilterProvider
+{
+    public RuleFilter? GetRuleFilter()
+    {
+       // Filter key is the one you use in MessagePublishOptions, and Filter Value is the value you pass
+       return new SqlRuleFilter("FilterKey = FilterValue");
+    }
+}
+
+// or you can define correlation filter
+
+public class CorrelationFilterProvider : IRuleFilterProvider
+{
+    public RuleFilter? GetRuleFilter()
+    {
+        return new CorrelationRuleFilter
+        {
+            CorrelationId = "Correlation Id Value"
+        };
+    }
+}
+
+[TopicConsumer(topic: "HelloQueue", subscription: nameof(PersonConsumer), typeof(CorrelationFilterProvider))]
+public class PersonConsumer : MessageConsumer<Person>
+{
+    public override Task Consume(ConsumeContext<Person> context)
+    {
+        Console.WriteLine($"Received message: {context.Message.Name}, Age: {context.Message.Age}");
+        return Task.CompletedTask;
+    }
+
+   public override Task Consume(ConsumeContext<Fault<MessageBox>> context)
+   {
+       return base.Consume(context);
+   }
+}
 ```
 
-### Step 6: Register the consumers to be marked as background service
-
-Finally, register your consumers in the dependency injection container in your `Startup` or `Program` class:
-
-```csharp
-    builder.Services.AddAMQPService<PersonConsumer,Person>();
-```
-
-### Step 7: Important Notes
-
-* Queue Creation: Azure Service Bus does not automatically create queues or topics. You must manually create them in the Azure portal or using the Azure Management API.
-
-* Queue/Topic Lookup: When the application starts, it will attempt to verify that the queue name specified for the consumer exists. If the queue is not found, the system will search for a topic with the same name as the queue. Additionally, it will look for a subscription matching the consumer's name.
-
-* Error Handling: It's important to implement fault handling for scenarios where the consumer encounters errors while processing messages. You can achieve this using the optional IMessageFaultHandler.
-
-### Step 8: Run the Application
+### Step 5: Run the Application
 
 Build and run your application. The consumer will continuously listen for messages on the specified queue, while the publisher sends messages to that queue.
 
@@ -129,3 +161,4 @@ If you encounter any issues or have suggestions for improvements, please feel fr
 ## License
 
 This project is licensed under the MIT License.
+

@@ -55,12 +55,18 @@ namespace WebApplication1
             // AMQP 0.9 
 
             // AMQP 1.0
-            builder.Services.AddAMQPClient<Program>(a =>
-            {
-                a.Host = "amqp://localhost:5672";
-                a.Username = "guest";
-                a.Password = "guest";
 
+
+            //builder.Services.AddAMQPClient<Program>(options =>
+            //{
+            //    options.Host = "Endpoint=sb://sb-dev-app.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=onouja6KzYf5AwJWQ/GASEPhEKBIo3lqw+ASbKKsNuc=";
+            //});   
+
+            builder.Services.AddAMQPClient<Program>(options =>
+            {
+                options.Host = "amqp://guest:guest@localhost:5672";
+                options.Username = "guest";
+                options.Password = "guest";
             });
 
             // Register the sender

@@ -52,7 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Flaminco.RabbitMQ.Amqp\Flaminco.RabbitMQ.AMQP.csproj" />
+    <ProjectReference Include="..\Flaminco.AzureBus.AMQP\Flaminco.AzureBus.AMQP.csproj" />
   </ItemGroup>
 
 

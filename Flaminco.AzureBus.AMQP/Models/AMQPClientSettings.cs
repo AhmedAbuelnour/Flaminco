@@ -1,7 +1,7 @@
-﻿namespace Flaminco.RabbitMQ.AMQP.Models
+﻿namespace Flaminco.AzureBus.AMQP.Models
 {
     /// <summary>
-    /// Represents the configuration settings for the AMQP connection, including the host, username, password, and optional retry configurations.
+    /// Represents the configuration settings for the AMQP connection, including the host, retry options, and optional retry configurations.
     /// </summary>
     public class AMQPClientSettings
     {
@@ -9,16 +9,6 @@
         /// Gets or sets the host address used to connect to the AMQP message broker.
         /// </summary>
         public string Host { get; set; }
-
-        /// <summary>
-        /// Gets or sets the username used for authentication with the AMQP message broker.
-        /// </summary>
-        public string Username { get; set; }
-
-        /// <summary>
-        /// Gets or sets the password used for authentication with the AMQP message broker.
-        /// </summary>
-        public string Password { get; set; }
 
         /// <summary>
         /// Gets or sets the number of retry attempts to be made in case of connection failure.

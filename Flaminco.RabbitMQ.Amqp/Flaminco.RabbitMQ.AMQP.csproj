@@ -6,11 +6,11 @@
 	  <Nullable>enable</Nullable>
 	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
 	  <Nullable>enable</Nullable>
-	  <Version>2.0.4</Version>
+	  <Version>2.1.0</Version>
 	  <Authors>Ahmed Abuelnour</Authors>
 	  <Company>Personal</Company>
 	  <Description>
-		  Flaminco.RabbitMQ.AMQP is a .NET library that simplifies the integration of RabbitMQ AMQP 1.0 in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with RabbitMQ queues.
+		  Flaminco.RabbitMQ.AMQP is a .NET library that simplifies the integration of RabbitMQ in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with RabbitMQ queues.
 	  </Description>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>

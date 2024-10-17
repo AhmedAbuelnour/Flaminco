@@ -1,6 +1,6 @@
 # Flaminco.RabbitMQ.AMQP
 
-Flaminco.RabbitMQ.AMQP is a .NET library that simplifies the integration of RabbitMQ AMQP 1.0 in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with RabbitMQ queues.
+Flaminco.RabbitMQ.AMQP is a .NET library that simplifies the integration of RabbitMQ in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with RabbitMQ queues.
 
 ## Installation
 
@@ -51,6 +51,13 @@ public class PersonPublisher : MessagePublisher
 Now, you can use your custom publisher to send a message to the specified queue:
 
 ```csharp
+
+public class Person : IMessage
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
 public class Example(PersonPublisher _personPublisher)
 {
     [HttpGet]
@@ -70,15 +77,19 @@ public class Example(PersonPublisher _personPublisher)
 Implement a custom consumer by extending the `MessageConsumer` class. The consumer defines the queue from which it will receive messages:
 
 ```csharp
+[QueueConsumer(queue: "HelloQueue")]
 public class PersonConsumer : MessageConsumer<Person>
 {
-    public override string Queue => "HelloQueue";
-
     public override Task Consume(ConsumeContext<Person> context)
     {
         Console.WriteLine($"Received message: {context.Message.Name}, Age: {context.Message.Age}");
         return Task.CompletedTask;
     }
+
+   public override Task Consume(ConsumeContext<Fault<MessageBox>> context)
+   {
+       return base.Consume(context);
+   }
 }
 ```
 

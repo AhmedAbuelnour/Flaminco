@@ -10,11 +10,6 @@ namespace Flaminco.RabbitMQ.AMQP.Abstractions
     public abstract class MessageConsumer<TMessage> : IConsumer<TMessage>, IConsumer<Fault<TMessage>> where TMessage : class, IMessage
     {
         /// <summary>
-        /// Gets the name of the queue from which messages are consumed.
-        /// </summary>
-        public abstract string Queue { get; }
-
-        /// <summary>
         /// Consumes the message of type <typeparamref name="TMessage"/>.
         /// </summary>
         /// <param name="context">The context of the message being consumed.</param>
