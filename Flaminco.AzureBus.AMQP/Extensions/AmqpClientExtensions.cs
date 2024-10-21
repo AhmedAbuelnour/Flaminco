@@ -60,6 +60,7 @@
                 // Configure RabbitMQ for MassTransit
                 x.UsingAzureServiceBus((context, cfg) =>
                 {
+
                     cfg.Host(clientSettings.Host);
 
                     if (clientSettings.RetryCount.HasValue && clientSettings.RetryInterval.HasValue)

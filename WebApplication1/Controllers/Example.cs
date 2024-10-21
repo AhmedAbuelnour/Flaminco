@@ -1,4 +1,3 @@
-using Flaminco.AzureBus.AMQP.Models;
 using Flaminco.RazorInk.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Consumers;
@@ -14,11 +13,12 @@ namespace WebApplication1.Controllers
         {
             await amqpLocator.PublishAsync(new MessageBox
             {
-                Message = "Hellosss"
-            }, new MessagePublishOptions
-            {
-                ApplicationProperties = { ["to"] = "something" }
-            });
+                NotifierId = "b709e1eb-5050-44b4-914b-c772458308c0",
+                NotifiedIds = ["11a6467b-6ecf-45df-a3c3-71023809f65f", "1842141f-41a7-4898-9b03-8dfe57ed9440"],
+                CourseId = 7480,
+                NotificationTypeId = 9,
+                Metadata = "1501"
+            }, CancellationToken.None);
 
             return Ok();
         }

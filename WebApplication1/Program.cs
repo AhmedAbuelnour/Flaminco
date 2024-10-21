@@ -1,4 +1,4 @@
-using Flaminco.RabbitMQ.AMQP.Extensions;
+using Flaminco.AzureBus.AMQP.Extensions;
 using Flaminco.RazorInk.Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -64,9 +64,7 @@ namespace WebApplication1
 
             builder.Services.AddAMQPClient<Program>(options =>
             {
-                options.Host = "amqp://guest:guest@localhost:5672";
-                options.Username = "guest";
-                options.Password = "guest";
+                options.Host = "Endpoint=sb://sb-dev-app.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=onouja6KzYf5AwJWQ/GASEPhEKBIo3lqw+ASbKKsNuc=";
             });
 
             // Register the sender

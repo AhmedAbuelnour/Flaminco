@@ -34,12 +34,21 @@ namespace WebApplication1.Consumers
     //    }
     //}
 
-    [TopicConsumer(topic: "hello", subscription: "HelloConsumer2", ruleFilterType: typeof(HelloConsumer2RuleFilterProvider))]
-    public class HelloConsumer2(IServiceProvider serviceProvider, ApplicationDbContext dbContext) : MessageConsumer<MessageBox>
+    public static class Consts
+    {
+
+        public class Queues
+        {
+            public const string XX = "notifier-send-class-notification";
+        }
+
+    }
+
+    [QueueConsumer(queue: Consts.Queues.XX)]
+    public class HelloConsumer2() : MessageConsumer<MessageBox>
     {
         public override Task Consume(ConsumeContext<MessageBox> context)
         {
-            Console.WriteLine($"I got a new message saying {context.Message.Message}");
 
             return Task.CompletedTask;
         }
@@ -51,12 +60,19 @@ namespace WebApplication1.Consumers
 
     public class MessageBox : IMessage
     {
-        public string Message { get; set; }
+        public string NotifierId { get; set; }
+        public int CourseId { get; set; }
+        public int NotificationTypeId { get; set; }
+        public string? Content { get; set; }
+        public IEnumerable<string>? NotifiedIds { get; set; }
+        public string? Metadata { get; set; }
     }
+
+
     public class HelloPublisher(ISendEndpointProvider sendEndpointProvider) : MessagePublisher(sendEndpointProvider)
     {
-        protected override string Queue => "hello";
+        protected override string Queue => Consts.Queues.XX;
 
-        protected override bool IsTopic => true;
+        protected override bool IsTopic => false;
     }
 }
