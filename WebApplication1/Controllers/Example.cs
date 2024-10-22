@@ -1,3 +1,4 @@
+using Flaminco.AzureBus.AMQP.Models;
 using Flaminco.RazorInk.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Consumers;
@@ -18,6 +19,9 @@ namespace WebApplication1.Controllers
                 CourseId = 7480,
                 NotificationTypeId = 9,
                 Metadata = "1501"
+            }, new MessagePublishOptions
+            {
+                ScheduledEnqueueTimeUtc = DateTime.UtcNow.AddSeconds(5),
             }, CancellationToken.None);
 
             return Ok();

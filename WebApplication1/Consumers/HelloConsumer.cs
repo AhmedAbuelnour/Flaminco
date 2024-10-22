@@ -1,6 +1,5 @@
 ﻿using Azure.Messaging.ServiceBus.Administration;
 using Flaminco.AzureBus.AMQP.Abstractions;
-using Flaminco.AzureBus.AMQP.Attributes;
 using MassTransit;
 
 namespace WebApplication1.Consumers
@@ -44,19 +43,19 @@ namespace WebApplication1.Consumers
 
     }
 
-    [QueueConsumer(queue: Consts.Queues.XX)]
-    public class HelloConsumer2() : MessageConsumer<MessageBox>
-    {
-        public override Task Consume(ConsumeContext<MessageBox> context)
-        {
+    //[QueueConsumer(queue: Consts.Queues.XX)]
+    //public class HelloConsumer2() : MessageConsumer<MessageBox>
+    //{
+    //    public override Task Consume(ConsumeContext<MessageBox> context)
+    //    {
 
-            return Task.CompletedTask;
-        }
-        public override Task Consume(ConsumeContext<Fault<MessageBox>> context)
-        {
-            return base.Consume(context);
-        }
-    }
+    //        return Task.CompletedTask;
+    //    }
+    //    public override Task Consume(ConsumeContext<Fault<MessageBox>> context)
+    //    {
+    //        return base.Consume(context);
+    //    }
+    //}
 
     public class MessageBox : IMessage
     {
@@ -69,9 +68,9 @@ namespace WebApplication1.Consumers
     }
 
 
-    public class HelloPublisher(ISendEndpointProvider sendEndpointProvider) : MessagePublisher(sendEndpointProvider)
+    public class HelloPublisher(ISendEndpointProvider sendEndpointProvider) : MessagePublisher<MessageBox>(sendEndpointProvider)
     {
-        protected override string Queue => Consts.Queues.XX;
+        protected override string Queue => "HelloTest";
 
         protected override bool IsTopic => false;
     }

@@ -34,7 +34,16 @@ builder.Services.AddAMQPClient<Program>(options =>
 Implement a custom publisher by extending the `MessagePublisher` class. The publisher defines the queue(s) to which it will send messages:
 
 ```csharp
-public class PersonPublisher : MessagePublisher
+
+// must be shared between your consumer and publisher (Must be same type not only identical in properties)
+public class Person : IMessage
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+
+public class PersonPublisher : MessagePublisher<Person>
 {
     public PersonPublisher(ISendEndpointProvider sendEndpointProvider) : base(sendEndpointProvider)
     {
@@ -49,12 +58,6 @@ public class PersonPublisher : MessagePublisher
 Now, you can use your custom publisher to send a message to the specified queue:
 
 ```csharp
-public class Person : IMessage
-{
-    public string Name { get; set; }
-    public int Age { get; set; }
-}
-
 public class Example(PersonPublisher _personPublisher)
 {
     [HttpGet]

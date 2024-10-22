@@ -6,8 +6,9 @@
     /// <summary>
     /// Represents an abstract base class for publishing messages to a message queue.
     /// </summary>
+    /// <typeparam name="TMessage">The type of the message being published. Must implement <see cref="IMessage"/>.</typeparam>
     /// <param name="sendEndpointProvider">The endpoint provider used to send messages to a specific queue.</param>
-    public abstract class MessagePublisher(ISendEndpointProvider sendEndpointProvider)
+    public abstract class MessagePublisher<TMessage>(ISendEndpointProvider sendEndpointProvider) where TMessage : class, IMessage
     {
         /// <summary>
         /// Gets the name of the queue where the message will be published.
@@ -22,12 +23,11 @@
         /// <summary>
         /// Publishes a message to the specified queue using MassTransit.
         /// </summary>
-        /// <typeparam name="TMessage">The type of the message being published. Must implement <see cref="IMessage"/>.</typeparam>
         /// <param name="message">The message to be published.</param>
         /// <param name="options">Optional parameters to customize the message sending process.</param>
         /// <param name="cancellationToken">Optional cancellation token to cancel the publish operation.</param>
         /// <returns>A task that represents the asynchronous publish operation.</returns>
-        public async Task PublishAsync<TMessage>(TMessage message, MessagePublishOptions? options = default, CancellationToken cancellationToken = default) where TMessage : class, IMessage
+        public async Task PublishAsync(TMessage message, MessagePublishOptions? options = default, CancellationToken cancellationToken = default)
         {
             ISendEndpoint endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri(IsTopic ? $"topic:{Queue}" : $"queue:{Queue}"));
 
@@ -37,19 +37,17 @@
         /// <summary>
         /// Publishes a message to the specified queue using MassTransit.
         /// </summary>
-        /// <typeparam name="TMessage">The type of the message being published. Must implement <see cref="IMessage"/>.</typeparam>
         /// <param name="message">The message to be published.</param>
         /// <param name="cancellationToken">Optional cancellation token to cancel the publish operation.</param>
         /// <returns>A task that represents the asynchronous publish operation.</returns>
-        public async Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default) where TMessage : class, IMessage
+        public async Task PublishAsync(TMessage message, CancellationToken cancellationToken = default)
         {
             ISendEndpoint endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri(IsTopic ? $"topic:{Queue}" : $"queue:{Queue}"));
 
             await endpoint.Send(message, cancellationToken);
         }
 
-
-        private static void AttachProperties<TMessage>(SendContext<TMessage> context, MessagePublishOptions? options) where TMessage : class, IMessage
+        private static void AttachProperties(SendContext<TMessage> context, MessagePublishOptions? options)
         {
             if (options == null)
             {

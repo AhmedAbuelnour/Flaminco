@@ -70,6 +70,7 @@ namespace WebApplication1
             // Register the sender
 
 
+
             // builder.Services.AddAMQPService<HelloConsumer, string>();
             //builder.Services.AddAMQPService<HelloConsumer2, string>();
 

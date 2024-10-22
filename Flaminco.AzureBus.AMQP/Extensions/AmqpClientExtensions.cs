@@ -72,10 +72,10 @@
                     {
                         if (consumer.GetCustomAttribute<QueueConsumerAttribute>() is QueueConsumerAttribute queueConsumer)
                         {
-                            cfg.ReceiveEndpoint(queueConsumer.Queue, e =>
+                            cfg.ReceiveEndpoint(queueConsumer.Queue, endpointConfig =>
                             {
                                 // Dynamically configure the consumer for the queue
-                                e.ConfigureConsumer(context, consumer);
+                                endpointConfig.ConfigureConsumer(context, consumer);
                             });
 
                             continue;
@@ -114,7 +114,10 @@
         /// <param name="services">The service collection to which the publishers will be added.</param>
         private static void AddPublishers<TScanner>(this IServiceCollection services)
         {
-            foreach (var type in typeof(TScanner).Assembly.DefinedTypes.Where(type => type.IsSubclassOf(typeof(MessagePublisher)) && !type.IsAbstract))
+            foreach (var type in typeof(TScanner).Assembly.DefinedTypes.Where(type => !type.IsAbstract &&
+                                                                                       type.BaseType != null &&
+                                                                                       type.BaseType.IsGenericType &&
+                                                                                       type.BaseType.GetGenericTypeDefinition() == typeof(MessagePublisher<>)))
             {
                 services.AddScoped(type);
             }
