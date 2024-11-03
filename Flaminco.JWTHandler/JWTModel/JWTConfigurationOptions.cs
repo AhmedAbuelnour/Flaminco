@@ -1,4 +1,5 @@
 ﻿namespace Flaminco.JWTHandler.JWTModel;
+
 public class JWTConfigurationOptions
 {
     public string Key { get; set; }
@@ -17,4 +18,3 @@ public class JWTConfigurationOptions
     public string? Authority { get; set; }
     public string? RoleClaimType { get; set; }
 }
-

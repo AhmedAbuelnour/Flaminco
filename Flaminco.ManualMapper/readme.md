@@ -1,15 +1,16 @@
 # Introduction
 
-this package trying to set a structured method for implementing object mapping in both ways (Sync, Async) 
+this package trying to set a structured method for implementing object mapping in both ways (Sync, Async)
 
 # Getting Started
 
-inject mapper scanner 
+inject mapper scanner
 
 ```csharp
   builder.Services.AddManualMapper<Program>();
 
 ```
+
 lets start with an example
 
 ```csharp

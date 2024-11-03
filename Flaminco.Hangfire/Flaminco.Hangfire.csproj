@@ -1,18 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	 <TargetFramework>net7.0</TargetFramework>
-    <Nullable>enable</Nullable>
-	  <Version>0.2.0</Version>
-	  <Authors>Ahmed Abuelnour</Authors>
-	  <Company>Personal</Company>
-	  <Description>A simple hangfire service organizer.</Description>
-	  <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
-	  <Copyright>Free</Copyright>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <Version>0.2.0</Version>
+        <Authors>Ahmed Abuelnour</Authors>
+        <Company>Personal</Company>
+        <Description>A simple hangfire service organizer.</Description>
+        <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
+        <Copyright>Free</Copyright>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.6" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Hangfire.AspNetCore" Version="1.8.6"/>
+    </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
 @using PdfFromRazor.Invoices
+
 @code {
     [Parameter] public Invoice Invoice { get; set; }
 }
@@ -15,7 +16,7 @@
 </head>
 
 <body>
-    <div class="invoice-box page-break">
+<div class="invoice-box page-break">
     <table cellpadding="0" cellspacing="0">
         <tr class="top">
             <td colspan="2">
@@ -30,10 +31,8 @@
                 </table>
             </td>
         </tr>
-		<!-- The Rest of your HTML Code. -->
+        <!-- The Rest of your HTML Code. -->
     </table>
 </div>
 </body>
 </html>
-
-

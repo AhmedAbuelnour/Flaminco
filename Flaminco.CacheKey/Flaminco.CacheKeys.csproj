@@ -1,26 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	  <TargetFramework>net7.0</TargetFramework>
-	  <ImplicitUsings>enable</ImplicitUsings>
-	  <Nullable>enable</Nullable>
-	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
-	  <Nullable>enable</Nullable>
-	  <Version>1.0.0</Version>
-	  <Authors>Ahmed Abuelnour</Authors>
-	  <Company>Personal</Company>
-	  <PackageReadmeFile>README.md</PackageReadmeFile>
-	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <Description>
-		  This library provides a structured way to define cache keys, ensuring they are uniquely identifiable across different regions and optionally tagged for finer-grained categorization and retrieval.
-	  </Description>
-	  <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
-	  <Copyright>
-		  Copyright (c) 2024, Ahmed Abuelnour
-	  </Copyright>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Nullable>enable</Nullable>
+        <Version>1.0.0</Version>
+        <Authors>Ahmed Abuelnour</Authors>
+        <Company>Personal</Company>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Description>
+            This library provides a structured way to define cache keys, ensuring they are uniquely identifiable across different regions and optionally tagged for finer-grained categorization and retrieval.
+        </Description>
+        <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
+        <Copyright>
+            Copyright (c) 2024, Ahmed Abuelnour
+        </Copyright>
+    </PropertyGroup>
 
-  <ItemGroup>
-	  <None Include="README.md" Pack="true" PackagePath=""/>
-  </ItemGroup>
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
 </Project>

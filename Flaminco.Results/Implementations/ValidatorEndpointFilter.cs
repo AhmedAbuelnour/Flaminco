@@ -8,7 +8,10 @@ public sealed class ValidatorEndpointFilter<TValue> : IEndpointFilter where TVal
 {
     private readonly IValidator<TValue> _validator;
 
-    public ValidatorEndpointFilter(IValidator<TValue> validator) => _validator = validator;
+    public ValidatorEndpointFilter(IValidator<TValue> validator)
+    {
+        _validator = validator;
+    }
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
@@ -17,9 +20,7 @@ public sealed class ValidatorEndpointFilter<TValue> : IEndpointFilter where TVal
             var validationResult = await _validator.ValidateAsync(input, CancellationToken.None);
 
             if (!validationResult.IsValid)
-            {
-                return ResultType.BadRequest.GetMinimalResult(errorDetails: validationResult.ToDictionary());
-            }
+                return ResultType.BadRequest.GetMinimalResult(validationResult.ToDictionary());
         }
 
         return await next.Invoke(context);

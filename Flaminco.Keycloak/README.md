@@ -1,12 +1,14 @@
 # Flaminco.Keycloak
 
-`Flaminco.Keycloak` is a .NET library that simplifies the integration of Keycloak for authentication and client communication in your ASP.NET Core applications.
+`Flaminco.Keycloak` is a .NET library that simplifies the integration of Keycloak for authentication and client
+communication in your ASP.NET Core applications.
 
 ## Getting Started
 
 ### Installation
 
-To get started with `Flaminco.Keycloak`, you need to configure the Keycloak services in your ASP.NET Core application. You can do this by adding the following line:
+To get started with `Flaminco.Keycloak`, you need to configure the Keycloak services in your ASP.NET Core application.
+You can do this by adding the following line:
 
 ```csharp
 builder.Services.AddKeycloakJwtBearerAuthentication(builder.Configuration).AddKeycloakClient();
@@ -14,7 +16,8 @@ builder.Services.AddKeycloakJwtBearerAuthentication(builder.Configuration).AddKe
 
 ### Configuration
 
-Ensure that you have the required Keycloak configuration in your `appsettings.json` file. Below is an example of the necessary Keycloak configuration:
+Ensure that you have the required Keycloak configuration in your `appsettings.json` file. Below is an example of the
+necessary Keycloak configuration:
 
 ```json
 "Keycloak": {
@@ -37,11 +40,13 @@ Ensure that you have the required Keycloak configuration in your `appsettings.js
 
 #### AddKeycloakJwtBearerAuthentication
 
-The `AddKeycloakJwtBearerAuthentication` method configures JWT bearer authentication using Keycloak. It injects the necessary services to authenticate requests against your Keycloak server.
+The `AddKeycloakJwtBearerAuthentication` method configures JWT bearer authentication using Keycloak. It injects the
+necessary services to authenticate requests against your Keycloak server.
 
 #### AddKeycloakClient
 
-The `AddKeycloakClient` method injects the Keycloak client services, enabling your application to communicate with the Keycloak server for various operations, such as managing users and groups.
+The `AddKeycloakClient` method injects the Keycloak client services, enabling your application to communicate with the
+Keycloak server for various operations, such as managing users and groups.
 
 ### Example
 
@@ -106,11 +111,13 @@ Add the Keycloak configuration to your `appsettings.json` file:
 
 ### Additional Features
 
-`Flaminco.Keycloak` provides various additional features for managing Keycloak resources, such as users and groups. Please refer to the library documentation for more details on these features.
+`Flaminco.Keycloak` provides various additional features for managing Keycloak resources, such as users and groups.
+Please refer to the library documentation for more details on these features.
 
 ### Contributing
 
-Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
+Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a
+pull request.
 
 ### License
 
@@ -118,4 +125,5 @@ This project is licensed under the MIT License.
 
 ---
 
-With this README, users will have a clear understanding of how to set up and use the `Flaminco.Keycloak` library in their ASP.NET Core applications.
+With this README, users will have a clear understanding of how to set up and use the `Flaminco.Keycloak` library in
+their ASP.NET Core applications.

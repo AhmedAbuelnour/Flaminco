@@ -3,59 +3,58 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Playwright;
 
+namespace Flaminco.RazorInk.Implementations;
 
-namespace Flaminco.RazorInk.Implementations
+/// <summary>
+///     A service that generates PDF files from rendered Blazor components.
+/// </summary>
+/// <param name="_serviceProvider">The service provider used to resolve component dependencies.</param>
+/// <param name="_loggerFactory">The logger factory for logging operations within the PDF generation process</param>
+public class RazorInkPdfGenerator(IServiceProvider _serviceProvider, ILoggerFactory _loggerFactory)
+    : IRazorInkPdfGenerator
 {
-    /// <summary>
-    /// A service that generates PDF files from rendered Blazor components.
-    /// </summary>
-    /// <param name="_serviceProvider">The service provider used to resolve component dependencies.</param>
-    /// <param name="_loggerFactory">The logger factory for logging operations within the PDF generation process</param>
-    public class RazorInkPdfGenerator(IServiceProvider _serviceProvider, ILoggerFactory _loggerFactory) : IRazorInkPdfGenerator
+    /// <inheritdoc />
+    public async Task<byte[]> RenderAsync<TComponent>(Dictionary<string, object?> parameters, PagePdfOptions pdfOptions)
+        where TComponent : IComponent
     {
-        /// <summary>
-        /// Ensures that Playwright and the required browser binaries (Chromium) are installed.
-        /// </summary>
-        public static void EnsurePlaywrightInstalled()
+        //EnsurePlaywrightInstalled();
+
+        await using (HtmlRenderer htmlRenderer = new(_serviceProvider, _loggerFactory))
         {
-            if (!Directory.Exists("./playwright"))
+            var html = await htmlRenderer.Dispatcher.InvokeAsync(async () =>
             {
-                Program.Main(["install", "chromium"]);
-            }
-        }
+                var output =
+                    await htmlRenderer.RenderComponentAsync<TComponent>(ParameterView.FromDictionary(parameters));
 
-        /// <inheritdoc/>
-        public async Task<byte[]> RenderAsync<TComponent>(Dictionary<string, object?> parameters, PagePdfOptions pdfOptions) where TComponent : IComponent
-        {
-            //EnsurePlaywrightInstalled();
+                return output.ToHtmlString();
+            });
 
-            await using (HtmlRenderer htmlRenderer = new(_serviceProvider, _loggerFactory))
+            using (var playwright = await Playwright.CreateAsync())
             {
-                string html = await htmlRenderer.Dispatcher.InvokeAsync(async () =>
+                await using (var browser =
+                             await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true }))
                 {
-                    var output = await htmlRenderer.RenderComponentAsync<TComponent>(ParameterView.FromDictionary(parameters));
+                    var page = await browser.NewPageAsync();
 
-                    return output.ToHtmlString();
-                });
+                    await page.SetContentAsync(html);
 
-                using (IPlaywright playwright = await Playwright.CreateAsync())
-                {
-                    await using (IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true }))
-                    {
-                        IPage page = await browser.NewPageAsync();
+                    var pdfBytes = await page.PdfAsync(pdfOptions);
 
-                        await page.SetContentAsync(html);
+                    await page.CloseAsync();
 
-                        byte[] pdfBytes = await page.PdfAsync(pdfOptions);
+                    await browser.CloseAsync();
 
-                        await page.CloseAsync();
-
-                        await browser.CloseAsync();
-
-                        return pdfBytes;
-                    }
+                    return pdfBytes;
                 }
             }
         }
+    }
+
+    /// <summary>
+    ///     Ensures that Playwright and the required browser binaries (Chromium) are installed.
+    /// </summary>
+    public static void EnsurePlaywrightInstalled()
+    {
+        if (!Directory.Exists("./playwright")) Program.Main(["install", "chromium"]);
     }
 }

@@ -5,5 +5,4 @@ namespace Flaminco.MinimalMediatR.Abstractions;
 
 public interface IEndPoint : IRequest<IResult>
 {
-
 }

@@ -14,7 +14,8 @@ dotnet add package Flaminco.RazorInk
 
 #### Step 1: Add Migration to Your Services
 
-To get started with `Flaminco.RazorInk`, you need to configure the Migration services in your ASP.NET Core application. You can do this by adding the following line:
+To get started with `Flaminco.RazorInk`, you need to configure the Migration services in your ASP.NET Core application.
+You can do this by adding the following line:
 
 Using Direct Configuration
 
@@ -22,7 +23,6 @@ Using Direct Configuration
 
 builder.Services.AddRazorInk();
 ```
-
 
 #### Step 2: Inject `IRazorInkPdfGenerator`
 
@@ -60,7 +60,6 @@ public class PdfController : ControllerBase
 }
 
 ```
-
 
 ```html
 
@@ -103,26 +102,25 @@ public class PdfController : ControllerBase
 
 ```
 
-
-### Placeholders: 
+### Placeholders:
 
 * `<span class='pageNumber'></span>` this placeholder is for writing the current page number
 * `<span class='totalPages'></span>` this placeholder is for writing the total page numbers.
 
+### Containerize
 
-### Containerize 
-
-Replace `FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base` with `FROM mcr.microsoft.com/playwright/dotnet:v1.46.0-jammy AS base`
+Replace `FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base` with
+`FROM mcr.microsoft.com/playwright/dotnet:v1.46.0-jammy AS base`
 
 Where v1.46.0 matches the current playwright
 
-Where you can also check the last docker image for dotnet from [here](https://hub.docker.com/r/microsoft/playwright-dotnet)
-
+Where you can also check the last docker image for dotnet
+from [here](https://hub.docker.com/r/microsoft/playwright-dotnet)
 
 ### Contributing
 
-Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
-
+Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a
+pull request.
 
 ### License
 

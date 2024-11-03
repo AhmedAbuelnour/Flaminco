@@ -1,14 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace WebApplication1
+namespace WebApplication1;
+
+public class LookupDbContext : DbContext
 {
-    public class LookupDbContext : DbContext
+    public LookupDbContext(DbContextOptions<LookupDbContext> options) : base(options)
     {
-        public LookupDbContext(DbContextOptions<LookupDbContext> options) : base(options)
-        {
-
-        }
-
-
     }
 }

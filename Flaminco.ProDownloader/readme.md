@@ -1,8 +1,9 @@
-## Getting Started 
+## Getting Started
 
-A Pro downloader which support segmentation, resuming, easy on memory consumtion taking advantage of System.IO.Pipelines, and easy to use ;)
+A Pro downloader which support segmentation, resuming, easy on memory consumtion taking advantage of
+System.IO.Pipelines, and easy to use ;)
 
-### Features: 
+### Features:
 
 * It Provides High Performance in downloading by using the new API System.IO.Pipelines
 * It supports Resuming

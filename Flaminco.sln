@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Pipeline", "Flamin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Hangfire", "Flaminco.Hangfire\Flaminco.Hangfire.csproj", "{33112C42-D01D-40BB-940C-32F661A2B03B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ServiceBus", "Flaminco.ServiceBus\Flaminco.ServiceBus.csproj", "{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Results", "Flaminco.Results\Flaminco.Results.csproj", "{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Validation", "Flamico.Validation\Flaminco.Validation.csproj", "{D0CFA0F8-1496-4948-B583-BD755787FA21}"
@@ -45,13 +43,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RabbitMQ.AMQP", "F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ImmutableStates", "Flaminco.ImmutableState\Flaminco.ImmutableStates.csproj", "{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GarnetWorker", "GarnetWorker\GarnetWorker.csproj", "{63DD5B18-6524-4230-870E-3FA7EBE31E98}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RazorInk", "Flaminco.RazorInk\Flaminco.RazorInk.csproj", "{ED9E5E19-4977-43B5-BAF8-9771896D3CBB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.AzureBus.AMQP", "Flaminco.AzureBus.AMQP\Flaminco.AzureBus.AMQP.csproj", "{FBC830D0-EA93-41EC-830C-915691FD56F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication3", "WebApplication3\WebApplication3.csproj", "{12F51F69-DDB1-4581-89D7-E817B96BE4D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication3", "WebApplication3\WebApplication3.csproj", "{12F51F69-DDB1-4581-89D7-E817B96BE4D1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.TickCronos", "Flaminco.TickCronos\Flaminco.TickCronos.csproj", "{CD9D4100-2BE0-4061-B325-1211D74AB966}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RefTicks", "Flaminco.RefTicks\Flaminco.RefTicks.csproj", "{D688D041-7631-4582-953E-3863742561FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,10 +83,6 @@ Global
 		{33112C42-D01D-40BB-940C-32F661A2B03B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33112C42-D01D-40BB-940C-32F661A2B03B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33112C42-D01D-40BB-940C-32F661A2B03B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0F8BBABF-0293-451D-BBFB-AC5E3DB07D1E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -143,10 +139,6 @@ Global
 		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{63DD5B18-6524-4230-870E-3FA7EBE31E98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{63DD5B18-6524-4230-870E-3FA7EBE31E98}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{63DD5B18-6524-4230-870E-3FA7EBE31E98}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{63DD5B18-6524-4230-870E-3FA7EBE31E98}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ED9E5E19-4977-43B5-BAF8-9771896D3CBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ED9E5E19-4977-43B5-BAF8-9771896D3CBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED9E5E19-4977-43B5-BAF8-9771896D3CBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -159,6 +151,14 @@ Global
 		{12F51F69-DDB1-4581-89D7-E817B96BE4D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12F51F69-DDB1-4581-89D7-E817B96BE4D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12F51F69-DDB1-4581-89D7-E817B96BE4D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD9D4100-2BE0-4061-B325-1211D74AB966}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD9D4100-2BE0-4061-B325-1211D74AB966}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD9D4100-2BE0-4061-B325-1211D74AB966}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD9D4100-2BE0-4061-B325-1211D74AB966}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D688D041-7631-4582-953E-3863742561FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D688D041-7631-4582-953E-3863742561FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D688D041-7631-4582-953E-3863742561FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D688D041-7631-4582-953E-3863742561FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

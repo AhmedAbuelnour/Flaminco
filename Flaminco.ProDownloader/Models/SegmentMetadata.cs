@@ -2,33 +2,36 @@
 
 namespace Flaminco.ProDownloader.Models;
 
-
 /// <summary>
-/// A class which represents the segment to download
+///     A class which represents the segment to download
 /// </summary>
 internal sealed class SegmentMetadata
 {
     /// <summary>
-    ///  Remote Server File location
+    ///     Remote Server File location
     /// </summary>
     public required string Url { get; set; }
+
     /// <summary>
-    /// Temp file location
+    ///     Temp file location
     /// </summary>
     public required string TempPath { get; set; }
+
     /// <summary>
-    /// Segment's Start position
+    ///     Segment's Start position
     /// </summary>
     public required long Start { get; set; }
 
-    public long Size { get => End - Start; }
+    public long Size => End - Start;
+
     /// <summary>
-    /// Segment's End position
+    ///     Segment's End position
     /// </summary>
     public required long End { get; set; }
 
     /// <summary>
-    /// Indicate the total bytes that has been downloaded.
+    ///     Indicate the total bytes that has been downloaded.
     /// </summary>
-    [JsonIgnore] internal long TotalReadBytes { get; set; }
+    [JsonIgnore]
+    internal long TotalReadBytes { get; set; }
 }

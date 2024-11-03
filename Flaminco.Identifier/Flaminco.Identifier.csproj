@@ -1,26 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	<Nullable>enable</Nullable>
-	<Version>1.0.1</Version>
-	<Authors>Ahmed Abuelnour</Authors>
-	<Company>Personal</Company>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
-	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <Description>
-		The library offers a robust, type-safe mechanism for handling entity identifiers in .NET applications, using GUIDs to ensure uniqueness while preventing the accidental interchange of identifiers between different entity types.
-	</Description>
-	<PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
-	<Copyright>
-		Copyright (c) 2024, Ahmed Abuelnour
-	</Copyright>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Nullable>enable</Nullable>
+        <Version>1.0.1</Version>
+        <Authors>Ahmed Abuelnour</Authors>
+        <Company>Personal</Company>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Description>
+            The library offers a robust, type-safe mechanism for handling entity identifiers in .NET applications, using GUIDs to ensure uniqueness while preventing the accidental interchange of identifiers between different entity types.
+        </Description>
+        <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
+        <Copyright>
+            Copyright (c) 2024, Ahmed Abuelnour
+        </Copyright>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<None Include="README.md" Pack="true" PackagePath=""/>
-	</ItemGroup>
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
 </Project>

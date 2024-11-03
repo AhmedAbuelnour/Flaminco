@@ -12,7 +12,7 @@ public sealed class DefaultMapper(IServiceProvider serviceProvider) : IMapper
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        IMapHandler<TSource, TDestination>? handler = _serviceProvider.GetService<IMapHandler<TSource, TDestination>>();
+        var handler = _serviceProvider.GetService<IMapHandler<TSource, TDestination>>();
 
         return handler switch
         {
@@ -21,11 +21,12 @@ public sealed class DefaultMapper(IServiceProvider serviceProvider) : IMapper
         };
     }
 
-    public Task<TDestination> MapAsync<TSource, TDestination>(TSource source, CancellationToken cancellationToken = default) where TDestination : class
+    public Task<TDestination> MapAsync<TSource, TDestination>(TSource source,
+        CancellationToken cancellationToken = default) where TDestination : class
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        IMapAsyncHandler<TSource, TDestination>? handler = _serviceProvider.GetService<IMapAsyncHandler<TSource, TDestination>>();
+        var handler = _serviceProvider.GetService<IMapAsyncHandler<TSource, TDestination>>();
 
         return handler switch
         {
@@ -34,11 +35,12 @@ public sealed class DefaultMapper(IServiceProvider serviceProvider) : IMapper
         };
     }
 
-    public IAsyncEnumerable<TDestination> MapStream<TSource, TDestination>(TSource source, CancellationToken cancellationToken = default) where TDestination : class
+    public IAsyncEnumerable<TDestination> MapStream<TSource, TDestination>(TSource source,
+        CancellationToken cancellationToken = default) where TDestination : class
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        IMapStreamHandler<TSource, TDestination>? handler = _serviceProvider.GetService<IMapStreamHandler<TSource, TDestination>>();
+        var handler = _serviceProvider.GetService<IMapStreamHandler<TSource, TDestination>>();
 
         return handler switch
         {

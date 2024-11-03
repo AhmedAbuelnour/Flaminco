@@ -1,12 +1,16 @@
 # Flaminco.CacheKeys
 
-The `Flaminco.CacheKeys` This library provides a structured way to define cache keys, ensuring they are uniquely identifiable across different regions and optionally tagged for finer-grained categorization and retrieval.
+The `Flaminco.CacheKeys` This library provides a structured way to define cache keys, ensuring they are uniquely
+identifiable across different regions and optionally tagged for finer-grained categorization and retrieval.
 
 ## Features
 
-- **Region-based Segmentation**: Define cache keys within specific regions to manage data more effectively across different contexts or locations.
-- **Tagging Capability**: Attach tags to cache keys for additional metadata, aiding in sorting, filtering, and identifying cache entries.
-- **Implicit String Conversion**: Use cache keys directly as strings for ease of integration with existing caching mechanisms.
+- **Region-based Segmentation**: Define cache keys within specific regions to manage data more effectively across
+  different contexts or locations.
+- **Tagging Capability**: Attach tags to cache keys for additional metadata, aiding in sorting, filtering, and
+  identifying cache entries.
+- **Implicit String Conversion**: Use cache keys directly as strings for ease of integration with existing caching
+  mechanisms.
 
 ## Getting Started
 
@@ -35,9 +39,11 @@ Usage
  await hybridCache.RemoveTagAsync("v1");
 ```
 
-
 ## Contribution
-Contributions are welcome! If you have suggestions, bug reports, or contributions, please submit them as issues or pull requests on our GitHub repository.
+
+Contributions are welcome! If you have suggestions, bug reports, or contributions, please submit them as issues or pull
+requests on our GitHub repository.
 
 ## License
+
 This project is licensed under the MIT License.

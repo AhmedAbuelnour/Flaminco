@@ -1,6 +1,5 @@
-﻿namespace WebApplication1.Consumers
+﻿namespace WebApplication1.Consumers;
+
+public interface IConsumerScanner
 {
-    public interface IConsumerScanner
-    {
-    }
 }

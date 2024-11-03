@@ -1,67 +1,69 @@
 ﻿using DbUp;
-using DbUp.Builder;
 using DbUp.Helpers;
 using Flaminco.Migration.Abstractions;
 using Flaminco.Migration.Extensions;
 using Flaminco.Migration.Options;
 
-namespace Flaminco.Migration.Implementations
+namespace Flaminco.Migration.Implementations;
+
+internal class DbUpMigrationService : IMigrationService
 {
-    internal class DbUpMigrationService : IMigrationService
+    private readonly MigrationOptions _migrationOptions;
+
+    public DbUpMigrationService(MigrationOptions migrationOptions)
     {
-        private readonly MigrationOptions _migrationOptions;
-        public DbUpMigrationService(MigrationOptions migrationOptions) => _migrationOptions = migrationOptions;
+        _migrationOptions = migrationOptions;
+    }
 
-        /// <inheritdoc/>
-        public void Migrate<TScriptScanner>() where TScriptScanner : class
-        {
-            EnsureDatabase.For.SqlDatabase(_migrationOptions.ConnectionString);
+    /// <inheritdoc />
+    public void Migrate<TScriptScanner>() where TScriptScanner : class
+    {
+        EnsureDatabase.For.SqlDatabase(_migrationOptions.ConnectionString);
 
-            MigrateJournalInternal<TScriptScanner>();
+        MigrateJournalInternal<TScriptScanner>();
 
-            MigrateAlwaysExecuteInternal<TScriptScanner>();
-        }
+        MigrateAlwaysExecuteInternal<TScriptScanner>();
+    }
 
-        internal void MigrateJournalInternal<TScriptScanner>()
-        {
-            UpgradeEngineBuilder upgradeEngineBuilder = DeployChanges.To.SqlDatabase(_migrationOptions.ConnectionString)
-                                                                        .WithTransaction()
-                                                                        .LogToConsole();
+    internal void MigrateJournalInternal<TScriptScanner>()
+    {
+        var upgradeEngineBuilder = DeployChanges.To.SqlDatabase(_migrationOptions.ConnectionString)
+            .WithTransaction()
+            .LogToConsole();
 
-            upgradeEngineBuilder = _migrationOptions.Directories?.Any() ?? false
-                ? upgradeEngineBuilder.WithScriptsEmbeddedInDirectories(typeof(TScriptScanner).Assembly, _migrationOptions.Directories, s => !IsAlwaysExecute(s))
-                : upgradeEngineBuilder.WithScriptsEmbeddedInAssembly(typeof(TScriptScanner).Assembly, s => !IsAlwaysExecute(s));
+        upgradeEngineBuilder = _migrationOptions.Directories?.Any() ?? false
+            ? upgradeEngineBuilder.WithScriptsEmbeddedInDirectories(typeof(TScriptScanner).Assembly,
+                _migrationOptions.Directories, s => !IsAlwaysExecute(s))
+            : upgradeEngineBuilder.WithScriptsEmbeddedInAssembly(typeof(TScriptScanner).Assembly,
+                s => !IsAlwaysExecute(s));
 
-            upgradeEngineBuilder.Build().RunUpgrader();
-        }
-
-
-        internal void MigrateAlwaysExecuteInternal<TScriptScanner>()
-        {
-            UpgradeEngineBuilder alwaysExecuteUpgradeEngineBuilder = DeployChanges.To.SqlDatabase(_migrationOptions.ConnectionString)
-                                                                                     .JournalTo(new NullJournal())
-                                                                                     .WithTransaction()
-                                                                                     .LogToConsole();
-
-            alwaysExecuteUpgradeEngineBuilder = _migrationOptions.Directories?.Any() ?? false
-                ? alwaysExecuteUpgradeEngineBuilder.WithScriptsEmbeddedInDirectories(typeof(TScriptScanner).Assembly, _migrationOptions.Directories, IsAlwaysExecute)
-                : alwaysExecuteUpgradeEngineBuilder.WithScriptsEmbeddedInAssembly(typeof(TScriptScanner).Assembly, IsAlwaysExecute);
+        upgradeEngineBuilder.Build().RunUpgrader();
+    }
 
 
-            alwaysExecuteUpgradeEngineBuilder.Build().RunUpgrader();
-        }
+    internal void MigrateAlwaysExecuteInternal<TScriptScanner>()
+    {
+        var alwaysExecuteUpgradeEngineBuilder = DeployChanges.To.SqlDatabase(_migrationOptions.ConnectionString)
+            .JournalTo(new NullJournal())
+            .WithTransaction()
+            .LogToConsole();
 
-        private bool IsAlwaysExecute(string scriptName)
-        {
-            foreach (string directory in _migrationOptions.AlwaysExecuteDirectories ?? Array.Empty<string>())
-            {
-                if (scriptName.StartsWith(directory, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
+        alwaysExecuteUpgradeEngineBuilder = _migrationOptions.Directories?.Any() ?? false
+            ? alwaysExecuteUpgradeEngineBuilder.WithScriptsEmbeddedInDirectories(typeof(TScriptScanner).Assembly,
+                _migrationOptions.Directories, IsAlwaysExecute)
+            : alwaysExecuteUpgradeEngineBuilder.WithScriptsEmbeddedInAssembly(typeof(TScriptScanner).Assembly,
+                IsAlwaysExecute);
 
-            return false;
-        }
+
+        alwaysExecuteUpgradeEngineBuilder.Build().RunUpgrader();
+    }
+
+    private bool IsAlwaysExecute(string scriptName)
+    {
+        foreach (string directory in _migrationOptions.AlwaysExecuteDirectories ?? Array.Empty<string>())
+            if (scriptName.StartsWith(directory, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+        return false;
     }
 }

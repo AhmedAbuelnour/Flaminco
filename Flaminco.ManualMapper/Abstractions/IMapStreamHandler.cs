@@ -1,7 +1,6 @@
-﻿namespace Flaminco.ManualMapper.Abstractions
+﻿namespace Flaminco.ManualMapper.Abstractions;
+
+public interface IMapStreamHandler<TSource, TDestination>
 {
-    public interface IMapStreamHandler<TSource, TDestination>
-    {
-        IAsyncEnumerable<TDestination> Handler(TSource source, CancellationToken cancellationToken = default);
-    }
+    IAsyncEnumerable<TDestination> Handler(TSource source, CancellationToken cancellationToken = default);
 }

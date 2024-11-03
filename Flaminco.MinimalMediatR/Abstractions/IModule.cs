@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Routing;
 
-namespace Flaminco.MinimalMediatR.Abstractions
+namespace Flaminco.MinimalMediatR.Abstractions;
+
+public interface IModule
 {
-    public interface IModule
-    {
-        void AddRoutes(IEndpointRouteBuilder app);
-    }
+    void AddRoutes(IEndpointRouteBuilder app);
 }

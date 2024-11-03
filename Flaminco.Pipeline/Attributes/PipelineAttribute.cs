@@ -11,6 +11,4 @@ public sealed class KeyedPipelineAttribute<TInput> : Attribute
 {
     public required int Order { get; init; }
     public required string Key { get; set; }
-
 }
-

@@ -1,5 +1,4 @@
-﻿
-//using Flaminco.Garnet.Server.Background;
+﻿//using Flaminco.Garnet.Server.Background;
 
 //namespace WebApplication1.HostedServices
 //{
@@ -8,3 +7,4 @@
 //        public override string ConfigurationPath => "HostedServices/garnet.conf";
 //    }
 //}
+

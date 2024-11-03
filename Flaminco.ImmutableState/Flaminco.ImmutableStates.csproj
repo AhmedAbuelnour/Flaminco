@@ -1,31 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<Nullable>enable</Nullable>
-		<Version>1.0.0</Version>
-		<Authors>Ahmed Abuelnour</Authors>
-		<Company>Personal</Company>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Description>
-			Flaminco.ImmutableStates is a .NET library designed to manage immutable state entities within an application. It provides a simple and efficient way to look up and manage immutable states using Entity Framework Core.
-		</Description>
-		<PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
-		<Copyright>
-			Copyright (c) 2024, Ahmed Abuelnour
-		</Copyright>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Nullable>enable</Nullable>
+        <Version>1.0.0</Version>
+        <Authors>Ahmed Abuelnour</Authors>
+        <Company>Personal</Company>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Description>
+            Flaminco.ImmutableStates is a .NET library designed to manage immutable state entities within an application. It provides a simple and efficient way to look up and manage immutable states using Entity Framework Core.
+        </Description>
+        <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
+        <Copyright>
+            Copyright (c) 2024, Ahmed Abuelnour
+        </Copyright>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<None Include="README.md" Pack="true" PackagePath=""/>
-	</ItemGroup>
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
 
 </Project>

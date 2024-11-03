@@ -1,2 +1,3 @@
 ﻿ALTER TABLE WorkflowStatus
-DROP Column Temp 
+DROP
+Column Temp 

@@ -1,35 +1,40 @@
-﻿using Flaminco.JWTHandler.JWTModel;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using Flaminco.JWTHandler.JWTModel;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Flaminco.JWTHandler.TokenHandler;
 
 public class TokenHandlerManager
 {
     private readonly JWTConfigurationOptions _configuration;
+
     public TokenHandlerManager(IOptions<JWTConfigurationOptions> options)
     {
         _configuration = options.Value;
     }
+
     public AccessToken GetAccessToken(Dictionary<string, string> userProfileClaims)
     {
         JwtSecurityToken token = new(
-        issuer: _configuration.Issuer,
-        audience: _configuration.Audience,
-        notBefore: DateTime.UtcNow,
-        claims: userProfileClaims.Select(claim => new Claim(claim.Key, claim.Value))
-                                 .Union([new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())]),
-        expires: DateTime.UtcNow.Add(_configuration.AccessTokenExpiration),
-        signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Convert.FromBase64String(_configuration.Key)), SecurityAlgorithms.HmacSha256Signature));
+            _configuration.Issuer,
+            _configuration.Audience,
+            notBefore: DateTime.UtcNow,
+            claims: userProfileClaims.Select(claim => new Claim(claim.Key, claim.Value))
+                .Union([new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())]),
+            expires: DateTime.UtcNow.Add(_configuration.AccessTokenExpiration),
+            signingCredentials: new SigningCredentials(
+                new SymmetricSecurityKey(Convert.FromBase64String(_configuration.Key)),
+                SecurityAlgorithms.HmacSha256Signature));
         if (_configuration.ClearCliamTypeMap)
         {
             // To stop mapping the Claim type long schema name to short ones.
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
         }
+
         return new AccessToken
         {
             Token = new JwtSecurityTokenHandler().WriteToken(token),
@@ -37,6 +42,7 @@ public class TokenHandlerManager
             ExpiresOn = DateTime.UtcNow.Add(_configuration.AccessTokenExpiration)
         };
     }
+
     public RefreshToken GetRefreshToken()
     {
         var randomNumber = new byte[64];
@@ -49,8 +55,12 @@ public class TokenHandlerManager
             ExpiresOn = DateTime.UtcNow.Add(_configuration.RefreshTokenExpiration)
         };
     }
+
     public AccessToken GetRefreshAccessToken(string expiredToken)
-        => GetAccessToken(GetPrincipalFromExpiredToken(expiredToken));
+    {
+        return GetAccessToken(GetPrincipalFromExpiredToken(expiredToken));
+    }
+
     private Dictionary<string, string> GetPrincipalFromExpiredToken(string expiredToken)
     {
         TokenValidationParameters tokenValidationParameters = new()
@@ -62,10 +72,11 @@ public class TokenHandlerManager
             ValidateLifetime = false //here we are saying that we don't care about the token's expiration date
         };
         var tokenHandler = new JwtSecurityTokenHandler();
-        ClaimsPrincipal? principal = tokenHandler.ValidateToken(expiredToken, tokenValidationParameters, out SecurityToken securityToken);
-        if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature, StringComparison.InvariantCultureIgnoreCase))
+        var principal = tokenHandler.ValidateToken(expiredToken, tokenValidationParameters, out var securityToken);
+        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature,
+                StringComparison.InvariantCultureIgnoreCase))
             throw new SecurityTokenException("Invalid token");
-        return principal.Claims.ToDictionary(keySelector: m => m.Type, elementSelector: m => m.Value);
+        return principal.Claims.ToDictionary(m => m.Type, m => m.Value);
     }
 }
-

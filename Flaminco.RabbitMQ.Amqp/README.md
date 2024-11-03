@@ -1,6 +1,7 @@
 # Flaminco.RabbitMQ.AMQP
 
-Flaminco.RabbitMQ.AMQP is a .NET library that simplifies the integration of RabbitMQ in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with RabbitMQ queues.
+Flaminco.RabbitMQ.AMQP is a .NET library that simplifies the integration of RabbitMQ in your applications. This library
+provides a clean and easy-to-use API for creating consumers and publishers to interact with RabbitMQ queues.
 
 ## Installation
 
@@ -33,7 +34,8 @@ builder.Services.AddAMQPClient<Program>(options =>
 
 ### Step 2: Create a Message Publisher
 
-Implement a custom publisher by extending the `MessagePublisher` class. The publisher defines the queue to which it will send messages:
+Implement a custom publisher by extending the `MessagePublisher` class. The publisher defines the queue to which it will
+send messages:
 
 ```csharp
 public class PersonPublisher : MessagePublisher
@@ -74,7 +76,8 @@ public class Example(PersonPublisher _personPublisher)
 
 ### Step 4: Create a Message Consumer
 
-Implement a custom consumer by extending the `MessageConsumer` class. The consumer defines the queue from which it will receive messages:
+Implement a custom consumer by extending the `MessageConsumer` class. The consumer defines the queue from which it will
+receive messages:
 
 ```csharp
 [QueueConsumer(queue: "HelloQueue")]
@@ -95,11 +98,13 @@ public class PersonConsumer : MessageConsumer<Person>
 
 ### Step 5: Run the Application
 
-Build and run your application. The consumer will continuously listen for messages on the specified queue, while the publisher sends messages to that queue.
+Build and run your application. The consumer will continuously listen for messages on the specified queue, while the
+publisher sends messages to that queue.
 
 ## Contributing
 
-If you encounter any issues or have suggestions for improvements, please feel free to contribute by submitting an issue or a pull request.
+If you encounter any issues or have suggestions for improvements, please feel free to contribute by submitting an issue
+or a pull request.
 
 ## License
 

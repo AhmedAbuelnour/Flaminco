@@ -1,4 +1,5 @@
 ﻿namespace Flaminco.JWTHandler.JWTModel;
+
 public class RefreshToken
 {
     public string Token { get; set; }
@@ -8,4 +9,3 @@ public class RefreshToken
     public bool IsExpired => DateTime.UtcNow >= ExpiresOn;
     public bool IsActive => RevokedOn is null && !IsExpired;
 }
-

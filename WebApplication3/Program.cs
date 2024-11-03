@@ -1,7 +1,4 @@
-using Flaminco.AzureBus.AMQP.Abstractions;
-using Flaminco.AzureBus.AMQP.Attributes;
-using Flaminco.AzureBus.AMQP.Extensions;
-using MassTransit;
+using Flaminco.TickCronos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,9 +8,21 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
-builder.Services.AddAMQPClient<Program>(options =>
+//builder.Services.AddAMQPClient<Program>(options =>
+//{
+//    options.SkipMessageTypeMatching = true;
+//    options.Host =
+//        "Endpoint=sb://sb-dev-app.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=onouja6KzYf5AwJWQ/GASEPhEKBIo3lqw+ASbKKsNuc=";
+//});
+
+// Define the time zone you want
+
+
+
+builder.Services.AddTickCronosJob<MyTickCronosExample2>(a =>
 {
-    options.Host = "Endpoint=sb://sb-dev-app.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=onouja6KzYf5AwJWQ/GASEPhEKBIo3lqw+ASbKKsNuc=";
+    a.CronExpression = "0 */1 * * * *";
+    a.TimeProvider = new TimeZoneTimeProvider(TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
 });
 
 
@@ -31,38 +40,42 @@ app.UseHttpsRedirection();
 
 app.Run();
 
-public static class Consts
+public class MyTickCronosExample1(ITickCronosConfig<MyTickCronosExample1> config, IServiceProvider serviceProvider, ILogger<MyTickCronosExample1> logger)
+    : TickCronosJobService(config.CronExpression, config.TimeProvider, serviceProvider, logger)
 {
+    public override string CronJobName => nameof(MyTickCronosExample1);
 
-    public class Queues
+    public override async Task ExecuteAsync(IServiceScope scope, CancellationToken cancellationToken)
     {
-        public const string XX = "notifier-send-class-notification";
-    }
-
-}
-
-public class MessageBox : IMessage
-{
-    public string NotifierId { get; set; }
-    public int CourseId { get; set; }
-    public int NotificationTypeId { get; set; }
-    public string? Content { get; set; }
-    public IEnumerable<string>? NotifiedIds { get; set; }
-    public string? Metadata { get; set; }
-}
-
-
-[QueueConsumer(queue: "HelloTest")]
-public class HelloConsumer2() : MessageConsumer<MessageBox>
-{
-    public override Task Consume(ConsumeContext<MessageBox> context)
-    {
-
-        return Task.CompletedTask;
-    }
-    public override Task Consume(ConsumeContext<Fault<MessageBox>> context)
-    {
-        return base.Consume(context);
+        // Your job logic here
+        Console.WriteLine("Running scheduled job...");
+        await Task.Delay(1000, cancellationToken);  // Simulated work
     }
 }
 
+public class MyTickCronosExample2(ITickCronosConfig<MyTickCronosExample2> config, IServiceProvider serviceProvider, ILogger<MyTickCronosExample2> logger)
+    : TickCronosJobService(config.CronExpression, config.TimeProvider, serviceProvider, logger)
+{
+    public override string CronJobName => nameof(MyTickCronosExample2);
+
+    public override async Task ExecuteAsync(IServiceScope scope, CancellationToken cancellationToken)
+    {
+        // Your job logic here
+        Console.WriteLine("Running scheduled job...");
+        await Task.Delay(1000, cancellationToken);  // Simulated work
+    }
+}
+
+
+public class TimeZoneTimeProvider(TimeZoneInfo timeZoneInfo) : TimeProvider
+{
+    private readonly TimeZoneInfo _timeZoneInfo = timeZoneInfo ?? throw new ArgumentNullException(nameof(timeZoneInfo));
+
+    public override DateTimeOffset GetUtcNow()
+    {
+        // Return the current time in the specified time zone, converted to UTC
+        return TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, _timeZoneInfo);
+    }
+
+    public override TimeZoneInfo LocalTimeZone => _timeZoneInfo;
+}

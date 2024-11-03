@@ -1,6 +1,7 @@
 # Flaminco.AzureBus.AMQP
 
-Flaminco.AzureBus.AMQP is a .NET library that simplifies the integration of Azure Bus in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with AzureBus queues.
+Flaminco.AzureBus.AMQP is a .NET library that simplifies the integration of Azure Bus in your applications. This library
+provides a clean and easy-to-use API for creating consumers and publishers to interact with AzureBus queues.
 
 ## Installation
 
@@ -31,11 +32,14 @@ builder.Services.AddAMQPClient<Program>(options =>
 
 ### Step 2: Create a Message Publisher
 
-Implement a custom publisher by extending the `MessagePublisher` class. The publisher defines the queue(s) to which it will send messages:
+Implement a custom publisher by extending the `MessagePublisher` class. The publisher defines the queue(s) to which it
+will send messages:
 
 ```csharp
 
 // must be shared between your consumer and publisher (Must be same type not only identical in properties)
+// in case you didn't Set SkipMessageTypeMatching to true.
+// if you set SkipMessageTypeMatching = true, then you don't need the identical type
 public class Person : IMessage
 {
     public string Name { get; set; }
@@ -74,7 +78,8 @@ public class Example(PersonPublisher _personPublisher)
 
 ### Step 4: Create a Message Consumer
 
-Implement a custom consumer by extending the `MessageConsumer` class. The consumer defines the queue from which it will receive messages:
+Implement a custom consumer by extending the `MessageConsumer` class. The consumer defines the queue from which it will
+receive messages:
 
 ```csharp
 
@@ -155,11 +160,13 @@ public class PersonConsumer : MessageConsumer<Person>
 
 ### Step 5: Run the Application
 
-Build and run your application. The consumer will continuously listen for messages on the specified queue, while the publisher sends messages to that queue.
+Build and run your application. The consumer will continuously listen for messages on the specified queue, while the
+publisher sends messages to that queue.
 
 ## Contributing
 
-If you encounter any issues or have suggestions for improvements, please feel free to contribute by submitting an issue or a pull request.
+If you encounter any issues or have suggestions for improvements, please feel free to contribute by submitting an issue
+or a pull request.
 
 ## License
 

@@ -2,20 +2,17 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace WebApplication1
+namespace WebApplication1;
+
+public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 {
-    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
+    }
 
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-
-
-        }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
     }
 }

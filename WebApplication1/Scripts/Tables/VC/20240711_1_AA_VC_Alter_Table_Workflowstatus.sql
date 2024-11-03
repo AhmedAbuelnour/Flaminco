@@ -1,2 +1,2 @@
 ﻿ALTER TABLE WorkflowStatus
-ADD Temp2 BIT NULL
+    ADD Temp2 BIT NULL

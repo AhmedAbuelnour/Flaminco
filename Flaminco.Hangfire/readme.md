@@ -1,14 +1,14 @@
-
-
 ## How to use it?
 
-You need to inject the service locator into the DI system, which must be located in the same library that your services are located at.
+You need to inject the service locator into the DI system, which must be located in the same library that your services
+are located at.
 
 ```csharp
 builder.Services.AddHangfireServiceLocator<IHangfireServicesScanner>();
 ```
 
-We have 4 service types each one of them, there is a contract represent each type 
+We have 4 service types each one of them, there is a contract represent each type
+
 * IQueueServiceJob for Queue based services
 * IScheduleServiceJob for delayed based services
 * IContinueServiceJob for continues based services
@@ -81,6 +81,7 @@ We have 4 service types each one of them, there is a contract represent each typ
         public bool IsMobile { get; set; }
     }
 ```
+
 ```csharp
 // Example for IScheduleServiceJob
 public class ScheduleEmailSend : IScheduleServiceJob
@@ -101,6 +102,7 @@ public class ScheduleEmailSend : IScheduleServiceJob
     }
 }
 ```
+
 ```csharp
 // Example for IContinueServiceJob 
 public class ContinueEmailSend : IContinueServiceJob
@@ -120,6 +122,7 @@ public class ContinueEmailSend : IContinueServiceJob
 }
 
 ```
+
 ```csharp
 // Example for IRecurringServiceJob
 // Each midnight send email notification 

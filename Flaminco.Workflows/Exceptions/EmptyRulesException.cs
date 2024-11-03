@@ -1,6 +1,5 @@
-﻿namespace Flaminco.Workflows.Exceptions
+﻿namespace Flaminco.Workflows.Exceptions;
+
+internal class EmptyRulesException(string workflow) : Exception($"Workflow {workflow} can't have empty rules.")
 {
-    internal class EmptyRulesException(string workflow) : Exception($"Workflow {workflow} can't have empty rules.")
-    {
-    }
 }

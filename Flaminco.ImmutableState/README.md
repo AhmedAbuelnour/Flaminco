@@ -1,6 +1,7 @@
 # Flaminco.ImmutableStates
 
-`Flaminco.ImmutableStates` is a .NET library designed to manage immutable state entities within an application. It provides a simple and efficient way to look up and manage immutable states using Entity Framework Core.
+`Flaminco.ImmutableStates` is a .NET library designed to manage immutable state entities within an application. It
+provides a simple and efficient way to look up and manage immutable states using Entity Framework Core.
 
 ## Features
 
@@ -67,7 +68,8 @@ public class YourService
 
 ## Contributing
 
-Contributions are welcome! If you have suggestions, bug reports, or contributions, please submit them as issues or pull requests on our GitHub repository.
+Contributions are welcome! If you have suggestions, bug reports, or contributions, please submit them as issues or pull
+requests on our GitHub repository.
 
 ## License
 

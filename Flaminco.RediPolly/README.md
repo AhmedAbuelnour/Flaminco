@@ -1,6 +1,9 @@
 # Flaminco.RediPolly
 
-The `Flaminco.RediPolly` library is a powerful tool designed to simplify the implementation of Redis Pub/Sub features with built-in support for Polly retry policies. Redis Pub/Sub allows for high-performance messaging between components of a distributed system, and Polly provides robust transient-fault-handling mechanisms. This library combines the two to offer a seamless experience in managing Redis channels with resilience.
+The `Flaminco.RediPolly` library is a powerful tool designed to simplify the implementation of Redis Pub/Sub features
+with built-in support for Polly retry policies. Redis Pub/Sub allows for high-performance messaging between components
+of a distributed system, and Polly provides robust transient-fault-handling mechanisms. This library combines the two to
+offer a seamless experience in managing Redis channels with resilience.
 
 ## Getting Started
 
@@ -103,9 +106,11 @@ Implement listeners and publishers using provided base classes
     }   
 ```
 
-
 ## Contribution
-Contributions are welcome! If you have suggestions, bug reports, or contributions, please submit them as issues or pull requests on our GitHub repository.
+
+Contributions are welcome! If you have suggestions, bug reports, or contributions, please submit them as issues or pull
+requests on our GitHub repository.
 
 ## License
+
 This project is licensed under the MIT License.

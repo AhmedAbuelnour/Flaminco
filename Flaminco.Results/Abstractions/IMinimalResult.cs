@@ -14,7 +14,6 @@ public interface IMinimalResult<T> : IMinimalResult
     T? Value { get; init; }
 }
 
-
 public interface IMinimalResults<T> : IMinimalResult
 {
     IEnumerable<T>? Value { get; init; }

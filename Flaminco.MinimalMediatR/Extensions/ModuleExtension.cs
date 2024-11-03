@@ -9,23 +9,17 @@ public static class ModuleExtension
     public static IServiceCollection AddModules<TScanner>(this IServiceCollection services)
     {
         IEnumerable<Type>? types = from type in typeof(TScanner).Assembly.DefinedTypes
-                                   where !type.IsAbstract && typeof(IModule).IsAssignableFrom(type) && type != typeof(IModule) && type.IsPublic
-                                   select type;
+            where !type.IsAbstract && typeof(IModule).IsAssignableFrom(type) && type != typeof(IModule) && type.IsPublic
+            select type;
 
-        foreach (Type? type in types ?? [])
-        {
-            services.AddSingleton(typeof(IModule), type);
-        }
+        foreach (var type in types ?? []) services.AddSingleton(typeof(IModule), type);
 
         return services;
     }
 
     public static IEndpointRouteBuilder MapModules(this IEndpointRouteBuilder builder)
     {
-        foreach (IModule module in builder.ServiceProvider.GetServices<IModule>())
-        {
-            module.AddRoutes(builder);
-        }
+        foreach (var module in builder.ServiceProvider.GetServices<IModule>()) module.AddRoutes(builder);
 
         return builder;
     }

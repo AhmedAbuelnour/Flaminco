@@ -1,4 +1,3 @@
-﻿namespace WebApplication1.Scripts
-{
-    public interface ScriptScanner;
-}
+﻿namespace WebApplication1.Scripts;
+
+public interface ScriptScanner;

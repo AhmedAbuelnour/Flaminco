@@ -1,6 +1,7 @@
 # Flaminco.SLA Library
 
-The `Flaminco.SLA` library is a .NET library designed to calculate Service Level Agreement (SLA) related metrics such as delivery dates, remaining days, and working days. It includes features to account for holidays and custom working days.
+The `Flaminco.SLA` library is a .NET library designed to calculate Service Level Agreement (SLA) related metrics such as
+delivery dates, remaining days, and working days. It includes features to account for holidays and custom working days.
 
 ## Features
 
@@ -57,9 +58,11 @@ builder.Services.AddScoped<SLAServiceBase,SLAService>();
 
 ```
 
-
 ## Contribution
-Contributions are welcome! If you have suggestions, bug reports, or contributions, please submit them as issues or pull requests on our GitHub repository.
+
+Contributions are welcome! If you have suggestions, bug reports, or contributions, please submit them as issues or pull
+requests on our GitHub repository.
 
 ## License
+
 This project is licensed under the MIT License.
