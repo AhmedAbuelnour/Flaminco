@@ -54,17 +54,7 @@ public class Program
         // AMQP 0.9 
 
         // AMQP 1.0
-
-
-        //builder.Services.AddAMQPClient<Program>(options =>
-        //{
-        //    options.Host = "Endpoint=sb://sb-dev-app.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=onouja6KzYf5AwJWQ/GASEPhEKBIo3lqw+ASbKKsNuc=";
-        //});   
-
-        //builder.Services.AddAMQPClient<Program>(options =>
-        //{
-        //    options.Host = "Endpoint=sb://sb-dev-app.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=onouja6KzYf5AwJWQ/GASEPhEKBIo3lqw+ASbKKsNuc=";
-        //});
+        
 
         builder.Services.AddAMQPClient<Program>(options =>
         {
