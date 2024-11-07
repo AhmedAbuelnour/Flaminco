@@ -32,4 +32,9 @@ public class AMQPClientSettings
     ///     If null, no retry interval will be applied.
     /// </summary>
     public TimeSpan? RetryInterval { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the timeout for message flow operations
+    /// </summary>
+    public TimeSpan? MessageFlowTimeOut { get; set; }
 }

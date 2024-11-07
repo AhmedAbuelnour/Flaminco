@@ -1,10 +1,10 @@
-﻿using System.Reflection;
-using Azure.Messaging.ServiceBus.Administration;
+﻿using Azure.Messaging.ServiceBus.Administration;
 using Flaminco.AzureBus.AMQP.Abstractions;
 using Flaminco.AzureBus.AMQP.Attributes;
 using Flaminco.AzureBus.AMQP.Models;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace Flaminco.AzureBus.AMQP.Extensions;
 
@@ -28,6 +28,8 @@ public static class AMQPClientExtensions
         Action<AMQPClientSettings> clientSettings)
     {
         services.AddPublishers<TScanner>();
+
+        services.AddMessageFlows<TScanner>();
 
         services.AddConsumers<TScanner>(clientSettings);
 
@@ -54,12 +56,22 @@ public static class AMQPClientExtensions
                         t.GetCustomAttributes<TopicConsumerAttribute>().Any())
             .ToList();
 
+
         services.AddMassTransit(x =>
         {
             // Register your consumer with MassTransit
             foreach (var consumer in consumerTypes)
                 // Register the consumer dynamically
                 x.AddConsumer(consumer);
+
+
+            foreach (Type messageFlowType in typeof(TScanner).Assembly.GetTypes().Where(t => t.GetCustomAttributes<MessageFlowAttribute>().Any()).ToList())
+            {
+                if (messageFlowType.GetCustomAttribute<MessageFlowAttribute>() is MessageFlowAttribute messageFlow)
+                {
+                    x.AddRequestClient(messageFlow.MessageType, new Uri($"queue:{messageFlow.Queue}"), clientSettings.MessageFlowTimeOut ?? RequestTimeout.Default);
+                }
+            }
 
             // Configure RabbitMQ for MassTransit
             x.UsingAzureServiceBus((context, cfg) =>
@@ -118,4 +130,19 @@ public static class AMQPClientExtensions
                      type.BaseType.GetGenericTypeDefinition() == typeof(MessagePublisher<>)))
             services.AddScoped(type);
     }
+
+    /// <summary>
+    ///     Adds flows registrations to the service collection for the specified scanner type.
+    /// </summary>
+    /// <typeparam name="TScanner">A type used to scan for flow implementations.</typeparam>
+    /// <param name="services">The service collection to which the flows will be added.</param>
+    private static void AddMessageFlows<TScanner>(this IServiceCollection services)
+    {
+        foreach (var type in typeof(TScanner).Assembly.DefinedTypes.Where(type => !type.IsAbstract &&
+                     type.BaseType != null &&
+                     type.BaseType.IsGenericType &&
+                     type.BaseType.GetGenericTypeDefinition() == typeof(MessageFlow<>)))
+            services.AddScoped(type);
+    }
+
 }

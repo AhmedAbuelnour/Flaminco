@@ -29,4 +29,9 @@ public class AMQPClientSettings
     ///     So regardless the message type, it will try serialize and deserialize raw json.
     /// </summary>
     public bool? SkipMessageTypeMatching { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the timeout for message flow operations
+    /// </summary>
+    public TimeSpan? MessageFlowTimeOut { get; set; }
 }

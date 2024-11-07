@@ -1,4 +1,4 @@
-using Flaminco.AzureBus.AMQP.Extensions;
+using Flaminco.RabbitMQ.AMQP.Extensions;
 using Flaminco.RazorInk.Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -61,11 +61,16 @@ public class Program
         //    options.Host = "Endpoint=sb://sb-dev-app.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=onouja6KzYf5AwJWQ/GASEPhEKBIo3lqw+ASbKKsNuc=";
         //});   
 
+        //builder.Services.AddAMQPClient<Program>(options =>
+        //{
+        //    options.Host = "Endpoint=sb://sb-dev-app.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=onouja6KzYf5AwJWQ/GASEPhEKBIo3lqw+ASbKKsNuc=";
+        //});
+
         builder.Services.AddAMQPClient<Program>(options =>
         {
-            options.SkipMessageTypeMatching = true;
-            options.Host =
-                "Endpoint=sb://sb-dev-app.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=onouja6KzYf5AwJWQ/GASEPhEKBIo3lqw+ASbKKsNuc=";
+            options.Host = "amqp://guest:guest@localhost:5672";
+            options.Username = "guest";
+            options.Password = "guest";
         });
 
         // Register the sender

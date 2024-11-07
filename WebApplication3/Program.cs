@@ -1,4 +1,8 @@
-using Flaminco.TickCronos;
+using Flaminco.Contracts;
+using Flaminco.RabbitMQ.AMQP.Abstractions;
+using Flaminco.RabbitMQ.AMQP.Attributes;
+using Flaminco.RabbitMQ.AMQP.Extensions;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,22 +12,17 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
-//builder.Services.AddAMQPClient<Program>(options =>
-//{
-//    options.SkipMessageTypeMatching = true;
-//    options.Host =
-//        "Endpoint=sb://sb-dev-app.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=onouja6KzYf5AwJWQ/GASEPhEKBIo3lqw+ASbKKsNuc=";
-//});
+
+builder.Services.AddAMQPClient<Program>(options =>
+{
+    options.Host = "amqp://guest:guest@localhost:5672";
+    options.Username = "guest";
+    options.Password = "guest";
+});
+
 
 // Define the time zone you want
 
-
-
-builder.Services.AddTickCronosJob<MyTickCronosExample2>(a =>
-{
-    a.CronExpression = "0 */1 * * * *";
-    a.TimeProvider = new TimeZoneTimeProvider(TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
-});
 
 
 var app = builder.Build();
@@ -40,42 +39,14 @@ app.UseHttpsRedirection();
 
 app.Run();
 
-public class MyTickCronosExample1(ITickCronosConfig<MyTickCronosExample1> config, IServiceProvider serviceProvider, ILogger<MyTickCronosExample1> logger)
-    : TickCronosJobService(config.CronExpression, config.TimeProvider, serviceProvider, logger)
+[QueueConsumer("HelloTest")]
+public class ExampleConsumer : MessageConsumer<ExampleRequest>
 {
-    public override string CronJobName => nameof(MyTickCronosExample1);
-
-    public override async Task ExecuteAsync(IServiceScope scope, CancellationToken cancellationToken)
+    public override async Task Consume(ConsumeContext<ExampleRequest> context)
     {
-        // Your job logic here
-        Console.WriteLine("Running scheduled job...");
-        await Task.Delay(1000, cancellationToken);  // Simulated work
+        await context.RespondAsync<ExampleResponse>(new ExampleResponse
+        {
+            Message = "This is a test message"
+        });
     }
-}
-
-public class MyTickCronosExample2(ITickCronosConfig<MyTickCronosExample2> config, IServiceProvider serviceProvider, ILogger<MyTickCronosExample2> logger)
-    : TickCronosJobService(config.CronExpression, config.TimeProvider, serviceProvider, logger)
-{
-    public override string CronJobName => nameof(MyTickCronosExample2);
-
-    public override async Task ExecuteAsync(IServiceScope scope, CancellationToken cancellationToken)
-    {
-        // Your job logic here
-        Console.WriteLine("Running scheduled job...");
-        await Task.Delay(1000, cancellationToken);  // Simulated work
-    }
-}
-
-
-public class TimeZoneTimeProvider(TimeZoneInfo timeZoneInfo) : TimeProvider
-{
-    private readonly TimeZoneInfo _timeZoneInfo = timeZoneInfo ?? throw new ArgumentNullException(nameof(timeZoneInfo));
-
-    public override DateTimeOffset GetUtcNow()
-    {
-        // Return the current time in the specified time zone, converted to UTC
-        return TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, _timeZoneInfo);
-    }
-
-    public override TimeZoneInfo LocalTimeZone => _timeZoneInfo;
 }

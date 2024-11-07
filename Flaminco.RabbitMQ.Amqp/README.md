@@ -101,6 +101,65 @@ public class PersonConsumer : MessageConsumer<Person>
 Build and run your application. The consumer will continuously listen for messages on the specified queue, while the
 publisher sends messages to that queue.
 
+### Step 6: Message Flow
+
+To build synchronous communication between a publisher and waiting the consumer to return a response
+
+```
+[MessageFlow("HelloTest", typeof(ExampleRequest))]
+public sealed class HelloMessageFlow(IRequestClient<ExampleRequest> requestClient) : MessageFlow<ExampleRequest>(requestClient);
+```
+
+example for using the flow publisher
+
+```
+[ApiController]
+[Route("api/pdf")]
+public class ExampleController(HelloMessageFlow helloMessageFlow) : ControllerBase
+{
+    [HttpPost("greating")]
+    public async Task<IActionResult> GenerateMessage()
+    {
+        Response<ExampleResponse> response = await helloMessageFlow.GetResponseAsync<ExampleResponse>(new ExampleRequest
+        {
+            Id = 1,
+        });
+
+        return Ok(response.Message);
+    }
+}
+```
+and for consumer 
+
+```
+[QueueConsumer("HelloTest")]
+public class ExampleConsumer : MessageConsumer<ExampleRequest>
+{
+    public override async Task Consume(ConsumeContext<ExampleRequest> context)
+    {
+        await context.RespondAsync<ExampleResponse>(new ExampleResponse
+        {
+            Message = "This is a test message"
+        });
+    }
+}
+```
+
+Messages example
+
+```
+public class ExampleRequest : IMessage
+{
+    public int Id { get; set; }
+}
+
+public class ExampleResponse : IMessage
+{
+    public string Message { get; set; }
+}
+```
+
+
 ## Contributing
 
 If you encounter any issues or have suggestions for improvements, please feel free to contribute by submitting an issue
