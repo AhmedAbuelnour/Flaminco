@@ -1,6 +1,0 @@
-@WebApplication1_HostAddress = http://localhost:5287
-
-POST {{WebApplication1_HostAddress}}/api/pdf/generate
-Accept: application/json
-
-###
