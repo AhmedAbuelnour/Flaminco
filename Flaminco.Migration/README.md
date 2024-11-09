@@ -1,6 +1,6 @@
-# Flaminco.Migration
+# Flaminco.Migration.SqlServer
 
-`Flaminco.Migration` is designed to simplify the process of executing database migration scripts embedded within your
+`Flaminco.Migration.SqlServer` is designed to simplify the process of executing database migration scripts embedded within your
 .NET assemblies built using (DbUP). By leveraging this library, you can ensure that your database schema is up-to-date
 with the latest changes whenever your application starts. This library supports the use of directories to organize and
 prioritize the execution order of your scripts.
@@ -16,7 +16,7 @@ prioritize the execution order of your scripts.
 ## Installation
 
 ```shell
-dotnet add package Flaminco.Migration
+dotnet add package Flaminco.Migration.SqlServer
 ```
 
 ## Getting Started
@@ -25,7 +25,7 @@ dotnet add package Flaminco.Migration
 
 #### Step 1: Add Migration to Your Services
 
-To get started with `Flaminco.Migration`, you need to configure the Migration services in your ASP.NET Core application.
+To get started with `Flaminco.Migration.SqlServer`, you need to configure the Migration services in your ASP.NET Core application.
 You can do this by adding the following line:
 
 Using Direct Configuration

@@ -1,4 +1,4 @@
-﻿namespace Flaminco.Migration.Abstractions;
+﻿namespace Flaminco.Migration.SqlServer.Abstractions;
 
 internal interface IMigrationService
 {

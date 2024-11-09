@@ -1,5 +1,6 @@
 using Flaminco.RabbitMQ.AMQP.Extensions;
 using Flaminco.RazorInk.Extensions;
+using Flaminco.TickCronos;
 using Microsoft.EntityFrameworkCore;
 
 namespace WebApplication1;
@@ -13,6 +14,7 @@ public class Program
         // Add services to the container.
 
         builder.Services.AddControllers();
+
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -54,7 +56,7 @@ public class Program
         // AMQP 0.9 
 
         // AMQP 1.0
-        
+
 
         builder.Services.AddAMQPClient<Program>(options =>
         {
@@ -75,6 +77,12 @@ public class Program
                 "Server=localhost;Initial Catalog=LookupDbs;Persist Security Info=False;User ID=sa;Password=sa;MultipleActiveResultSets=False;TrustServerCertificate=true");
         });
 
+
+        builder.Services.AddTickCronosJob<BackgroundWorker>(a =>
+        {
+            a.CronExpression = "0 15 21 * * *";
+            a.TimeProvider = new EgyptTimeProvider();
+        });
 
         var app = builder.Build();
 
@@ -101,4 +109,30 @@ public class Program
 
         app.Run();
     }
+}
+
+
+public class BackgroundWorker : TickCronosJobService
+{
+    public BackgroundWorker(ITickCronosConfig<BackgroundWorker> config, IServiceProvider serviceProvider, ILogger<BackgroundWorker> logger) : base(config.CronExpression, config.TimeProvider, serviceProvider, logger)
+    {
+    }
+
+    public override string CronJobName => nameof(BackgroundWorker);
+
+    public override async Task ExecuteAsync(IServiceScope scope, CancellationToken cancellationToken)
+    {
+        Console.WriteLine($"Current time is {DateTime.UtcNow}");
+    }
+}
+
+public class EgyptTimeProvider : TimeProvider
+{
+    private readonly TimeZoneInfo _timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+    public override DateTimeOffset GetUtcNow()
+    {
+        return TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, _timeZoneInfo);
+    }
+
+    public override TimeZoneInfo LocalTimeZone => _timeZoneInfo;
 }

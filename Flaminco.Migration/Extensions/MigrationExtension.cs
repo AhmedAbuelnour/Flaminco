@@ -1,13 +1,14 @@
 ﻿using DbUp.Builder;
 using DbUp.Engine;
-using Flaminco.Migration.Abstractions;
-using Flaminco.Migration.HostedService;
-using Flaminco.Migration.Implementations;
-using Flaminco.Migration.Options;
+using Flaminco.Migration.SqlServer.Abstractions;
+using Flaminco.Migration.SqlServer.HostedService;
+using Flaminco.Migration.SqlServer.Implementations;
+using Flaminco.Migration.SqlServer.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
-namespace Flaminco.Migration.Extensions;
+namespace Flaminco.Migration.SqlServer.Extensions;
 
 /// <summary>
 ///     Provides extension methods for configuring and adding database migration services.
@@ -111,7 +112,7 @@ public static class MigrationExtension
     {
         if (upgradeEngine.IsUpgradeRequired())
         {
-            var databaseUpgradeResult = upgradeEngine.PerformUpgrade();
+            DatabaseUpgradeResult databaseUpgradeResult = upgradeEngine.PerformUpgrade();
 
             if (!databaseUpgradeResult.Successful) throw databaseUpgradeResult.Error;
         }

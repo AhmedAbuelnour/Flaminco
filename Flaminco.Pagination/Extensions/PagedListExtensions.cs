@@ -1,12 +1,14 @@
-﻿using Flaminco.Pagination.Models;
+﻿using Flaminco.QueryableExtensions.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Flaminco.Pagination.Extensions;
+namespace Flaminco.QueryableExtensions.Extensions;
 
 public static class PagedListExtensions
 {
-    public static async Task<PagedList<TItem>> ToPagedList<TItem>(this IQueryable<TItem> query, int page, int pageSize,
-        CancellationToken cancellationToken = default)
+    public static async Task<PagedList<TItem>> ToPagedListAsync<TItem>(this IQueryable<TItem> query,
+                                                                       int page,
+                                                                       int pageSize,
+                                                                       CancellationToken cancellationToken = default)
     {
         return new PagedList<TItem>
         {
@@ -17,13 +19,18 @@ public static class PagedListExtensions
         };
     }
 
-    public static async Task<PagedList<TItem>> ToPagedList<TItem>(this IQueryable<TItem> query,
-        CancellationToken cancellationToken = default)
+    public static async Task<AttachedPagedList<TItem, TAttachment>> ToAttachedPagedListAsync<TItem, TAttachment>(this IQueryable<TItem> query,
+                                                                                                                 int page,
+                                                                                                                 int pageSize,
+                                                                                                                 TAttachment attachment,
+                                                                                                                 CancellationToken cancellationToken = default)
     {
-        return new PagedList<TItem>
+        return new AttachedPagedList<TItem, TAttachment>
         {
-            Page = 1,
-            Items = await query.ToListAsync(cancellationToken),
+            Page = page,
+            PageSize = pageSize,
+            Items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken),
+            Attachment = attachment,
             TotalCount = await query.CountAsync(cancellationToken)
         };
     }

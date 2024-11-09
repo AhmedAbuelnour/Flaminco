@@ -70,24 +70,18 @@ builder.Services.AddTickCronosJob<MyTickCronosExample1>(a =>
 builder.Services.AddTickCronosJob<MyTickCronosExample2>(a =>
 {
     a.CronExpression = "*/5 * * * * *";  // Every 5 seconds
-    a.TimeProvider = new TimeZoneTimeProvider(TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
+    a.TimeProvider = new EgyptTimeProvider();
 });
 ```
 
 ### Custom Time Provider Example
 
-TickCronons allows for custom time providers. Here’s an example of a `TimeZoneTimeProvider` to run jobs in a specific time zone.
+TickCronons allows for custom time providers. Here’s an example of a `EgyptTimeProvider` to run jobs in a specific time zone.
 
 ```csharp
-public class TimeZoneTimeProvider : TimeProvider
+public class EgyptTimeProvider : TimeProvider
 {
-    private readonly TimeZoneInfo _timeZoneInfo;
-
-    public TimeZoneTimeProvider(TimeZoneInfo timeZoneInfo)
-    {
-        _timeZoneInfo = timeZoneInfo ?? throw new ArgumentNullException(nameof(timeZoneInfo));
-    }
-
+    private readonly TimeZoneInfo _timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
     public override DateTimeOffset GetUtcNow()
     {
         return TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, _timeZoneInfo);

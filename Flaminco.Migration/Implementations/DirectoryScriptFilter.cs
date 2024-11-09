@@ -1,17 +1,10 @@
 ﻿using DbUp.Engine;
 using DbUp.Support;
 
-namespace Flaminco.Migration.Implementations;
+namespace Flaminco.Migration.SqlServer.Implementations;
 
-internal class DirectoryScriptFilter : IScriptFilter
+internal class DirectoryScriptFilter(string[] directories) : IScriptFilter
 {
-    private readonly string[] _directories;
-
-    public DirectoryScriptFilter(string[] directories)
-    {
-        _directories = directories;
-    }
-
     public IEnumerable<SqlScript> Filter(IEnumerable<SqlScript> sorted, HashSet<string> executedScriptNames,
         ScriptNameComparer comparer)
     {
@@ -22,10 +15,10 @@ internal class DirectoryScriptFilter : IScriptFilter
 
     private int GetDirectoryIndex(string scriptName)
     {
-        for (int i = 0; i < _directories.Length; i++)
-            if (scriptName.StartsWith(_directories[i], StringComparison.OrdinalIgnoreCase))
+        for (int i = 0; i < directories.Length; i++)
+            if (scriptName.StartsWith(directories[i], StringComparison.OrdinalIgnoreCase))
                 return i;
 
-        return _directories.Length; // Scripts not in the specified directories will be at the end
+        return directories.Length; // Scripts not in the specified directories will be at the end
     }
 }

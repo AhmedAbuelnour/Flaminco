@@ -1,24 +1,18 @@
 ﻿using DbUp;
 using DbUp.Helpers;
-using Flaminco.Migration.Abstractions;
-using Flaminco.Migration.Extensions;
-using Flaminco.Migration.Options;
+using Flaminco.Migration.SqlServer.Abstractions;
+using Flaminco.Migration.SqlServer.Extensions;
+using Flaminco.Migration.SqlServer.Options;
 
-namespace Flaminco.Migration.Implementations;
+namespace Flaminco.Migration.SqlServer.Implementations;
 
-internal class DbUpMigrationService : IMigrationService
+internal class DbUpMigrationService(MigrationOptions migrationOptions) : IMigrationService
 {
-    private readonly MigrationOptions _migrationOptions;
-
-    public DbUpMigrationService(MigrationOptions migrationOptions)
-    {
-        _migrationOptions = migrationOptions;
-    }
 
     /// <inheritdoc />
     public void Migrate<TScriptScanner>() where TScriptScanner : class
     {
-        EnsureDatabase.For.SqlDatabase(_migrationOptions.ConnectionString);
+        EnsureDatabase.For.SqlDatabase(migrationOptions.ConnectionString);
 
         MigrateJournalInternal<TScriptScanner>();
 
@@ -27,13 +21,13 @@ internal class DbUpMigrationService : IMigrationService
 
     internal void MigrateJournalInternal<TScriptScanner>()
     {
-        var upgradeEngineBuilder = DeployChanges.To.SqlDatabase(_migrationOptions.ConnectionString)
+        var upgradeEngineBuilder = DeployChanges.To.SqlDatabase(migrationOptions.ConnectionString)
             .WithTransaction()
             .LogToConsole();
 
-        upgradeEngineBuilder = _migrationOptions.Directories?.Any() ?? false
+        upgradeEngineBuilder = migrationOptions.Directories?.Any() ?? false
             ? upgradeEngineBuilder.WithScriptsEmbeddedInDirectories(typeof(TScriptScanner).Assembly,
-                _migrationOptions.Directories, s => !IsAlwaysExecute(s))
+                migrationOptions.Directories, s => !IsAlwaysExecute(s))
             : upgradeEngineBuilder.WithScriptsEmbeddedInAssembly(typeof(TScriptScanner).Assembly,
                 s => !IsAlwaysExecute(s));
 
@@ -43,14 +37,14 @@ internal class DbUpMigrationService : IMigrationService
 
     internal void MigrateAlwaysExecuteInternal<TScriptScanner>()
     {
-        var alwaysExecuteUpgradeEngineBuilder = DeployChanges.To.SqlDatabase(_migrationOptions.ConnectionString)
+        var alwaysExecuteUpgradeEngineBuilder = DeployChanges.To.SqlDatabase(migrationOptions.ConnectionString)
             .JournalTo(new NullJournal())
             .WithTransaction()
             .LogToConsole();
 
-        alwaysExecuteUpgradeEngineBuilder = _migrationOptions.Directories?.Any() ?? false
+        alwaysExecuteUpgradeEngineBuilder = migrationOptions.Directories?.Any() ?? false
             ? alwaysExecuteUpgradeEngineBuilder.WithScriptsEmbeddedInDirectories(typeof(TScriptScanner).Assembly,
-                _migrationOptions.Directories, IsAlwaysExecute)
+                migrationOptions.Directories, IsAlwaysExecute)
             : alwaysExecuteUpgradeEngineBuilder.WithScriptsEmbeddedInAssembly(typeof(TScriptScanner).Assembly,
                 IsAlwaysExecute);
 
@@ -60,7 +54,7 @@ internal class DbUpMigrationService : IMigrationService
 
     private bool IsAlwaysExecute(string scriptName)
     {
-        foreach (string directory in _migrationOptions.AlwaysExecuteDirectories ?? Array.Empty<string>())
+        foreach (string directory in migrationOptions.AlwaysExecuteDirectories ?? [])
             if (scriptName.StartsWith(directory, StringComparison.OrdinalIgnoreCase))
                 return true;
 

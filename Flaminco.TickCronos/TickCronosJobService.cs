@@ -53,7 +53,7 @@ public abstract class TickCronosJobService(string cronExpression,
         {
             try
             {
-                DateTimeOffset nowTime = timeProvider.GetLocalNow();
+                DateTimeOffset nowTime = timeProvider.GetUtcNow();
 
                 DateTimeOffset? next = _expression.GetNextOccurrence(nowTime, timeProvider.LocalTimeZone);
 

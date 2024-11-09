@@ -1,7 +1,7 @@
-﻿using Flaminco.Migration.Abstractions;
+﻿using Flaminco.Migration.SqlServer.Abstractions;
 using Microsoft.Extensions.Hosting;
 
-namespace Flaminco.Migration.HostedService;
+namespace Flaminco.Migration.SqlServer.HostedService;
 
 /// <summary>
 ///     Using Hosted Service, to block the application to accept any requests until the migration successfully done,

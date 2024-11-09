@@ -1,18 +1,12 @@
-﻿namespace Flaminco.Pagination.Models;
+﻿namespace Flaminco.QueryableExtensions.Models;
 
-public class PagedList<T>
+public class PagedList<TItem>
 {
-    private int? pageSize;
-    public required IEnumerable<T> Items { get; set; }
+    public required IEnumerable<TItem> Items { get; set; }
     public int Page { get; set; }
-
-    public int PageSize
-    {
-        get => pageSize ?? TotalCount;
-        set => pageSize = value;
-    }
-
+    public int PageSize { get; set; }
     public int TotalCount { get; set; }
-    public bool HasNextPage => Page * PageSize < TotalCount;
+    public bool HasNextPage => Page < TotalPages;
     public bool HasPreviousPage => Page > 1;
+    public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
 }

@@ -1,4 +1,4 @@
-﻿namespace Flaminco.Migration.Options;
+﻿namespace Flaminco.Migration.SqlServer.Options;
 
 /// <summary>
 ///     Represents the configuration options for database migration.
