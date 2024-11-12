@@ -5,26 +5,4 @@
     {
         public abstract IQueryable<TProject> ProjectTo(IQueryable<TSource> query);
     }
-
-    public class XXX : ProjectionSpecification<Student, StudentModel>
-    {
-        public override IQueryable<StudentModel> ProjectTo(IQueryable<Student> query)
-        {
-            return query.Select(a => new StudentModel
-            {
-
-            });
-        }
-    }
-
-
-    public class Student
-    {
-
-    }
-
-    public class StudentModel
-    {
-
-    }
 }
