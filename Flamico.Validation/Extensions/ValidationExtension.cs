@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using ErrorOr;
+﻿using ErrorOr;
 using Flaminco.ManualMapper.Implementations;
 using Flaminco.Validation.Abstractions;
+using Flaminco.Validation.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
+using System.ComponentModel.DataAnnotations;
 
-namespace Flaminco.ManualMapper.Extensions;
+namespace Flaminco.Validation.Extensions;
 
 /// <summary>
 ///     Provides extension methods for registering validation services.
@@ -24,10 +25,16 @@ public static class ValidationExtension
             i.GetGenericTypeDefinition() == typeof(IValidationHandler<>))).ToList();
 
         foreach (var typeInfo in types)
-        foreach (var implementedInterface in typeInfo.ImplementedInterfaces)
-            services.AddScoped(implementedInterface, typeInfo);
+            foreach (var implementedInterface in typeInfo.ImplementedInterfaces)
+                services.AddScoped(implementedInterface, typeInfo);
 
         services.AddScoped<IValidation, DefaultValidation>();
+
+        services.AddExceptionHandler<ProblemExceptionHandler>();
+
+        services.AddExceptionHandler<ValidationsExceptionHandler>();
+
+        services.AddProblemDetails();
 
         return services;
     }
@@ -42,9 +49,20 @@ public static class ValidationExtension
         if (validationResults == null || validationResults.Count == 0 ||
             validationResults.All(vr => vr == ValidationResult.Success)) return Result.Success;
 
+        ErrorOr<bool> errorOr = Error.Validation("", "");
+
+
+
         return validationResults.Where(vr => vr != ValidationResult.Success)
             .SelectMany(vr => vr.MemberNames.Select(memberName =>
                 Error.Validation(memberName, vr.ErrorMessage ?? "Validation failed.")))
             .ToList();
+    }
+
+    public static ErrorOr<Success> TryDataAnnotationValidate<TInput>(this TInput model) where TInput : Abstractions.IValidatableObject
+    {
+        var results = new List<ValidationResult>();
+        Validator.TryValidateObject(model, new ValidationContext(model), results, true);
+        return results.ConvertToErrorOr();
     }
 }

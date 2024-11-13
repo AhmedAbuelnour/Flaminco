@@ -27,8 +27,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.QueryableExtension
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Identifier", "Flaminco.Identifier\Flaminco.Identifier.csproj", "{BE2B3704-E649-43A4-80F1-1DBA2C00E884}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{A96D1F87-9F55-434A-BEEB-0EA435522B26}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RediPolly", "Flaminco.RediPolly\Flaminco.RediPolly.csproj", "{3ACDA3BD-51A3-49D9-8352-8F67885E36A0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.CacheKeys", "Flaminco.CacheKey\Flaminco.CacheKeys.csproj", "{6D15071B-BE81-484D-8DDC-B61AB21B1A45}"
@@ -45,11 +43,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RazorInk", "Flamin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.AzureBus.AMQP", "Flaminco.AzureBus.AMQP\Flaminco.AzureBus.AMQP.csproj", "{FBC830D0-EA93-41EC-830C-915691FD56F5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication3", "WebApplication3\WebApplication3.csproj", "{12F51F69-DDB1-4581-89D7-E817B96BE4D1}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.TickCronos", "Flaminco.TickCronos\Flaminco.TickCronos.csproj", "{CD9D4100-2BE0-4061-B325-1211D74AB966}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Contracts", "Flaminco.Contracts\Flaminco.Contracts.csproj", "{23B8A994-8E97-496D-90BE-14FA1A6DCD6C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication1", "WebApplication\WebApplication1.csproj", "{01A322AF-52ED-408B-AA24-1A5478D6A5D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -105,10 +103,6 @@ Global
 		{BE2B3704-E649-43A4-80F1-1DBA2C00E884}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE2B3704-E649-43A4-80F1-1DBA2C00E884}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE2B3704-E649-43A4-80F1-1DBA2C00E884}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A96D1F87-9F55-434A-BEEB-0EA435522B26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A96D1F87-9F55-434A-BEEB-0EA435522B26}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A96D1F87-9F55-434A-BEEB-0EA435522B26}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A96D1F87-9F55-434A-BEEB-0EA435522B26}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3ACDA3BD-51A3-49D9-8352-8F67885E36A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3ACDA3BD-51A3-49D9-8352-8F67885E36A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3ACDA3BD-51A3-49D9-8352-8F67885E36A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -141,10 +135,6 @@ Global
 		{FBC830D0-EA93-41EC-830C-915691FD56F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBC830D0-EA93-41EC-830C-915691FD56F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBC830D0-EA93-41EC-830C-915691FD56F5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{12F51F69-DDB1-4581-89D7-E817B96BE4D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{12F51F69-DDB1-4581-89D7-E817B96BE4D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{12F51F69-DDB1-4581-89D7-E817B96BE4D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{12F51F69-DDB1-4581-89D7-E817B96BE4D1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CD9D4100-2BE0-4061-B325-1211D74AB966}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CD9D4100-2BE0-4061-B325-1211D74AB966}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD9D4100-2BE0-4061-B325-1211D74AB966}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -153,6 +143,10 @@ Global
 		{23B8A994-8E97-496D-90BE-14FA1A6DCD6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23B8A994-8E97-496D-90BE-14FA1A6DCD6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23B8A994-8E97-496D-90BE-14FA1A6DCD6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01A322AF-52ED-408B-AA24-1A5478D6A5D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01A322AF-52ED-408B-AA24-1A5478D6A5D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01A322AF-52ED-408B-AA24-1A5478D6A5D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01A322AF-52ED-408B-AA24-1A5478D6A5D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

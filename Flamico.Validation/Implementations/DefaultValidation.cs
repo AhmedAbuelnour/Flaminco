@@ -16,7 +16,7 @@ internal sealed class DefaultValidation(IServiceProvider serviceProvider) : IVal
 {
     /// <inheritdoc />
     public ValueTask<ErrorOr<Success>> Validate<TInput>(TInput input, CancellationToken cancellationToken = default)
-        where TInput : notnull
+        where TInput : IValidatableObject
     {
         ArgumentNullException.ThrowIfNull(input);
 

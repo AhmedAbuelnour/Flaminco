@@ -15,23 +15,18 @@ namespace Flaminco.TickCronos
         /// <param name="options">The configuration options for the cron job service.</param>
         /// <returns>The updated service collection.</returns>
         /// <exception cref="ArgumentNullException">Thrown if the options or cron expression is null or empty.</exception>
-        public static IServiceCollection AddTickCronosJob<T>(this IServiceCollection services, Action<TickCronosConfig<T>> options) where T : TickCronosJobService
+        public static IServiceCollection AddTickCronosJob<T>(this IServiceCollection services, Action<ITickCronosConfig<T>> options) where T : TickCronosJob
         {
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options), "Please provide Schedule Configurations.");
             }
 
-            TickCronosConfig<T> config = new();
+            ITickCronosConfig<T> config = new TickCronosConfig<T>();
 
             options.Invoke(config);
 
-            if (string.IsNullOrWhiteSpace(config.CronExpression))
-            {
-                throw new ArgumentNullException(nameof(options), "Empty Cron Expression is not allowed.");
-            }
-
-            services.AddSingleton<ITickCronosConfig<T>>(config);
+            services.AddSingleton(config);
 
             services.AddHostedService<T>();
 

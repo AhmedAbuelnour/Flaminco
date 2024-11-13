@@ -18,5 +18,5 @@ public interface IValidation
     ///     success or failure.
     /// </returns>
     ValueTask<ErrorOr<Success>> Validate<TInput>(TInput input, CancellationToken cancellationToken = default)
-        where TInput : notnull;
+        where TInput : IValidatableObject;
 }

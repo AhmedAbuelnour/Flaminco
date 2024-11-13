@@ -2,7 +2,7 @@
 
 namespace Flaminco.QueryableExtensions.Extensions
 {
-    public static class ProjectionExtensions
+    public static class SpecificationExtensions
     {
         public static IQueryable<TProject> ProjectSpecification<TSource, TProject, TSpecification>(this IQueryable<TSource> query)
             where TSource : notnull
@@ -17,6 +17,14 @@ namespace Flaminco.QueryableExtensions.Extensions
         where TProject : notnull
         {
             return projectionSpecification.ProjectTo(query);
+        }
+
+
+        public static IQueryable<TSource> WhereSpecification<TSource>(this IQueryable<TSource> query, WhereSpecification<TSource> specification) where TSource : notnull
+        {
+            specification.Handle();
+
+            return specification.SpecificationExpression == null ? query : query.Where(specification.SpecificationExpression);
         }
     }
 }

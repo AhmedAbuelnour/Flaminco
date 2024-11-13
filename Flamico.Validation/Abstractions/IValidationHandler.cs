@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using ErrorOr;
-using Flaminco.ManualMapper.Extensions;
+﻿using ErrorOr;
+using Flaminco.Validation.Extensions;
+using System.ComponentModel.DataAnnotations;
 
 namespace Flaminco.Validation.Abstractions;
 
@@ -8,7 +8,7 @@ namespace Flaminco.Validation.Abstractions;
 ///     Defines a handler for validating input asynchronously.
 /// </summary>
 /// <typeparam name="TInput">The type of the input to validate.</typeparam>
-public interface IValidationHandler<TInput> where TInput : notnull
+public interface IValidationHandler<TInput> where TInput : IValidatableObject
 {
     /// <summary>
     ///     Handles the asynchronous validation of the input.
@@ -26,7 +26,7 @@ public interface IValidationHandler<TInput> where TInput : notnull
     /// </summary>
     /// <param name="model">The model to validate.</param>
     /// <returns>An <see cref="ErrorOr{T}" /> result containing validation errors or success.</returns>
-    ErrorOr<Success> TryDataAnnotationValidate(TInput model)
+    public virtual ErrorOr<Success> TryDataAnnotationValidate(TInput model)
     {
         var results = new List<ValidationResult>();
         Validator.TryValidateObject(model, new ValidationContext(model), results, true);

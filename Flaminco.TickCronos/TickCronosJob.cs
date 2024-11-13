@@ -1,5 +1,4 @@
 ﻿using Cronos;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -10,17 +9,15 @@ namespace Flaminco.TickCronos;
 /// </summary>
 /// <param name="cronExpression">The cron expression for scheduling the job.</param>
 /// <param name="timeProvider">The time provider used to obtain current time and time zones.</param>
-/// <param name="serviceProvider">The service provider for dependency injection.</param>
 /// <param name="logger">The logger used for logging messages.</param>
-public abstract class TickCronosJobService(string cronExpression,
-                                          TimeProvider timeProvider,
-                                          IServiceProvider serviceProvider,
-                                          ILogger logger) : IHostedService, IDisposable
+public abstract class TickCronosJob(string? cronExpression,
+                                    TimeProvider timeProvider,
+                                    ILogger logger) : IHostedService, IDisposable
 {
-    private readonly CronExpression _expression = CronExpression.Parse(cronExpression, CronFormat.IncludeSeconds);
+
     private Task? _executingTask;
     private CancellationTokenSource? _stoppingCts;
-
+    private CronExpression? _expression;
     /// <summary>
     /// Gets the name of the cron job.
     /// </summary>
@@ -43,6 +40,24 @@ public abstract class TickCronosJobService(string cronExpression,
     }
 
     /// <summary>
+    /// Determines the next scheduled occurrence for the job based on the cron expression.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="DateTimeOffset"/> representing the next occurrence of the job.
+    /// </returns>
+    public virtual DateTimeOffset? ConfigureNextOccurrence()
+    {
+        if (!string.IsNullOrWhiteSpace(cronExpression))
+        {
+            _expression ??= CronExpression.Parse(cronExpression, CronFormat.IncludeSeconds);
+
+            return _expression.GetNextOccurrence(timeProvider.GetUtcNow(), timeProvider.LocalTimeZone);
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// Schedules the job according to the cron expression.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token to signal the scheduling process.</param>
@@ -55,7 +70,7 @@ public abstract class TickCronosJobService(string cronExpression,
             {
                 DateTimeOffset nowTime = timeProvider.GetUtcNow();
 
-                DateTimeOffset? next = _expression.GetNextOccurrence(nowTime, timeProvider.LocalTimeZone);
+                DateTimeOffset? next = ConfigureNextOccurrence();
 
                 if (!next.HasValue)
                 {
@@ -79,9 +94,7 @@ public abstract class TickCronosJobService(string cronExpression,
 
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    using var scope = serviceProvider.CreateScope();
-
-                    await ExecuteAsync(scope, cancellationToken);
+                    await ExecuteAsync(cancellationToken);
 
                     logger.LogInformation("{jobName}: Job executed at {time}", CronJobName, timeProvider.GetLocalNow());
                 }
@@ -100,10 +113,9 @@ public abstract class TickCronosJobService(string cronExpression,
     /// <summary>
     /// Executes the job logic asynchronously.
     /// </summary>
-    /// <param name="scope">The scope for resolving dependencies.</param>
     /// <param name="cancellationToken">The cancellation token to signal the execution process.</param>
     /// <returns>A task representing the execution process.</returns>
-    public abstract Task ExecuteAsync(IServiceScope scope, CancellationToken cancellationToken);
+    public abstract Task ExecuteAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Stops the cron job service asynchronously.
