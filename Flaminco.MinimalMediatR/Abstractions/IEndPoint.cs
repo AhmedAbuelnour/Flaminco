@@ -3,6 +3,5 @@ using Microsoft.AspNetCore.Http;
 
 namespace Flaminco.MinimalMediatR.Abstractions;
 
-public interface IEndPoint : IRequest<IResult>
-{
-}
+public interface IEndpoint : IRequest<IResult>;
+

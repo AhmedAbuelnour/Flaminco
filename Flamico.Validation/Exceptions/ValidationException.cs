@@ -71,58 +71,5 @@ namespace Flaminco.Validation.Exceptions
         }
     }
 
-    public class ValidationsExceptionHandler(IProblemDetailsService _problemDetailsService) : IExceptionHandler
-    {
 
-        public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
-        {
-            if (exception is ValidationException validationException)
-            {
-                await _problemDetailsService.TryWriteAsync(new ProblemDetailsContext
-                {
-                    HttpContext = httpContext,
-                    Exception = exception,
-                    ProblemDetails = ToProblem(httpContext, validationException),
-                });
-
-                return true;
-            }
-
-            return false;
-        }
-
-        private static ProblemDetails ToProblem(HttpContext httpContext, ValidationException validationException)
-        {
-            // Aggregate multiple validation errors into a dictionary format
-            var errors = validationException.Errors
-                .Where(a => a.Type == ErrorType.Validation)
-                .GroupBy(e => e.Code)  // Group errors by code or field
-                .ToDictionary(
-                    group => group.Key,
-                    group => group.Select(e => e.Description).ToList()
-                );
-
-            httpContext.Response.StatusCode = StatusCodes.Status400BadRequest; // Explicitly set the status code
-
-            return new ProblemDetails
-            {
-                Type = "Bad Request",
-                Status = StatusCodes.Status400BadRequest,
-                Title = "Validation failed",
-                Detail = "One or more validation errors occurred",
-                Instance = $"{httpContext.Request.Method} {httpContext.Request.Path}",
-                Extensions = new Dictionary<string, object?>
-                    {
-                        { "errors", errors },  // Add the aggregated errors dictionary
-                        { "traceId", $"{httpContext.Features.Get<IHttpActivityFeature>()?.Activity?.Id}" },
-                        { "timestamp", DateTime.UtcNow.ToString("o") },
-                        { "userId", httpContext.User.Identity?.IsAuthenticated == true ? httpContext.User.Identity.Name : null },
-                        { "userAgent", httpContext.Request.Headers.UserAgent.ToString() },
-                        { "queryParams", httpContext.Request.Query.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString()) }
-                    }
-            };
-
-        }
-
-    }
 }

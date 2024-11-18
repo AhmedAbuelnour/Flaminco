@@ -1,9 +1,9 @@
 ﻿using ErrorOr;
-using Flaminco.ManualMapper.Implementations;
 using Flaminco.Validation.Abstractions;
 using Flaminco.Validation.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 
 namespace Flaminco.Validation.Extensions;
 
@@ -20,21 +20,45 @@ public static class ValidationExtension
     /// <returns>The service collection with validation handlers registered.</returns>
     public static IServiceCollection AddValidation<T>(this IServiceCollection services)
     {
-        var types = typeof(T).Assembly.DefinedTypes.Where(type => !type.IsAbstract && type.GetInterfaces().Any(i =>
-            i.IsGenericType &&
-            i.GetGenericTypeDefinition() == typeof(IValidationHandler<>))).ToList();
-
-        foreach (var typeInfo in types)
-            foreach (var implementedInterface in typeInfo.ImplementedInterfaces)
-                services.AddScoped(implementedInterface, typeInfo);
-
-        services.AddScoped<IValidation, DefaultValidation>();
-
         services.AddExceptionHandler<ProblemExceptionHandler>();
 
         services.AddExceptionHandler<ValidationsExceptionHandler>();
 
         services.AddProblemDetails();
+
+
+        var assembly = Assembly.GetExecutingAssembly();
+
+        // Register all implementations of IValidator<TModel> as transient
+        var validators = assembly.GetTypes()
+            .Where(t => !t.IsAbstract && !t.IsInterface)
+            .SelectMany(t => t.GetInterfaces()
+                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>)),
+                (t, i) => new { Implementation = t, Interface = i });
+
+        foreach (var validator in validators)
+        {
+            services.AddTransient(validator.Interface, validator.Implementation);
+        }
+
+
+        // Register all implementations of IValidationRule<TModel, TProperty>
+        var validationRules = assembly.GetTypes()
+            .Where(t => !t.IsAbstract && !t.IsInterface)
+            .SelectMany(t => t.GetInterfaces()
+                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidationRule<,>)),
+                (t, i) => new { Implementation = t, Interface = i });
+
+        foreach (var rule in validationRules)
+        {
+            var attribute = rule.Implementation.GetCustomAttribute<ValidationRuleAttribute>();
+
+            if (attribute != null)
+            {
+                // Register each rule with a unique name from the attribute
+                services.AddKeyedTransient(rule.Interface, attribute.Name, rule.Implementation); // Register the rule type itself
+            }
+        }
 
         return services;
     }
@@ -59,10 +83,12 @@ public static class ValidationExtension
             .ToList();
     }
 
-    public static ErrorOr<Success> TryDataAnnotationValidate<TInput>(this TInput model) where TInput : Abstractions.IValidatableObject
+    public static ErrorOr<Success> TryDataAnnotationValidate<TInput>(this TInput model, ValidationContext validationContext)
     {
         var results = new List<ValidationResult>();
-        Validator.TryValidateObject(model, new ValidationContext(model), results, true);
+
+        bool isValid = Validator.TryValidateObject(model, validationContext, results, validateAllProperties: true);
+
         return results.ConvertToErrorOr();
     }
 }

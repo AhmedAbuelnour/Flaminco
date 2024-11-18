@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Pipeline", "Flamin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Results", "Flaminco.Results\Flaminco.Results.csproj", "{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Validation", "Flamico.Validation\Flaminco.Validation.csproj", "{D0CFA0F8-1496-4948-B583-BD755787FA21}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Migration.SqlServer", "Flaminco.Migration\Flaminco.Migration.SqlServer.csproj", "{2CDC09BD-96C9-479D-BF03-E15BD194A23A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.MinimalExtensions", "Flaminco.MinimalExtensions\Flaminco.MinimalExtensions.csproj", "{97ADDA4A-5503-4A46-BF14-E6BA517C061C}"
@@ -79,10 +77,6 @@ Global
 		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D0CFA0F8-1496-4948-B583-BD755787FA21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D0CFA0F8-1496-4948-B583-BD755787FA21}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D0CFA0F8-1496-4948-B583-BD755787FA21}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D0CFA0F8-1496-4948-B583-BD755787FA21}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2CDC09BD-96C9-479D-BF03-E15BD194A23A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2CDC09BD-96C9-479D-BF03-E15BD194A23A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CDC09BD-96C9-479D-BF03-E15BD194A23A}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -45,16 +45,16 @@ public abstract class TickCronosJob(string? cronExpression,
     /// <returns>
     /// A <see cref="DateTimeOffset"/> representing the next occurrence of the job.
     /// </returns>
-    public virtual DateTimeOffset? ConfigureNextOccurrence()
+    public virtual ValueTask<DateTimeOffset?> ConfigureNextOccurrence(CancellationToken cancellationToken)
     {
         if (!string.IsNullOrWhiteSpace(cronExpression))
         {
             _expression ??= CronExpression.Parse(cronExpression, CronFormat.IncludeSeconds);
 
-            return _expression.GetNextOccurrence(timeProvider.GetUtcNow(), timeProvider.LocalTimeZone);
+            return ValueTask.FromResult(_expression.GetNextOccurrence(timeProvider.GetUtcNow(), timeProvider.LocalTimeZone));
         }
 
-        return null;
+        return ValueTask.FromResult<DateTimeOffset?>(null);
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ public abstract class TickCronosJob(string? cronExpression,
             {
                 DateTimeOffset nowTime = timeProvider.GetUtcNow();
 
-                DateTimeOffset? next = ConfigureNextOccurrence();
+                DateTimeOffset? next = await ConfigureNextOccurrence(cancellationToken);
 
                 if (!next.HasValue)
                 {
@@ -88,7 +88,7 @@ public abstract class TickCronosJob(string? cronExpression,
                     continue;
                 }
 
-                using PeriodicTimer periodicTimer = new(delay);
+                using PeriodicTimer periodicTimer = new(delay, timeProvider);
 
                 await periodicTimer.WaitForNextTickAsync(cancellationToken);  // Wait until the next schedule
 

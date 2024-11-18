@@ -1,15 +1,31 @@
-using ErrorOr;
-using Flaminco.Validation.Abstractions;
-using Flaminco.Validation.Exceptions;
-using Flaminco.Validation.Extensions;
-using WebApplication1.Validations;
+using Flaminco.MinimalMediatR.Extensions;
+using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddValidation<Program>();
+
+builder.Services.AddAuthentication().AddBearerToken(JwtBearerDefaults.AuthenticationScheme);
+builder.Services.AddAuthorization();
+
+builder.Services.AddModules<Program>();
+
+builder.Services.AddMediatR(o =>
+{
+    o.RegisterServicesFromAssemblyContaining<Program>();
+});
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+builder.Services.AddValidationProblemHandler(options =>
+{
+    options.Title = "Test title";
+});
+
+
 
 var app = builder.Build();
 
@@ -22,25 +38,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthorization();
+app.UseAuthorization();
 
-app.MapGet("/weatherforecast", async (IValidation validation) =>
-{
-    ErrorOr<Success> validationResult = await validation.Validate<Person>(new Person
-    {
-        Age = 1,
-        Name = "AM"
-    });
-
-    if (validationResult.IsError)
-    {
-        throw new ValidationException
-        {
-            Errors = validationResult.Errors
-        };
-    }
-
-})
-.WithName("GetWeatherForecast");
+app.MapModules();
 
 app.UseExceptionHandler();
 
