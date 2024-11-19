@@ -1,13 +1,10 @@
-﻿namespace Flaminco.MinimalMediatR.Options
-{
-    public interface IValidationExceptionHandlerOptions
-    {
-        string Type { get; set; }
-        string Title { get; set; }
-        string UserIdTokenName { get; set; }
-    }
+﻿
+using FluentValidation;
 
-    internal class ValidationExceptionHandlerOptions : IValidationExceptionHandlerOptions
+
+namespace Flaminco.MinimalMediatR.Options
+{
+    internal class ValidationExceptionHandlerOptions : IExceptionHandlerOptions<ValidationException>
     {
         public string Type { get; set; } = "Bad Request"; // Default value
         public string Title { get; set; } = "Validation Failed"; // Default value

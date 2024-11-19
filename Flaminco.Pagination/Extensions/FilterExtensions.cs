@@ -24,11 +24,11 @@ namespace Flaminco.QueryableExtensions.Extensions
 
         public static Task<Dictionary<TKey, int>> GroupByWithCountAsync<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, CancellationToken cancellationToken) where TKey : notnull
         {
-            return source.GroupBy(keySelector).Select(a => new { Key = a.Key, Count = a.Count() }).ToDictionaryAsync(x => x.Key, x => x.Count, cancellationToken);
+            return source.GroupBy(keySelector).Select(a => new { a.Key, Count = a.Count() }).ToDictionaryAsync(x => x.Key, x => x.Count, cancellationToken);
         }
         public static Task<Dictionary<TKey, long>> GroupByWithLongCountAsync<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, CancellationToken cancellationToken) where TKey : notnull
         {
-            return source.GroupBy(keySelector).Select(a => new { Key = a.Key, Count = a.LongCount() }).ToDictionaryAsync(x => x.Key, x => x.Count, cancellationToken);
+            return source.GroupBy(keySelector).Select(a => new { a.Key, Count = a.LongCount() }).ToDictionaryAsync(x => x.Key, x => x.Count, cancellationToken);
         }
 
         internal static Expression<Func<TSource, bool>>? MultiColumnSearch<TSource>(string filter, params Expression<Func<TSource, string?>>[] properties)

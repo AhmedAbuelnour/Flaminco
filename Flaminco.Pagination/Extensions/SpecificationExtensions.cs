@@ -20,11 +20,9 @@ namespace Flaminco.QueryableExtensions.Extensions
         }
 
 
-        public static IQueryable<TSource> WhereSpecification<TSource>(this IQueryable<TSource> query, WhereSpecification<TSource> specification) where TSource : notnull
+        public static IQueryable<TEntity> WhereSpecification<TEntity>(this IQueryable<TEntity> query, WhereSpecification<TEntity> specification) where TEntity : notnull
         {
-            specification.Handle();
-
-            return specification.SpecificationExpression == null ? query : query.Where(specification.SpecificationExpression);
+            return specification.Where(query);
         }
     }
 }

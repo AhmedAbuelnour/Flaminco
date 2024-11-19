@@ -8,13 +8,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Flaminco.MinimalMediatR.Exceptions
 {
-    internal sealed class ValidationsExceptionHandler(IProblemDetailsService _problemDetailsService, IValidationExceptionHandlerOptions validationExceptionHandlerOptions, ILogger<ValidationsExceptionHandler> _logger) : IExceptionHandler
+    internal sealed class ValidationsExceptionHandler(IProblemDetailsService _problemDetailsService, IExceptionHandlerOptions<ValidationException> validationExceptionHandlerOptions, ILogger<ValidationsExceptionHandler> _logger) : IExceptionHandler
     {
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
             if (exception is ValidationException validationException)
             {
-                // Log the validation exception for debugging purposes
                 _logger.LogError("Validation exception occurred: {ValidationErrors}", validationException.Errors);
 
                 await _problemDetailsService.TryWriteAsync(new ProblemDetailsContext
