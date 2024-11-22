@@ -9,7 +9,7 @@ namespace Flaminco.MinimalMediatR.Extensions
 {
     public static class ValidationExtensions
     {
-        public static IServiceCollection AddValidationProblemHandler(this IServiceCollection services, Action<IExceptionHandlerOptions<ValidationException>>? options = default)
+        public static IServiceCollection AddValidationExceptionHandler(this IServiceCollection services, Action<IExceptionHandlerOptions<ValidationException>>? options = default)
         {
             IExceptionHandlerOptions<ValidationException> config = new ValidationExceptionHandlerOptions();
 

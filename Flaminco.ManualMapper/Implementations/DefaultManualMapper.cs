@@ -4,15 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Flaminco.ManualMapper.Implementations;
 
-public sealed class DefaultMapper(IServiceProvider serviceProvider) : IMapper
+internal sealed class DefaultManualMapper(IServiceProvider _serviceProvider) : IMapper
 {
-    private readonly IServiceProvider _serviceProvider = serviceProvider;
-
-    public TDestination Map<TSource, TDestination>(TSource source) where TDestination : class
+    public TDestination? Map<TSource, TDestination>(TSource source) where TDestination : class
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        var handler = _serviceProvider.GetService<IMapHandler<TSource, TDestination>>();
+        IMapHandler<TSource, TDestination>? handler = _serviceProvider.GetService<IMapHandler<TSource, TDestination>>();
 
         return handler switch
         {
@@ -21,12 +19,12 @@ public sealed class DefaultMapper(IServiceProvider serviceProvider) : IMapper
         };
     }
 
-    public Task<TDestination> MapAsync<TSource, TDestination>(TSource source,
+    public Task<TDestination?> MapAsync<TSource, TDestination>(TSource source,
         CancellationToken cancellationToken = default) where TDestination : class
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        var handler = _serviceProvider.GetService<IMapAsyncHandler<TSource, TDestination>>();
+        IMapAsyncHandler<TSource, TDestination>? handler = _serviceProvider.GetService<IMapAsyncHandler<TSource, TDestination>>();
 
         return handler switch
         {
@@ -35,12 +33,12 @@ public sealed class DefaultMapper(IServiceProvider serviceProvider) : IMapper
         };
     }
 
-    public IAsyncEnumerable<TDestination> MapStream<TSource, TDestination>(TSource source,
+    public IAsyncEnumerable<TDestination?> MapStream<TSource, TDestination>(TSource source,
         CancellationToken cancellationToken = default) where TDestination : class
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        var handler = _serviceProvider.GetService<IMapStreamHandler<TSource, TDestination>>();
+        IMapStreamHandler<TSource, TDestination>? handler = _serviceProvider.GetService<IMapStreamHandler<TSource, TDestination>>();
 
         return handler switch
         {

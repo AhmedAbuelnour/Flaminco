@@ -1,3 +1,4 @@
+using Flaminco.ManualMapper.Extensions;
 using Flaminco.MinimalMediatR.Extensions;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,14 +19,18 @@ builder.Services.AddMediatR(o =>
     o.RegisterServicesFromAssemblyContaining<Program>();
 });
 
+builder.Services.AddManualMapper<Program>();
+
+builder.Services.AddEntityDtoAdaptors<Program>();
+
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
-builder.Services.AddValidationProblemHandler(options =>
+builder.Services.AddValidationExceptionHandler(options =>
 {
     options.Title = "Test title";
 });
 
-
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 

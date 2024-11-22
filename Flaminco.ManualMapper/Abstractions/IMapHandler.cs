@@ -2,5 +2,5 @@
 
 public interface IMapHandler<TSource, TDestination>
 {
-    TDestination Handler(TSource source);
+    TDestination? Handler(TSource source);
 }

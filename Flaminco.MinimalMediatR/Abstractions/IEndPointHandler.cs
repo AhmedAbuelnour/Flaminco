@@ -3,5 +3,5 @@ using Microsoft.AspNetCore.Http;
 
 namespace Flaminco.MinimalMediatR.Abstractions;
 
-public interface IEndpointHandler<TEndpointRequest> : IRequestHandler<TEndpointRequest, IResult> where TEndpointRequest : IEndpoint;
+public interface IEndPointHandler<TEndPointRequest> : IRequestHandler<TEndPointRequest, IResult> where TEndPointRequest : IEndPoint;
 
