@@ -4,6 +4,6 @@
     {
         string Type { get; set; }
         string Title { get; set; }
-        string UserIdTokenName { get; set; }
+        string UserIdentifierTokenName { get; set; }
     }
 }

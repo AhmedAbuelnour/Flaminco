@@ -1,6 +1,7 @@
 ﻿using Flaminco.MinimalMediatR.Behaviors;
-using Flaminco.MinimalMediatR.Exceptions;
+using Flaminco.MinimalMediatR.ExceptionHandlers;
 using Flaminco.MinimalMediatR.Options;
+using Flaminco.Validation.Options;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;

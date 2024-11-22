@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace Flaminco.MinimalMediatR.Exceptions
+namespace Flaminco.MinimalMediatR.ExceptionHandlers
 {
     internal sealed class ValidationsExceptionHandler(IProblemDetailsService _problemDetailsService,
                                                       IExceptionHandlerOptions<ValidationException> validationExceptionHandlerOptions,
@@ -16,16 +16,14 @@ namespace Flaminco.MinimalMediatR.Exceptions
         {
             if (exception is ValidationException validationException)
             {
-                _logger.LogError("Validation exception occurred: {ValidationErrors}", validationException.Errors);
+                _logger.LogError(exception, "Validation exception occurred: {ValidationErrors}", validationException.Errors);
 
-                await _problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+                return await _problemDetailsService.TryWriteAsync(new ProblemDetailsContext
                 {
                     HttpContext = httpContext,
                     Exception = exception,
                     ProblemDetails = ToProblem(httpContext, validationException),
                 });
-
-                return true;
             }
 
             return false;
@@ -57,24 +55,24 @@ namespace Flaminco.MinimalMediatR.Exceptions
                     },  // Add the aggregated errors dictionary
                     { "traceId", $"{httpContext.Features.Get<IHttpActivityFeature>()?.Activity?.Id}" },
                     { "timestamp", DateTime.UtcNow.ToString("o") },
-                    { "userId", GetUserId(httpContext) },
+                    { "userIdentifier", GetUserIdentifier(httpContext) },
                     { "userAgent", httpContext.Request.Headers.UserAgent.ToString() },
                     { "queryParams", httpContext.Request.Query.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString()) }
                 }
             };
         }
 
-        private string? GetUserId(HttpContext httpContext)
+        private string? GetUserIdentifier(HttpContext httpContext)
         {
             // Check for the user ID in claims
-            string? userId = httpContext.User.Claims.FirstOrDefault(claim => claim.Type == validationExceptionHandlerOptions.UserIdTokenName)?.Value;
+            string? userIdentifier = httpContext.User.Claims.FirstOrDefault(claim => claim.Type == validationExceptionHandlerOptions.UserIdentifierTokenName)?.Value;
 
             // If not found in claims, check headers
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userIdentifier))
             {
-                if (httpContext.Request.Headers.TryGetValue(validationExceptionHandlerOptions.UserIdTokenName, out var headerValue))
+                if (httpContext.Request.Headers.TryGetValue(validationExceptionHandlerOptions.UserIdentifierTokenName, out var headerValue))
                 {
-                    userId = headerValue.ToString();
+                    userIdentifier = headerValue.ToString();
                 }
                 else
                 {
@@ -82,7 +80,7 @@ namespace Flaminco.MinimalMediatR.Exceptions
                 }
             }
 
-            return userId;
+            return userIdentifier;
         }
     }
 }
