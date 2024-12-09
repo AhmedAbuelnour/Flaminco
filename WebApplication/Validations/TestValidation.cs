@@ -62,7 +62,7 @@ namespace WebApplication1.Validations
     {
         public async ValueTask<bool> HandleAsync(INotification notification, Exception exception, CancellationToken cancellationToken)
         {
-            await channelPublisher.PublishAsync(notification, cancellationToken);
+            await channelPublisher.Publish(notification, cancellationToken);
 
             return true;
         }
@@ -72,7 +72,7 @@ namespace WebApplication1.Validations
     {
         public async Task<IResult> Handle(AddPersonCommand request, CancellationToken cancellationToken)
         {
-            await publisher.PublishAsync(new TestEvent(), cancellationToken);
+            await publisher.Publish(new TestEvent(), cancellationToken);
 
             return Results.Ok();
         }

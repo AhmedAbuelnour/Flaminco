@@ -1,7 +1,6 @@
 using Flaminco.AdvancedHybridCache.Extensions;
 using Flaminco.DualMapper.Extensions;
 using Flaminco.ManualMapper.Extensions;
-using Flaminco.MinimalMediatR.Abstractions;
 using Flaminco.MinimalMediatR.Extensions;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -60,7 +59,7 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddChannelPublishers();
 
-builder.Services.AddSingleton<INotificationErrorHandler, NotificationErrorHandler2>();
+builder.Services.TryAddNotificationErrorHandler<NotificationErrorHandler2>();
 
 var app = builder.Build();
 

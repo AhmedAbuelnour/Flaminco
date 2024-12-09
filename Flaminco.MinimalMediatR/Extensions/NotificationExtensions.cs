@@ -1,6 +1,7 @@
 ﻿using Flaminco.MinimalMediatR.Abstractions;
 using Flaminco.MinimalMediatR.Implementations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Flaminco.MinimalMediatR.Extensions
 {
@@ -15,6 +16,13 @@ namespace Flaminco.MinimalMediatR.Extensions
             services.AddSingleton<IChannelPublisher, DefaultChannelPublisherImp>();
 
             services.AddHostedService<DefaultNotificationProcessor>();
+
+            return services;
+        }
+
+        public static IServiceCollection TryAddNotificationErrorHandler<T>(this IServiceCollection services) where T : class, INotificationErrorHandler
+        {
+            services.TryAddSingleton<INotificationErrorHandler, T>();
 
             return services;
         }
