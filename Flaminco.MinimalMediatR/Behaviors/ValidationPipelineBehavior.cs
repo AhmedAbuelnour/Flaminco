@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Flaminco.MinimalMediatR.Behaviors
 {
-    internal class ValidationPipelineBehavior<TRequest, IResult>(IEnumerable<IValidator<TRequest>> validators) : IPipelineBehavior<TRequest, IResult> where TRequest : IEndPoint
+    internal sealed class ValidationPipelineBehavior<TRequest, IResult>(IEnumerable<IValidator<TRequest>> validators) : IPipelineBehavior<TRequest, IResult> where TRequest : IEndPointRequest
     {
         public async Task<IResult> Handle(TRequest request, RequestHandlerDelegate<IResult> next, CancellationToken cancellationToken)
         {

@@ -1,4 +1,4 @@
-﻿using Flaminco.ManualMapper.Abstractions;
+﻿using Flaminco.DualMapper.Abstractions;
 
 namespace WebApplication1.Validations
 {
@@ -16,9 +16,9 @@ namespace WebApplication1.Validations
         public string FullName { get; set; }
     }
 
-    public class AdaptorExample : IEntityDtoAdapter<Entity, Dto>
+    public class AdaptorExampleMapper : IDualMapper<Entity, Dto>
     {
-        public Dto ToDto(Entity entity)
+        public Dto MapTo(Entity entity)
         {
             return new Dto
             {
@@ -27,7 +27,7 @@ namespace WebApplication1.Validations
             };
         }
 
-        public Entity ToEntity(Dto dto)
+        public Entity MapFrom(Dto dto)
         {
             return new Entity
             {

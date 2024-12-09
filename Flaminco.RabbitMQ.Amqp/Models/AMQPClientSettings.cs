@@ -1,4 +1,6 @@
-﻿namespace Flaminco.RabbitMQ.AMQP.Models;
+﻿using MassTransit.Configuration;
+
+namespace Flaminco.RabbitMQ.AMQP.Models;
 
 /// <summary>
 ///     Represents the configuration settings for the AMQP connection, including the host, username, password, and optional
@@ -34,7 +36,13 @@ public class AMQPClientSettings
     public TimeSpan? RetryInterval { get; set; }
 
     /// <summary>
-    ///     Gets or sets the timeout for message flow operations
+    ///     Gets or sets the timeout for sync queue operations
     /// </summary>
-    public TimeSpan? MessageFlowTimeOut { get; set; }
+    public TimeSpan? SyncQueuePublisherTimeOut { get; set; }
+
+
+    /// <summary>
+    ///     Gets or sets the health check options for the AMQP connection.
+    /// </summary>
+    public IHealthCheckOptions? HealthCheckOptions { get; set; }
 }

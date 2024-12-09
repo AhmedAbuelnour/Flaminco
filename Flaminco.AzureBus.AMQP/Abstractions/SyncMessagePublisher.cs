@@ -1,6 +1,6 @@
 ﻿using MassTransit;
 
-namespace Flaminco.RabbitMQ.AMQP.Abstractions
+namespace Flaminco.AzureBus.AMQP.Abstractions
 {
     /// <summary>
     ///     Represents an abstract base class for publishing messages to a message queue with request-response capabilities.
@@ -8,7 +8,7 @@ namespace Flaminco.RabbitMQ.AMQP.Abstractions
     /// </summary>
     /// <typeparam name="TMessage">The type of the message being published. Must implement <see cref="IMessage" />.</typeparam>
     /// <param name="requestClient">The request client used to send messages and receive responses from a specific queue.</param>
-    public abstract class MessageFlow<TMessage>(IRequestClient<TMessage> requestClient)
+    public abstract class SyncMessagePublisher<TMessage>(IRequestClient<TMessage> requestClient)
         where TMessage : class, IMessage
     {
         /// <summary>

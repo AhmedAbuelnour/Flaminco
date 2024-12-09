@@ -1,23 +1,20 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using Flaminco.JWTHandler.JWTModel;
+﻿using Flaminco.Shield.Authentication.JwtBearer.JWTModel;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
 
-namespace Flaminco.JWTHandler.TokenHandler;
+namespace Flaminco.Shield.Authentication.JwtBearer.TokenHandler;
 
-public class TokenHandlerManager
+public class TokenHandlerManager(IOptions<JWTConfigurationOptions> options)
 {
-    private readonly JWTConfigurationOptions _configuration;
-
-    public TokenHandlerManager(IOptions<JWTConfigurationOptions> options)
-    {
-        _configuration = options.Value;
-    }
+    private readonly JWTConfigurationOptions _configuration = options.Value;
 
     public AccessToken GetAccessToken(Dictionary<string, string> userProfileClaims)
     {
+
+
         JwtSecurityToken token = new(
             _configuration.Issuer,
             _configuration.Audience,
@@ -28,6 +25,7 @@ public class TokenHandlerManager
             signingCredentials: new SigningCredentials(
                 new SymmetricSecurityKey(Convert.FromBase64String(_configuration.Key)),
                 SecurityAlgorithms.HmacSha256Signature));
+
         if (_configuration.ClearCliamTypeMap)
         {
             // To stop mapping the Claim type long schema name to short ones.

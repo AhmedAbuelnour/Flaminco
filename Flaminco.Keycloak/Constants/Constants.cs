@@ -1,7 +1,8 @@
-﻿namespace Flaminco.Keycloak.Constants;
-
-internal static class Constant
+﻿namespace Flaminco.Keycloak.Constants
 {
-    internal const string KeycloakClient = "KeycloakClient";
-    internal const string KeycloakAccessTokenClient = "KeycloakAccessTokenClient";
+    internal static class Constant
+    {
+        internal const string KeycloakClient = "KeycloakClient";
+        internal const string KeycloakAccessTokenClient = "KeycloakAccessTokenClient";
+    }
 }

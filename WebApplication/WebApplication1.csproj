@@ -8,6 +8,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
@@ -15,6 +16,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Flaminco.AdvancedHybridCache\Flaminco.AdvancedHybridCache.csproj" />
+	  <ProjectReference Include="..\Flaminco.DualMapper\Flaminco.DualMapper.csproj" />
 	  <ProjectReference Include="..\Flaminco.ManualMapper\Flaminco.ManualMapper.csproj" />
 	  <ProjectReference Include="..\Flaminco.MinimalMediatR\Flaminco.MinimalMediatR.csproj" />
 	</ItemGroup>

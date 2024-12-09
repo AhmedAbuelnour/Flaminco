@@ -26,8 +26,10 @@ public class PdfRazorInk(IServiceProvider _serviceProvider, ILoggerFactory _logg
         });
 
         using var playwright = await Playwright.CreateAsync();
-        await using var browser =
-            await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
+        await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        {
+            Headless = true
+        });
         var page = await browser.NewPageAsync();
 
         await page.SetContentAsync(html);

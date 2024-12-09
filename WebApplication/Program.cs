@@ -1,7 +1,12 @@
+using Flaminco.AdvancedHybridCache.Extensions;
+using Flaminco.DualMapper.Extensions;
 using Flaminco.ManualMapper.Extensions;
+using Flaminco.MinimalMediatR.Abstractions;
 using Flaminco.MinimalMediatR.Extensions;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Caching.Hybrid;
+using WebApplication1.Validations;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -12,16 +17,32 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication().AddBearerToken(JwtBearerDefaults.AuthenticationScheme);
 builder.Services.AddAuthorization();
 
+builder.Services.AddManualMapper<Program>();
+
+builder.Services.AddDualMappers<Program>();
+
+builder.Services.AddStackExchangeRedisCache(a =>
+{
+    a.Configuration = "172.17.7.5:6379";
+});
+
+builder.Services.AddAdvancedHybridCache(a =>
+{
+    a.DefaultEntryOptions = new HybridCacheEntryOptions
+    {
+        Expiration = TimeSpan.FromMinutes(5),
+        LocalCacheExpiration = TimeSpan.FromMinutes(1),
+        Flags = HybridCacheEntryFlags.DisableLocalCache
+    };
+});
+
+
 builder.Services.AddModules<Program>();
 
 builder.Services.AddMediatR(o =>
 {
     o.RegisterServicesFromAssemblyContaining<Program>();
 });
-
-builder.Services.AddManualMapper<Program>();
-
-builder.Services.AddEntityDtoAdaptors<Program>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -30,7 +51,16 @@ builder.Services.AddValidationExceptionHandler(options =>
     options.Title = "Test title";
 });
 
+builder.Services.AddBusinessExceptionHandler(a =>
+{
+    a.Type = "https://dga.error.codes/index#";
+});
+
 builder.Services.AddProblemDetails();
+
+builder.Services.AddChannelPublishers();
+
+builder.Services.AddSingleton<INotificationErrorHandler, NotificationErrorHandler2>();
 
 var app = builder.Build();
 

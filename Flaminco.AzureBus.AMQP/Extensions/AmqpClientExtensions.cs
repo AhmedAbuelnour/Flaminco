@@ -4,6 +4,7 @@ using Flaminco.AzureBus.AMQP.Attributes;
 using Flaminco.AzureBus.AMQP.Models;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Reflection;
 
 namespace Flaminco.AzureBus.AMQP.Extensions;
@@ -29,7 +30,7 @@ public static class AMQPClientExtensions
     {
         services.AddPublishers<TScanner>();
 
-        services.AddMessageFlows<TScanner>();
+        services.AddSyncPublishers<TScanner>();
 
         services.AddConsumers<TScanner>(clientSettings);
 
@@ -57,24 +58,47 @@ public static class AMQPClientExtensions
             .ToList();
 
 
-        services.AddMassTransit(x =>
+        services.AddMassTransit(bus =>
         {
             // Register your consumer with MassTransit
             foreach (var consumer in consumerTypes)
                 // Register the consumer dynamically
-                x.AddConsumer(consumer);
+                bus.AddConsumer(consumer);
 
 
-            foreach (Type messageFlowType in typeof(TScanner).Assembly.GetTypes().Where(t => t.GetCustomAttributes<MessageFlowAttribute>().Any()).ToList())
+            foreach (Type syncQueueConsumerType in typeof(TScanner).Assembly.GetTypes().Where(t => t.GetCustomAttributes<SyncQueueConsumerAttribute>().Any()).ToList())
             {
-                if (messageFlowType.GetCustomAttribute<MessageFlowAttribute>() is MessageFlowAttribute messageFlow)
+                if (syncQueueConsumerType.GetCustomAttribute<SyncQueueConsumerAttribute>() is SyncQueueConsumerAttribute syncQueueConsumerAttribute)
                 {
-                    x.AddRequestClient(messageFlow.MessageType, new Uri($"queue:{messageFlow.Queue}"), clientSettings.MessageFlowTimeOut ?? RequestTimeout.Default);
+                    bus.AddRequestClient(syncQueueConsumerAttribute.MessageType, new Uri($"queue:{syncQueueConsumerAttribute.Queue}"), clientSettings.SyncQueuePublisherTimeOut ?? RequestTimeout.Default);
                 }
             }
 
+            if (clientSettings.HealthCheckOptions is null)
+            {
+                bus.ConfigureHealthCheckOptions(options =>
+                {
+                    options.Name = "MassTransit-AzureBus";
+                    options.MinimalFailureStatus = HealthStatus.Unhealthy;
+                    options.Tags.Add("health");
+                });
+            }
+            else
+            {
+                bus.ConfigureHealthCheckOptions(option =>
+                {
+                    option.MinimalFailureStatus = clientSettings.HealthCheckOptions?.MinimalFailureStatus ?? HealthStatus.Unhealthy;
+                    option.Name = clientSettings.HealthCheckOptions?.Name ?? "MassTransit-AzureBus";
+
+                    foreach (string tag in new List<string>(clientSettings.HealthCheckOptions?.Tags ?? ["health"]))
+                    {
+                        option.Tags.Add(tag);
+                    }
+                });
+            }
+
             // Configure RabbitMQ for MassTransit
-            x.UsingAzureServiceBus((context, cfg) =>
+            bus.UsingAzureServiceBus((context, cfg) =>
             {
                 cfg.Host(clientSettings.Host);
 
@@ -136,12 +160,12 @@ public static class AMQPClientExtensions
     /// </summary>
     /// <typeparam name="TScanner">A type used to scan for flow implementations.</typeparam>
     /// <param name="services">The service collection to which the flows will be added.</param>
-    private static void AddMessageFlows<TScanner>(this IServiceCollection services)
+    private static void AddSyncPublishers<TScanner>(this IServiceCollection services)
     {
         foreach (var type in typeof(TScanner).Assembly.DefinedTypes.Where(type => !type.IsAbstract &&
                      type.BaseType != null &&
                      type.BaseType.IsGenericType &&
-                     type.BaseType.GetGenericTypeDefinition() == typeof(MessageFlow<>)))
+                     type.BaseType.GetGenericTypeDefinition() == typeof(SyncMessagePublisher<>)))
             services.AddScoped(type);
     }
 

@@ -1,10 +1,11 @@
-﻿using Flaminco.JWTHandler.JWTModel;
+﻿using Flaminco.Shield.Authentication.JwtBearer.JWTModel;
+using Flaminco.Shield.Authentication.JwtBearer.TokenHandler;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Flaminco.JWTHandler.TokenHandler;
+namespace Flaminco.Shield.Authentication.JwtBearer.TokenHandler;
 
 public static class TokenHandlerExtension
 {

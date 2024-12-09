@@ -1,4 +1,4 @@
-﻿namespace Flaminco.JWTHandler.JWTModel;
+﻿namespace Flaminco.Shield.Authentication.JwtBearer.JWTModel;
 
 public class JWTConfigurationOptions
 {
