@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Flaminco.Keycloak.Models
+namespace Flaminco.Keycloak.Client.Models
 {
     /// <summary>
     /// Represents a token response from Keycloak.

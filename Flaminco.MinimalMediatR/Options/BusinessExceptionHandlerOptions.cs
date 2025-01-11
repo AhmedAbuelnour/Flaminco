@@ -5,7 +5,7 @@ namespace Flaminco.MinimalMediatR.Options
     /// <summary>
     /// Options for handling business exceptions.
     /// </summary>
-    internal class BusinessExceptionHandlerOptions : IExceptionHandlerOptions<BusinessException>
+    internal sealed class BusinessExceptionHandlerOptions : IExceptionHandlerOptions<BusinessException>
     {
         /// <inheritdoc />
         public string Type { get; set; } // Default value

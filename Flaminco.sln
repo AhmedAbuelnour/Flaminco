@@ -13,8 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.MinimalMediatR", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Pipeline", "Flaminco.Pipeline\Flaminco.Pipeline.csproj", "{C859199F-C80C-4704-83D8-A1B85ADC5A11}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Results", "Flaminco.Results\Flaminco.Results.csproj", "{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Migration.SqlServer", "Flaminco.Migration\Flaminco.Migration.SqlServer.csproj", "{2CDC09BD-96C9-479D-BF03-E15BD194A23A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.MinimalExtensions", "Flaminco.MinimalExtensions\Flaminco.MinimalExtensions.csproj", "{97ADDA4A-5503-4A46-BF14-E6BA517C061C}"
@@ -25,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.QueryableExtension
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RediPolly", "Flaminco.RediPolly\Flaminco.RediPolly.csproj", "{3ACDA3BD-51A3-49D9-8352-8F67885E36A0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Keycloak", "Flaminco.Keycloak\Flaminco.Keycloak.csproj", "{D4E2C683-0674-4914-9A69-7817468BCDC3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Keycloak.Authentication.JwtBearer", "Flaminco.Keycloak\Flaminco.Keycloak.Authentication.JwtBearer.csproj", "{D4E2C683-0674-4914-9A69-7817468BCDC3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.SLA", "Flaminco.SLA\Flaminco.SLA.csproj", "{AD0F7C53-1AF6-494C-AA1C-FE53AE639BBA}"
 EndProject
@@ -51,6 +49,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.DualMapper", "Flaminco.DualMapper\Flaminco.DualMapper.csproj", "{CEABA228-750C-4E35-B736-E3BAE0B14063}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Keycloak.Client", "Flaminco.Keycloak.Client\Flaminco.Keycloak.Client.csproj", "{8815AEA5-C58D-4CD0-8992-2077EB145DC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Minimal.Filters.Transaction", "Flaminco.Minimal.Filters.Transaction\Flaminco.Minimal.Filters.Transaction.csproj", "{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,10 +80,6 @@ Global
 		{C859199F-C80C-4704-83D8-A1B85ADC5A11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C859199F-C80C-4704-83D8-A1B85ADC5A11}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C859199F-C80C-4704-83D8-A1B85ADC5A11}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F3E54D9E-B329-4D6D-8EA5-4020B01192D0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2CDC09BD-96C9-479D-BF03-E15BD194A23A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2CDC09BD-96C9-479D-BF03-E15BD194A23A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CDC09BD-96C9-479D-BF03-E15BD194A23A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -146,6 +144,14 @@ Global
 		{CEABA228-750C-4E35-B736-E3BAE0B14063}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CEABA228-750C-4E35-B736-E3BAE0B14063}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CEABA228-750C-4E35-B736-E3BAE0B14063}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8815AEA5-C58D-4CD0-8992-2077EB145DC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8815AEA5-C58D-4CD0-8992-2077EB145DC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8815AEA5-C58D-4CD0-8992-2077EB145DC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8815AEA5-C58D-4CD0-8992-2077EB145DC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

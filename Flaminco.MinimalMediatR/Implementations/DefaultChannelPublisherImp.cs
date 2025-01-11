@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Flaminco.MinimalMediatR.Implementations
 {
-    public sealed class DefaultChannelPublisherImp(InMemoryMessageQueue queue) : IChannelPublisher
+    internal sealed class DefaultChannelPublisherImp(InMemoryMessageQueue queue) : IChannelPublisher
     {
         public ValueTask Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default) where TNotification : INotification
         {

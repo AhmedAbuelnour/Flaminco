@@ -1,6 +1,6 @@
-﻿using Flaminco.Keycloak.Models;
+﻿using Flaminco.Keycloak.Client.Models;
 
-namespace Flaminco.Keycloak.Clients
+namespace Flaminco.Keycloak.Client.Clients
 {
     /// <summary>
     /// Interface for Keycloak client operations.

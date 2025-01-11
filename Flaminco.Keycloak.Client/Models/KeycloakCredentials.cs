@@ -1,4 +1,4 @@
-﻿namespace Flaminco.Keycloak.Models
+﻿namespace Flaminco.Keycloak.Client.Models
 {
     /// <summary>
     /// Represents the credentials for Keycloak, including client ID and client secret.

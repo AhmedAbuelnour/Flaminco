@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace Flaminco.Keycloak.ClaimsTransformations
+namespace Flaminco.Keycloak.Authentication.JwtBearer.ClaimsTransformations
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="KeycloakRolesClaimsTransformation"/> class.

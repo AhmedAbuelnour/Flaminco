@@ -1,16 +1,14 @@
-﻿using Flaminco.Keycloak.Authentication.ClaimsTransformations;
-using Flaminco.Keycloak.Authentication.JwtBearer.Models;
-using Microsoft.AspNetCore.Authentication;
+﻿using Flaminco.Shield.Authentication.JwtBearer.JWTModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Flaminco.Keycloak.Authentication.JwtBearer.Extensions
+namespace Flaminco.Keycloak.Authentication.Extensions
 {
     /// <summary>
     /// Provides extension methods for configuring Keycloak authentication and client services.
     /// </summary>
-    public static class KeycloakExtensions
+    public static class ShieldExtensions
     {
         /// <summary>
         /// Adds Keycloak JWT Bearer authentication to the service collection using the specified options action.
@@ -18,15 +16,15 @@ namespace Flaminco.Keycloak.Authentication.JwtBearer.Extensions
         /// <param name="services">The service collection to add the authentication to.</param>
         /// <param name="configureOptions">An action to configure the Keycloak options.</param>
         /// <returns>The service collection with Keycloak authentication added.</returns>
-        public static IServiceCollection AddKeycloakJwtBearerAuthentication(this IServiceCollection services, Action<KeycloakOptions> configureOptions)
+        public static IServiceCollection AddShieldJwtBearerAuthentication(this IServiceCollection services, Action<JWTConfigurationOptions> configureOptions)
         {
-            KeycloakOptions keycloakOptions = new();
+            JWTConfigurationOptions keycloakOptions = new();
 
             configureOptions(keycloakOptions);
 
             services.Configure(configureOptions);
 
-            keycloakOptions.Validate();
+            //  keycloakOptions.Validate();
 
             return AddKeycloakJwtBearerAuthenticationInternal(services, keycloakOptions);
         }
@@ -37,7 +35,7 @@ namespace Flaminco.Keycloak.Authentication.JwtBearer.Extensions
         /// <param name="services">The service collection to add the authentication to.</param>
         /// <param name="keycloakOptions">The configured Keycloak options.</param>
         /// <returns>The service collection with Keycloak authentication added.</returns>
-        private static IServiceCollection AddKeycloakJwtBearerAuthenticationInternal(IServiceCollection services, KeycloakOptions keycloakOptions)
+        private static IServiceCollection AddKeycloakJwtBearerAuthenticationInternal(IServiceCollection services, JWTConfigurationOptions keycloakOptions)
         {
             services.AddAuthentication(options =>
             {
@@ -46,12 +44,9 @@ namespace Flaminco.Keycloak.Authentication.JwtBearer.Extensions
             }).AddJwtBearer(options =>
             {
                 options.Authority = keycloakOptions.Authority;
-                options.SaveToken = keycloakOptions.SaveToken;
+                options.SaveToken = keycloakOptions.SaveTokenInAuthProperties;
                 options.RequireHttpsMetadata = keycloakOptions.RequireHttpsMetadata;
-                options.MetadataAddress = keycloakOptions.MetadataAddress;
-                options.AutomaticRefreshInterval = keycloakOptions.JwksOption.AutomaticRefreshInterval ?? BaseConfigurationManager.DefaultAutomaticRefreshInterval;
-                options.RefreshInterval = keycloakOptions.JwksOption.RefreshInterval ?? BaseConfigurationManager.DefaultRefreshInterval;
-                options.BackchannelHttpHandler = keycloakOptions.JwksOption.BackchannelHttpHandler;
+                //  options.MetadataAddress = keycloakOptions.MetadataAddress;
                 options.TokenValidationParameters = new TokenValidationParameters()
                 {
                     ValidateIssuer = true,
@@ -61,10 +56,10 @@ namespace Flaminco.Keycloak.Authentication.JwtBearer.Extensions
                     ValidIssuer = keycloakOptions.Issuer,
                     RoleClaimType = keycloakOptions.RoleClaimType,
                     NameClaimType = keycloakOptions.NameClaimType,
-                    ClockSkew = keycloakOptions.ClockSkew ?? TimeSpan.FromSeconds(15),
+                    ClockSkew = keycloakOptions.ClockSkew,
                 };
 
-                options.SetJwksOptions(keycloakOptions.CertsAddress);
+                // options.SetJwksOptions(keycloakOptions.CertsAddress);
 
                 options.Events = new JwtBearerEvents()
                 {
@@ -94,8 +89,6 @@ namespace Flaminco.Keycloak.Authentication.JwtBearer.Extensions
                     }
                 };
             });
-
-            services.AddScoped<IClaimsTransformation>(_ => new KeycloakRolesClaimsTransformation(keycloakOptions.RoleClaimType, keycloakOptions.Audience));
 
             return services;
         }

@@ -3,7 +3,7 @@
 
 namespace Flaminco.MinimalMediatR.Options
 {
-    internal class ValidationExceptionHandlerOptions : IExceptionHandlerOptions<ValidationException>
+    internal sealed class ValidationExceptionHandlerOptions : IExceptionHandlerOptions<ValidationException>
     {
         /// <inheritdoc />
         public string Type { get; set; } = "Bad Request"; // Default value

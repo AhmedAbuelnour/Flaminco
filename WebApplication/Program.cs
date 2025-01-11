@@ -57,9 +57,9 @@ builder.Services.AddBusinessExceptionHandler(a =>
 
 builder.Services.AddProblemDetails();
 
-builder.Services.AddChannelPublishers();
+builder.Services.AddInMemoryChannel();
 
-builder.Services.TryAddNotificationErrorHandler<NotificationErrorHandler2>();
+builder.Services.AddScoped<ITest, Test>();
 
 var app = builder.Build();
 

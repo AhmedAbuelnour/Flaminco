@@ -1,4 +1,4 @@
-﻿namespace Flaminco.Keycloak.Models
+﻿namespace Flaminco.Keycloak.Authentication.JwtBearer.Models
 {
     /// <summary>
     /// Represents the JWKS (JSON Web Key Set) options for Keycloak.

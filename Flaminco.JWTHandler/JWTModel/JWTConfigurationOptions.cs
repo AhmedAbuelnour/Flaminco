@@ -17,4 +17,5 @@ public class JWTConfigurationOptions
     public TimeSpan ClockSkew { get; set; } = TimeSpan.Zero;
     public string? Authority { get; set; }
     public string? RoleClaimType { get; set; }
+    public string? NameClaimType { get; set; }
 }

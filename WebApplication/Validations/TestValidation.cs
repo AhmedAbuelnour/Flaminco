@@ -7,7 +7,17 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication1.Validations
 {
-    public class Person
+    public interface ITest
+    {
+
+    }
+
+    public class Test : ITest
+    {
+
+    }
+
+    public class Address
     {
         [MinLength(3, ErrorMessage = "something to show here ")]
         public string Name { get; set; }
@@ -17,22 +27,20 @@ namespace WebApplication1.Validations
     }
 
 
-    public class AddPersonCommand : IEndPointRequest
+    public class AddAddressCommand : IEndPointRequest
     {
-        [FromBody] public Person Person { get; set; }
-        [FromQuery] public string? Query { get; set; } = "default";
+        [FromBody] public Address Address { get; set; }
     }
 
-    public class MyModelValidator : AbstractValidator<AddPersonCommand>
+    public class AddAddressValidator : AbstractValidator<AddAddressCommand>
     {
-        public MyModelValidator()
+        public AddAddressValidator()
         {
-            RuleFor(a => a.Person).DataAnnotations();
         }
     }
 
 
-    public class MyCustomValidation : AbstractValidator<Person>
+    public class MyCustomValidation : AbstractValidator<Address>
     {
         public MyCustomValidation()
         {
@@ -46,33 +54,36 @@ namespace WebApplication1.Validations
 
     }
 
-    public class TestEventHandler : INotificationHandler<TestEvent>
+    public class TestEventHandler(ITest test) : ChannelConsumer<TestEvent>
     {
-        public async Task Handle(TestEvent notification, CancellationToken cancellationToken)
+        public override async Task Consume(TestEvent notification, CancellationToken cancellationToken)
         {
             Console.WriteLine("TestEvent");
 
             await Task.Delay(5000);
 
+            throw new Exception();
+
             Console.WriteLine("Done");
         }
-    }
 
-    public class NotificationErrorHandler2(IChannelPublisher channelPublisher) : INotificationErrorHandler
-    {
-        public async ValueTask<bool> HandleAsync(INotification notification, Exception exception, CancellationToken cancellationToken)
+        public override async Task Consume(TestEvent notification, Exception exception, CancellationToken cancellationToken)
         {
-            await channelPublisher.Publish(notification, cancellationToken);
+            Console.WriteLine("Consumed error");
 
-            return true;
+            await Task.CompletedTask;
         }
     }
 
-    public class AddPersonCommandHandler(IChannelPublisher publisher) : IEndPointRequestHandler<AddPersonCommand>
+
+    public class AddAddressCommandHandler(IChannelPublisher channelPublisher) : IEndPointRequestHandler<AddAddressCommand>
     {
-        public async Task<IResult> Handle(AddPersonCommand request, CancellationToken cancellationToken)
+        public async Task<IResult> Handle(AddAddressCommand request, CancellationToken cancellationToken)
         {
-            await publisher.Publish(new TestEvent(), cancellationToken);
+            await channelPublisher.Publish(new TestEvent
+            {
+
+            });
 
             return Results.Ok();
         }
@@ -84,7 +95,7 @@ namespace WebApplication1.Validations
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MediatePost<AddPersonCommand>("/person/add")
+            app.MediatePost<AddAddressCommand>("/person/add")
                 .WithName("add-person");
         }
     }

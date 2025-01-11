@@ -2,7 +2,7 @@
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Flaminco.Keycloak.Retrievers
+namespace Flaminco.Keycloak.Authentication.JwtBearer.Retrievers
 {
     internal sealed class JwksRetriever(string _certsAddress) : IConfigurationRetriever<OpenIdConnectConfiguration>
     {

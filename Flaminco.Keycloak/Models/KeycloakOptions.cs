@@ -1,4 +1,4 @@
-﻿namespace Flaminco.Keycloak.Models
+﻿namespace Flaminco.Keycloak.Authentication.JwtBearer.Models
 {
     /// <summary>
     /// Represents the configuration options for Keycloak, including server URLs, realm, token validation settings, and credentials.
@@ -69,11 +69,6 @@
         public bool SaveToken { get; set; }
 
         /// <summary>
-        /// Gets or sets the credentials for Keycloak.
-        /// </summary>
-        public KeycloakCredentials Credentials { get; set; } = default!;
-
-        /// <summary>
         /// Gets or sets the JWKS options for Keycloak.
         /// </summary>
         public JwksOptions JwksOption { get; set; } = default!;
@@ -87,8 +82,6 @@
             ArgumentException.ThrowIfNullOrWhiteSpace(Realm, nameof(Realm));
             ArgumentException.ThrowIfNullOrWhiteSpace(Audience, nameof(Audience));
             ArgumentException.ThrowIfNullOrWhiteSpace(Issuer, nameof(Issuer));
-            ArgumentException.ThrowIfNullOrWhiteSpace(Credentials?.ClientId, nameof(KeycloakCredentials.ClientId));
-            ArgumentException.ThrowIfNullOrWhiteSpace(Credentials?.ClientSecret, nameof(KeycloakCredentials.ClientSecret));
             ArgumentNullException.ThrowIfNull(JwksOption?.BackchannelHttpHandler, nameof(JwksOptions.BackchannelHttpHandler));
         }
     }

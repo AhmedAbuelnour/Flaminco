@@ -7,7 +7,7 @@
     /// <typeparam name="TFrom">The type to map from.</typeparam>
     /// <typeparam name="TTo">The type to map to.</typeparam>
     public interface IDualMapper<TFrom, TTo>
-        where TFrom : class, new()
+        where TFrom : new()
         where TTo : new()
     {
         /// <summary>

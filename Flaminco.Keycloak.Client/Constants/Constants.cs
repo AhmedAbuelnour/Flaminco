@@ -1,4 +1,4 @@
-﻿namespace Flaminco.Keycloak.Constants
+﻿namespace Flaminco.Keycloak.Client.Constants
 {
     internal static class Constant
     {

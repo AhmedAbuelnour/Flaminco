@@ -1,12 +1,12 @@
-﻿using Flaminco.Keycloak.Constants;
-using Flaminco.Keycloak.Exceptions;
-using Flaminco.Keycloak.Models;
+﻿using Flaminco.Keycloak.Client.Constants;
+using Flaminco.Keycloak.Client.Exceptions;
+using Flaminco.Keycloak.Client.Models;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 
-namespace Flaminco.Keycloak.Clients
+namespace Flaminco.Keycloak.Client.Clients
 {
     /// <summary>
     /// Implementation of the Keycloak client for interacting with the Keycloak server.
