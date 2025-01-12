@@ -4,19 +4,19 @@ namespace Flaminco.QueryableExtensions.Extensions
 {
     public static class SpecificationExtensions
     {
-        public static IQueryable<TOutput> SelectSpecification<TEntity, TOutput, TSpecification>(this IQueryable<TEntity> query)
+        public static IQueryable<TReturn> WithSpecification<TEntity, TReturn, TSpecification>(this IQueryable<TEntity> query)
             where TEntity : notnull
-            where TOutput : notnull
-            where TSpecification : ISelectSpecification<TEntity, TOutput>, new()
+            where TReturn : notnull
+            where TSpecification : Specification<TEntity, TReturn>, new()
             => new TSpecification().Select(query);
 
-        public static IQueryable<TOutput> SelectSpecification<TEntity, TOutput>(this IQueryable<TEntity> query, ISelectSpecification<TEntity, TOutput> specification)
+        public static IQueryable<TReturn> WithSpecification<TEntity, TReturn>(this IQueryable<TEntity> query, Specification<TEntity, TReturn> specification)
             where TEntity : notnull
-            where TOutput : notnull
+            where TReturn : notnull
             => specification.Select(query);
 
 
-        public static IQueryable<TEntity> WhereSpecification<TEntity>(this IQueryable<TEntity> query, IWhereSpecification<TEntity> specification) where TEntity : notnull
+        public static IQueryable<TEntity> WithSpecification<TEntity>(this IQueryable<TEntity> query, Specification<TEntity> specification) where TEntity : notnull
             => specification.Where(query);
     }
 }
