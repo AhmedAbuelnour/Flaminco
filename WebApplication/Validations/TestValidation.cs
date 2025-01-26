@@ -1,5 +1,6 @@
 ﻿using Flaminco.MinimalMediatR.Abstractions;
 using Flaminco.MinimalMediatR.Extensions;
+using Flaminco.StateMachine;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -76,14 +77,18 @@ namespace WebApplication1.Validations
     }
 
 
-    public class AddAddressCommandHandler(IChannelPublisher channelPublisher) : IEndPointRequestHandler<AddAddressCommand>
+    public class AddAddressCommandHandler() : IEndPointRequestHandler<AddAddressCommand>
     {
         public async Task<IResult> Handle(AddAddressCommand request, CancellationToken cancellationToken)
         {
-            await channelPublisher.Publish(new TestEvent
-            {
+            // Should always start with Initial state and Initial value
 
-            });
+            StateContext<string> context = new(new StateA(), "sttt");
+
+            while (await context.ProcessStateMachineAsync(cancellationToken))
+            {
+                Console.WriteLine("Executing");
+            }
 
             return Results.Ok();
         }

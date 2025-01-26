@@ -15,11 +15,18 @@ public static class ModuleExtension
     /// <returns>The updated service collection.</returns>
     public static IServiceCollection AddModules<TScanner>(this IServiceCollection services)
     {
-        IEnumerable<Type>? types = from type in typeof(TScanner).Assembly.DefinedTypes
-                                   where !type.IsAbstract && typeof(IModule).IsAssignableFrom(type) && type != typeof(IModule) && type.IsPublic
-                                   select type;
+        static IEnumerable<System.Reflection.TypeInfo> enumerable()
+        {
+            foreach (var type in typeof(TScanner).Assembly.DefinedTypes)
+            {
+                if (!type.IsAbstract && typeof(IModule).IsAssignableFrom(type) && type != typeof(IModule) && type.IsPublic)
+                {
+                    yield return type;
+                }
+            }
+        }
 
-        foreach (var type in types ?? []) services.AddSingleton(typeof(IModule), type);
+        foreach (var type in enumerable() ?? []) services.AddSingleton(typeof(IModule), type);
 
         return services;
     }

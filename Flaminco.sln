@@ -54,6 +54,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Keycloak.Client", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Minimal.Filters.Transaction", "Flaminco.Minimal.Filters.Transaction\Flaminco.Minimal.Filters.Transaction.csproj", "{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.StateMachine", "Flaminco.StateMachine\Flaminco.StateMachine.csproj", "{454DFFFC-EC7F-401C-B2F2-967C121D1AAC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -152,6 +154,10 @@ Global
 		{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{454DFFFC-EC7F-401C-B2F2-967C121D1AAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{454DFFFC-EC7F-401C-B2F2-967C121D1AAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{454DFFFC-EC7F-401C-B2F2-967C121D1AAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{454DFFFC-EC7F-401C-B2F2-967C121D1AAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

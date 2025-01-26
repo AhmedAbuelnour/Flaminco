@@ -1,21 +1,47 @@
-﻿namespace Flaminco.StateMachine
+﻿using Microsoft.Extensions.Logging;
+using System.Diagnostics;
+using System.Text.Json;
+
+namespace Flaminco.StateMachine
 {
-    public class State(string identifier, Machine machine)
+    public abstract class State<TObject>(ILogger _logger) where TObject : notnull, new()
     {
-        internal string Identifier = identifier;
+        public abstract string Key { get; }
 
-        internal Machine Machine = machine;
+        /// <summary>
+        /// Returns true if the a state transition is expected and the context should carry on executing, false if you want to get out of the state machine.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async ValueTask<bool> ExecuteAsync(StateContext<TObject> context, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                // Capture object state before execution
+                string previous = JsonSerializer.Serialize(context.Object, JsonSerializerOptions.Web);
 
-        internal readonly List<Type> BeforeTransitions = [];
+                _logger.LogInformation("Entering state: {StateKey}", Key);
 
-        internal readonly List<Type> AfterTransitions = [];
+                bool shouldContinue = await Handle(context, cancellationToken);
 
-        public void OnEntry<Transition>() where Transition : ITransition
-            => BeforeTransitions.Add(typeof(Transition));
+                _logger.LogInformation("Exiting state: {StateKey}", Key);
 
-        public void OnExit<Transition>() where Transition : ITransition
-            => AfterTransitions.Add(typeof(Transition));
+                string current = JsonSerializer.Serialize(context.Object, JsonSerializerOptions.Web);
 
-        public ValueTask EnterAsync(CancellationToken cancellationToken = default) => Machine.SetCurrentAsync(this, cancellationToken);
+                context.StateSnapshots.Add(new StateSnapshot(Key, previous, current, Stopwatch.GetTimestamp()));
+
+                return shouldContinue;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception in state: {StateKey}", Key);
+
+                return await Handle(context, ex, cancellationToken);
+            }
+        }
+
+        public abstract ValueTask<bool> Handle(StateContext<TObject> context, CancellationToken cancellationToken = default);
+        public abstract ValueTask<bool> Handle(StateContext<TObject> context, Exception exception, CancellationToken cancellationToken = default);
     }
 }
