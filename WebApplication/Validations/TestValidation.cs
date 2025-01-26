@@ -77,24 +77,85 @@ namespace WebApplication1.Validations
     }
 
 
-    public class AddAddressCommandHandler() : IEndPointRequestHandler<AddAddressCommand>
+    public class AddAddressCommandHandler(StateContext<StateObject> stateContext, StateContext<StateObject2> stateContext2) : IEndPointRequestHandler<AddAddressCommand>
     {
         public async Task<IResult> Handle(AddAddressCommand request, CancellationToken cancellationToken)
         {
             // Should always start with Initial state and Initial value
 
-            StateContext<string> context = new(new StateA(), "sttt");
-
-            while (await context.ProcessStateMachineAsync(cancellationToken))
+            stateContext.SetState(nameof(StateA), new StateObject
             {
-                Console.WriteLine("Executing");
+                Name = "Test 1"
+            });
+
+            await stateContext.ProcessAsync(cancellationToken);
+
+
+            stateContext2.SetState(nameof(StateA), new StateObject2
+            {
+                Name = "Test 2"
+            });
+
+            await stateContext2.ProcessAsync(cancellationToken);
+
+
+            foreach (var item in stateContext.StateSnapshots)
+            {
+                Console.WriteLine(item.ToString());
             }
 
             return Results.Ok();
         }
     }
 
+    public class StateObject
+    {
+        public string Name { get; set; }
+    }
 
+    public class StateObject2
+    {
+        public string Name { get; set; }
+    }
+
+    [StateKey(nameof(StateA))]
+    public class StateA(ILogger<StateA> logger) : State<StateObject>(logger)
+    {
+        public override async ValueTask<bool> Handle(StateContext<StateObject> context, CancellationToken cancellationToken = default)
+        {
+            Console.WriteLine("State A");
+
+            context.Payload.Name = "State A";
+
+            context.SetState(nameof(StateB));
+
+            return true;
+        }
+        public override async ValueTask<bool> Handle(StateContext<StateObject> context, Exception exception, CancellationToken cancellationToken = default)
+        {
+            Console.WriteLine("State A Error");
+
+            return false;
+        }
+    }
+
+    [StateKey(nameof(StateB))]
+    public class StateB(ILogger<StateB> logger) : State<StateObject>(logger)
+    {
+        public override async ValueTask<bool> Handle(StateContext<StateObject> context, CancellationToken cancellationToken = default)
+        {
+            Console.WriteLine("State B");
+
+            context.Payload.Name = "State B";
+
+            return false;
+        }
+        public override async ValueTask<bool> Handle(StateContext<StateObject> context, Exception exception, CancellationToken cancellationToken = default)
+        {
+            Console.WriteLine("State B Error");
+            return false;
+        }
+    }
 
     public class TestModule : IModule
     {

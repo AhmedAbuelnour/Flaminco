@@ -1,25 +1,33 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text.Json;
 
 namespace Flaminco.StateMachine
 {
-    public abstract class State<TObject>(ILogger _logger) where TObject : notnull, new()
+    /// <summary>
+    /// Represents an abstract state in the state machine.
+    /// </summary>
+    /// <typeparam name="TPayload">The type of the object associated with the state.</typeparam>
+    public abstract class State<TPayload>(ILogger _logger) where TPayload : notnull, new()
     {
-        public abstract string Key { get; }
+        /// <summary>
+        /// Gets the key of the state by reading the [StateKey] attribute.
+        /// </summary>
+        protected string Key => GetType().GetCustomAttribute<StateKeyAttribute>()?.Key ?? throw new InvalidOperationException($"The state '{GetType().Name}' is missing the [StateKey] attribute.");
+
 
         /// <summary>
-        /// Returns true if the a state transition is expected and the context should carry on executing, false if you want to get out of the state machine.
+        /// Executes the state logic asynchronously.
         /// </summary>
-        /// <param name="context"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public async ValueTask<bool> ExecuteAsync(StateContext<TObject> context, CancellationToken cancellationToken = default)
+        /// <param name="context">The state context.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a boolean value indicating whether to continue to the next state.</returns>
+        public async ValueTask<bool> ExecuteAsync(StateContext<TPayload> context, CancellationToken cancellationToken = default)
         {
             try
             {
-                // Capture object state before execution
-                string previous = JsonSerializer.Serialize(context.Object, JsonSerializerOptions.Web);
+                string previous = JsonSerializer.Serialize(context.Payload, JsonSerializerOptions.Web);
 
                 _logger.LogInformation("Entering state: {StateKey}", Key);
 
@@ -27,7 +35,7 @@ namespace Flaminco.StateMachine
 
                 _logger.LogInformation("Exiting state: {StateKey}", Key);
 
-                string current = JsonSerializer.Serialize(context.Object, JsonSerializerOptions.Web);
+                string current = JsonSerializer.Serialize(context.Payload, JsonSerializerOptions.Web);
 
                 context.StateSnapshots.Add(new StateSnapshot(Key, previous, current, Stopwatch.GetTimestamp()));
 
@@ -41,7 +49,21 @@ namespace Flaminco.StateMachine
             }
         }
 
-        public abstract ValueTask<bool> Handle(StateContext<TObject> context, CancellationToken cancellationToken = default);
-        public abstract ValueTask<bool> Handle(StateContext<TObject> context, Exception exception, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Handles the state logic asynchronously.
+        /// </summary>
+        /// <param name="context">The state context.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a boolean value indicating whether to continue to the next state.</returns>
+        public abstract ValueTask<bool> Handle(StateContext<TPayload> context, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Handles the state logic asynchronously when an exception occurs.
+        /// </summary>
+        /// <param name="context">The state context.</param>
+        /// <param name="exception">The exception that occurred.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a boolean value indicating whether to continue to the next state.</returns>
+        public abstract ValueTask<bool> Handle(StateContext<TPayload> context, Exception exception, CancellationToken cancellationToken = default);
     }
 }

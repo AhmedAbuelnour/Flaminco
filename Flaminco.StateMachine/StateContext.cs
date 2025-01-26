@@ -1,18 +1,64 @@
-﻿namespace Flaminco.StateMachine
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace Flaminco.StateMachine
 {
-    public sealed class StateContext<TObject>(State<TObject> InitialState, TObject Object) where TObject : notnull, new()
+
+    /// <summary>
+    /// Represents the context for the state machine, holding the current state and the object being processed.
+    /// </summary>
+    /// <typeparam name="TPayload">The type of the object being processed by the state machine.</typeparam>
+    /// <param name="serviceProvider">The service provider for creating scopes and resolving services.</param>
+    public sealed class StateContext<TPayload>(IServiceProvider serviceProvider) where TPayload : notnull, new()
     {
-        private State<TObject> _currentState = InitialState;
+        private State<TPayload>? _currentState;
 
-        public TObject Object { get; set; } = Object;
+        /// <summary>
+        /// Gets or sets the object being processed by the state machine.
+        /// </summary>
+        public TPayload? Payload { get; set; }
 
+        /// <summary>
+        /// Gets the list of state snapshots.
+        /// </summary>
         public IList<StateSnapshot> StateSnapshots { get; } = [];
 
-        internal void SetState(State<TObject> state) => _currentState = state;
-
-        public async ValueTask ProcessStateMachineAsync(CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Sets the current state of the state machine and assigns the object being processed.
+        /// </summary>
+        /// <param name="key">The key of the new state to set.</param>
+        /// <param name="payload">The payload being processed by the state machine.</param>
+        public void SetState(string key, TPayload payload)
         {
-            while (!cancellationToken.IsCancellationRequested && await _currentState.ExecuteAsync(this, cancellationToken)) ;
+            Payload = payload;
+
+            SetState(key);
+        }
+
+        /// <summary>
+        /// Sets the current state of the state machine.
+        /// </summary>
+        /// <param name="key">The key of the new state to set.</param>
+        public void SetState(string key)
+        {
+            if (serviceProvider.GetKeyedService<State<TPayload>>(key) is State<TPayload> state)
+            {
+                _currentState = state;
+            }
+            else
+            {
+                throw new InvalidOperationException($"The state '{key}' is not registered.");
+            }
+        }
+
+        /// <summary>
+        /// Processes the state machine asynchronously until cancellation is requested.
+        /// </summary>
+        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+        public async ValueTask ProcessAsync(CancellationToken cancellationToken = default)
+        {
+            while (!cancellationToken.IsCancellationRequested
+                && _currentState is not null
+                && await _currentState.ExecuteAsync(this, cancellationToken)) ;
         }
     }
 }

@@ -2,6 +2,7 @@ using Flaminco.AdvancedHybridCache.Extensions;
 using Flaminco.DualMapper.Extensions;
 using Flaminco.ManualMapper.Extensions;
 using Flaminco.MinimalMediatR.Extensions;
+using Flaminco.StateMachine;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Caching.Hybrid;
@@ -12,6 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddStateMachine<Program>();
 
 builder.Services.AddAuthentication().AddBearerToken(JwtBearerDefaults.AuthenticationScheme);
 builder.Services.AddAuthorization();
