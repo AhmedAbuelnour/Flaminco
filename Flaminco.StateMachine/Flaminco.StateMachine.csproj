@@ -1,14 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+   <TargetFramework>net9.0</TargetFramework>
+   <ImplicitUsings>enable</ImplicitUsings>
+   <Nullable>enable</Nullable>
+   <Version>0.0.1</Version>
+   <Authors>Ahmed Abuelnour</Authors>
+   <GenerateDocumentationFile>true</GenerateDocumentationFile>
+   <Company>Personal</Company>
+   <PackageReadmeFile>README.md</PackageReadmeFile>
+   <PackageLicenseExpression>MIT</PackageLicenseExpression>
+   <Description>
+	   Flaminco.StateMachine is a lightweight, flexible library for building and executing state machines in .NET applications. It provides an easy-to-use framework for managing states, transitions, and asynchronous state processing, leveraging .NET's dependency injection and logging capabilities.
+   </Description>
+   <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
+   <Copyright>
+    Copyright (c) 2024, Ahmed Abuelnour
+   </Copyright>  
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="" />
 	</ItemGroup>
 	
 </Project>

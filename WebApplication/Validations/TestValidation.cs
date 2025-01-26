@@ -77,7 +77,7 @@ namespace WebApplication1.Validations
     }
 
 
-    public class AddAddressCommandHandler(StateContext<StateObject> stateContext, StateContext<StateObject2> stateContext2) : IEndPointRequestHandler<AddAddressCommand>
+    public class AddAddressCommandHandler(StateContext<StateObject> stateContext) : IEndPointRequestHandler<AddAddressCommand>
     {
         public async Task<IResult> Handle(AddAddressCommand request, CancellationToken cancellationToken)
         {
@@ -85,18 +85,10 @@ namespace WebApplication1.Validations
 
             stateContext.SetState(nameof(StateA), new StateObject
             {
-                Name = "Test 1"
+                Data = "Initial data to start with"
             });
 
             await stateContext.ProcessAsync(cancellationToken);
-
-
-            stateContext2.SetState(nameof(StateA), new StateObject2
-            {
-                Name = "Test 2"
-            });
-
-            await stateContext2.ProcessAsync(cancellationToken);
 
 
             foreach (var item in stateContext.StateSnapshots)
@@ -110,12 +102,7 @@ namespace WebApplication1.Validations
 
     public class StateObject
     {
-        public string Name { get; set; }
-    }
-
-    public class StateObject2
-    {
-        public string Name { get; set; }
+        public string Data { get; set; }
     }
 
     [StateKey(nameof(StateA))]
@@ -125,7 +112,7 @@ namespace WebApplication1.Validations
         {
             Console.WriteLine("State A");
 
-            context.Payload.Name = "State A";
+            context.Payload.Data = "State A";
 
             context.SetState(nameof(StateB));
 
@@ -146,7 +133,7 @@ namespace WebApplication1.Validations
         {
             Console.WriteLine("State B");
 
-            context.Payload.Name = "State B";
+            context.Payload.Data = "State B";
 
             return false;
         }
