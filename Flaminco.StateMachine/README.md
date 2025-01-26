@@ -90,7 +90,7 @@ public class StateObject
 Register the states and the state machine context in your `Startup.cs` or equivalent:
 
 ```csharp
-services.AddStateMachine<StateA>();
+services.AddStateMachine<IStateScanner>();
 ```
 
 This scans the assembly for all state classes and registers them with the dependency injection container.
@@ -105,7 +105,7 @@ public class Example(StateContext<StateObject> stateContext)
     public async Task Handle(CancellationToken cancellationToken)
     {
         // Initialize with the initial state and payload
-        stateContext.SetState("StateA", new StateObject
+        stateContext.SetState(nameof(StateA), new StateObject
         {
             Data = "Initial data to start with"
         });

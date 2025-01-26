@@ -129,11 +129,15 @@ namespace WebApplication1.Validations
     [StateKey(nameof(StateB))]
     public class StateB(ILogger<StateB> logger) : State<StateObject>(logger)
     {
+        int trycount = 0;
         public override async ValueTask<bool> Handle(StateContext<StateObject> context, CancellationToken cancellationToken = default)
         {
             Console.WriteLine("State B");
 
             context.Payload.Data = "State B";
+
+            // if in the db the user is free user.
+            // then no need to go to state 3, break the states, enough.
 
             return false;
         }
