@@ -1,20 +1,19 @@
-# Flaminco.AzureBus.AMQP
+# LowCodeHub.RabbitMQ.AMQP
 
-Flaminco.AzureBus.AMQP is a .NET library that simplifies the integration of Azure Bus in your applications. This library
-provides a clean and easy-to-use API for creating consumers and publishers to interact with AzureBus queues.
+LowCodeHub.RabbitMQ.AMQP is a .NET library that simplifies the integration of RabbitMQ with AMQP 1.0 protocol in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with RabbitMQ queues using AMQP 1.0.
 
 ## Installation
 
 You can install the package via NuGet Package Manager:
 
 ```bash
-dotnet add package Flaminco.AzureBus.AMQP
+dotnet add package LowCodeHub.RabbitMQ.AMQP
 ```
 
 Or via the Package Manager Console in Visual Studio:
 
 ```powershell
-Install-Package Flaminco.AzureBus.AMQP
+Install-Package LowCodeHub.RabbitMQ.AMQP
 ```
 
 ## Getting Started
@@ -26,30 +25,27 @@ First, you need to configure the AMQP client in your application's `Startup` or 
 ```csharp
 builder.Services.AddAMQPClient<Program>(options =>
 {
-    options.ConnectionString = "<Azure Bus Connection String>";
+    options.Host = "amqp://localhost:5672"; // RabbitMQ host with AMQP 1.0 plugin enabled
+    options.Username = "guest";
+    options.Password = "guest";
+    options.RetryCount = 3; // Optional: Set retry count
+    options.RetryInterval = TimeSpan.FromSeconds(2); // Optional: Set retry interval
 });
 ```
 
+> **Note**: To use AMQP 1.0 with RabbitMQ 4, you need to install the RabbitMQ AMQP 1.0 plugin:
+> ```bash
+> rabbitmq-plugins enable rabbitmq_amqp1_0
+> ```
+
 ### Step 2: Create a Message Publisher
 
-Implement a custom publisher by extending the `MessagePublisher` class. The publisher defines the queue(s) to which it
-will send messages:
+Implement a custom publisher by extending the `MessagePublisher` class. The publisher defines the queue to which it will send messages:
 
 ```csharp
-
-// must be shared between your consumer and publisher (Must be same type not only identical in properties)
-// in case you didn't Set SkipMessageTypeMatching to true.
-// if you set SkipMessageTypeMatching = true, then you don't need the identical type
-public class Person : IMessage
+public class PersonPublisher : MessagePublisher
 {
-    public string Name { get; set; }
-    public int Age { get; set; }
-}
-
-
-public class PersonPublisher : MessagePublisher<Person>
-{
-    public PersonPublisher(ISendEndpointProvider sendEndpointProvider) : base(sendEndpointProvider)
+    public PersonPublisher(AMQPConnectionProvider connectionProvider) : base(connectionProvider)
     {
     }
 
@@ -62,169 +58,89 @@ public class PersonPublisher : MessagePublisher<Person>
 Now, you can use your custom publisher to send a message to the specified queue:
 
 ```csharp
-public class Example(PersonPublisher _personPublisher)
+public class Person : IMessage
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+public class Example(PersonPublisher personPublisher)
 {
     [HttpGet]
     public async Task PushMessage(CancellationToken cancellationToken)
     {
-        await _personPublisher.PublishAsync(new Person
+        // Simple message publishing
+        await personPublisher.PublishAsync(new Person
         {
             Name = "Ahmed Abuelnour",
             Age = 30
         }, cancellationToken);
+        
+        // Publishing with options
+        var options = new MessagePublishOptions
+        {
+            MessageId = Guid.NewGuid(),
+            CorrelationId = Guid.NewGuid(),
+            TimeToLive = TimeSpan.FromHours(1),
+            ContentType = "application/json",
+            ApplicationProperties = new Dictionary<string, string>
+            {
+                ["Priority"] = "High"
+            }
+        };
+        
+        await personPublisher.PublishAsync(new Person
+        {
+            Name = "John Doe",
+            Age = 25
+        }, options, cancellationToken);
     }
 }
 ```
 
 ### Step 4: Create a Message Consumer
 
-Implement a custom consumer by extending the `MessageConsumer` class. The consumer defines the queue from which it will
-receive messages:
+Implement a custom consumer by extending the `MessageConsumer` class. The consumer defines the queue from which it will receive messages using the `QueueConsumerAttribute`:
 
 ```csharp
-
-// For queue consumers
-
 [QueueConsumer(queue: "HelloQueue")]
 public class PersonConsumer : MessageConsumer<Person>
 {
-    public override Task Consume(ConsumeContext<Person> context)
+    private readonly ILogger<PersonConsumer> _logger;
+    
+    public PersonConsumer(ILogger<PersonConsumer> logger)
     {
-        Console.WriteLine($"Received message: {context.Message.Name}, Age: {context.Message.Age}");
-        return Task.CompletedTask;
+        _logger = logger;
     }
-
-   public override Task Consume(ConsumeContext<Fault<MessageBox>> context)
-   {
-       return base.Consume(context);
-   }
-}
-
-// For topic consumers
-
-[TopicConsumer(topic: "HelloQueue", subscription: nameof(PersonConsumer))]
-public class PersonConsumer : MessageConsumer<Person>
-{
-    public override Task Consume(ConsumeContext<Person> context)
+    
+    public override Task ConsumeAsync(Person message, MessageProperties properties, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Received message: {context.Message.Name}, Age: {context.Message.Age}");
-        return Task.CompletedTask;
-    }
-
-   public override Task Consume(ConsumeContext<Fault<MessageBox>> context)
-   {
-       return base.Consume(context);
-   }
-}
-
-// For filter based topic consumer
-
-// you can define sql filter
-public class SqlFilterProvider : IRuleFilterProvider
-{
-    public RuleFilter? GetRuleFilter()
-    {
-       // Filter key is the one you use in MessagePublishOptions, and Filter Value is the value you pass
-       return new SqlRuleFilter("FilterKey = FilterValue");
-    }
-}
-
-// or you can define correlation filter
-
-public class CorrelationFilterProvider : IRuleFilterProvider
-{
-    public RuleFilter? GetRuleFilter()
-    {
-        return new CorrelationRuleFilter
+        _logger.LogInformation("Received message: {Name}, Age: {Age}", message.Name, message.Age);
+        
+        // You can access message properties
+        if (properties.ApplicationProperties.TryGetValue("Priority", out var priority))
         {
-            CorrelationId = "Correlation Id Value"
-        };
-    }
-}
-
-[TopicConsumer(topic: "HelloQueue", subscription: nameof(PersonConsumer), typeof(CorrelationFilterProvider))]
-public class PersonConsumer : MessageConsumer<Person>
-{
-    public override Task Consume(ConsumeContext<Person> context)
-    {
-        Console.WriteLine($"Received message: {context.Message.Name}, Age: {context.Message.Age}");
+            _logger.LogInformation("Message priority: {Priority}", priority);
+        }
+        
         return Task.CompletedTask;
     }
 
-   public override Task Consume(ConsumeContext<Fault<MessageBox>> context)
-   {
-       return base.Consume(context);
-   }
+    public override Task ConsumeErrorAsync(Exception error, MessageProperties properties, CancellationToken cancellationToken)
+    {
+        _logger.LogError(error, "Error processing message");
+        return Task.CompletedTask;
+    }
 }
 ```
 
 ### Step 5: Run the Application
 
-Build and run your application. The consumer will continuously listen for messages on the specified queue, while the
-publisher sends messages to that queue.
-
-### Step 6: Sync Message Publisher
-
-To build synchronous communication between a publisher and waiting the consumer to return a response
-
-```
-[SyncQueueConsumer("HelloTest", typeof(ExampleRequest))]
-public sealed class HelloSyncMessagePublisher(IRequestClient<ExampleRequest> requestClient) : SyncMessagePublisher<ExampleRequest>(requestClient);
-```
-
-example for using the sync publisher
-
-```
-[ApiController]
-[Route("api/pdf")]
-public class ExampleController(HelloSyncMessagePublisher helloSyncMessagePublisher) : ControllerBase
-{
-    [HttpPost("greating")]
-    public async Task<IActionResult> GenerateMessage()
-    {
-        Response<ExampleResponse> response = await helloSyncMessagePublisher.GetResponseAsync<ExampleResponse>(new ExampleRequest
-        {
-            Id = 1,
-        });
-
-        return Ok(response.Message);
-    }
-}
-```
-and for consumer 
-
-```
-[QueueConsumer("HelloTest")]
-public class ExampleConsumer : MessageConsumer<ExampleRequest>
-{
-    public override async Task Consume(ConsumeContext<ExampleRequest> context)
-    {
-        await context.RespondAsync<ExampleResponse>(new ExampleResponse
-        {
-            Message = "This is a test message"
-        });
-    }
-}
-```
-
-Messages example
-
-```
-public class ExampleRequest : IMessage
-{
-    public int Id { get; set; }
-}
-
-public class ExampleResponse : IMessage
-{
-    public string Message { get; set; }
-}
-```
+Build and run your application. The consumer will automatically start and listen for messages on the specified queue, while the publisher can be used to send messages to that queue.
 
 ## Contributing
 
-If you encounter any issues or have suggestions for improvements, please feel free to contribute by submitting an issue
-or a pull request.
+If you encounter any issues or have suggestions for improvements, please feel free to contribute by submitting an issue or a pull request.
 
 ## License
 

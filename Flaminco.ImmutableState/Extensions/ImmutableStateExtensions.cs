@@ -16,6 +16,6 @@ public static class ImmutableStateExtensions
     public static IServiceCollection AddImmutableState<TContext>(this IServiceCollection services)
         where TContext : DbContext
     {
-        return services.AddSingleton<IImmutableStateLookup, DefaultImmutableStateLookup<TContext>>();
+        return services.AddScoped<IImmutableStateLookup, DefaultImmutableStateLookup<TContext>>();
     }
 }

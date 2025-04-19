@@ -1,8 +1,12 @@
-﻿using System.Linq.Expressions;
-using Flaminco.ImmutableStates.Entity;
+﻿using Flaminco.ImmutableStates.Entity;
+using System.Linq.Expressions;
 
 namespace Flaminco.ImmutableStates.Abstractions;
 
+
+/// <summary>
+///     Provides methods to lookup immutable state entities.
+/// </summary>
 public interface IImmutableStateLookup
 {
     /// <summary>

@@ -9,7 +9,7 @@ namespace Flaminco.ImmutableStates.Implementations;
 ///     Provides a default implementation for looking up immutable states using Entity Framework Core.
 /// </summary>
 /// <typeparam name="TContext">The type of the DbContext used for database operations.</typeparam>
-public class DefaultImmutableStateLookup<TContext>(TContext _dbContext) : IImmutableStateLookup where TContext : DbContext
+public sealed class DefaultImmutableStateLookup<TContext>(TContext _dbContext) : IImmutableStateLookup where TContext : DbContext
 {
     /// <inheritdoc />
     public Task<ImmutableState?> GetByCodeAsync(int code, CancellationToken cancellationToken = default)

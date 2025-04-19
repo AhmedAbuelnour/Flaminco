@@ -4,9 +4,15 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<Version>0.0.1</Version>
+	  <Authors>Ahmed Abuelnour</Authors>
+	  <Company>Personal</Company>
+	  <Description>A simplify using the new Microsoft.Extensions.Caching.Hybrid</Description>
+	  <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
+	  <Copyright>MIT</Copyright>
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.0.0-preview.9.24556.5" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.3.0" />
 	</ItemGroup>
 </Project>

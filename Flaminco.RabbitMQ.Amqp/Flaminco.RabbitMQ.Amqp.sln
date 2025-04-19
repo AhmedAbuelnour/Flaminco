@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.RabbitMQ.AMQP", "Flaminco.RabbitMQ.AMQP.csproj", "{8F7F2EB7-F973-CDFD-DC35-380077095278}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F7F2EB7-F973-CDFD-DC35-380077095278}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F7F2EB7-F973-CDFD-DC35-380077095278}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F7F2EB7-F973-CDFD-DC35-380077095278}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F7F2EB7-F973-CDFD-DC35-380077095278}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BBFC7862-763B-4964-8E4E-DBE83D8EB6E5}
+	EndGlobalSection
+EndGlobal

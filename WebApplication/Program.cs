@@ -66,6 +66,12 @@ builder.Services.AddScoped<ITest, Test>();
 
 var app = builder.Build();
 
+app.MapGet("/test", async (ITest test) =>
+{
+    await test.Test();
+    return Results.Ok();
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
