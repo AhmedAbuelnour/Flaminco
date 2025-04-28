@@ -1,70 +1,75 @@
-using Amqp;
-using Amqp.Framing;
-using Flaminco.RabbitMQ.AMQP.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using RabbitMQ.Client;
 using System.Collections.Concurrent;
 
 namespace Flaminco.RabbitMQ.AMQP.Services
 {
     /// <summary>
-    /// Provides AMQP connections to publishers and consumers.
+    /// Provides RabbitMQ connections to publishers and consumers.
     /// </summary>
     /// <remarks>
     /// Initializes a new instance of the <see cref="AmqpConnectionProvider"/> class.
     /// </remarks>
-    public sealed class AmqpConnectionProvider(IOptions<AmqpClientSettings> settings, ILogger<AmqpConnectionProvider> logger) : IDisposable
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="AmqpConnectionProvider"/> class.
+    /// </remarks>
+    /// <param name="factory">The AMQP client settings.</param>
+    /// <param name="logger">The logger instance.</param>
+    public sealed class AmqpConnectionProvider(IOptions<ConnectionFactory> factory, ILogger<AmqpConnectionProvider> logger) : IAsyncDisposable
     {
-        private readonly AmqpClientSettings _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-        private Connection? _connection;
-        private readonly ConcurrentDictionary<string, Session> _sessions = new();
+        private IConnection? _connection;
+        private readonly ConcurrentDictionary<string, IChannel> _channels = new();
         private readonly SemaphoreSlim _connectionLock = new(1, 1);
         private bool _disposed;
+        private readonly ConnectionFactory _factory = factory.Value;
 
         /// <summary>
-        /// Gets an AMQP connection instance, creating it if necessary.
+        /// Gets a RabbitMQ connection instance, creating it if necessary.
         /// </summary>
-        public async Task<Connection> GetConnectionAsync()
+        public async Task<IConnection> GetConnectionAsync(CancellationToken cancellationToken = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(AmqpConnectionProvider));
 
-            if (_connection != null && !_connection.IsClosed)
+            if (_connection?.IsOpen == true)
                 return _connection;
 
-            await _connectionLock.WaitAsync();
+            await _connectionLock.WaitAsync(cancellationToken);
 
             try
             {
                 // Double-check in case another thread created the connection while we were waiting
-                if (_connection != null && !_connection.IsClosed)
+                if (_connection?.IsOpen == true)
                     return _connection;
 
-                logger.LogInformation("Opening AMQP connection to {Host}", _settings.Host);
+                logger.LogInformation("Opening RabbitMQ connection to {Host}", _factory.HostName);
 
-                // Create connection object with address and connection settings
-                Address address = new(_settings.Host);
-
-                ConnectionFactory connectionFactory = new();
-
-                // Set connection properties
-                Connection connection = await connectionFactory.CreateAsync(address, new Open()
+                // Dispose the old connection if it exists
+                if (_connection != null)
                 {
-                    ContainerId = Guid.NewGuid().ToString(),
-                    IdleTimeOut = (uint)_settings.IdleTimeout.TotalMilliseconds
-                });
+                    try
+                    {
+                        _connection.Dispose();
+                    }
+                    catch
+                    {
+                    }
+                }
 
-                connection.Closed += (sender, error) =>
+                // Create connection asynchronously
+                _connection = await _factory.CreateConnectionAsync(cancellationToken);
+
+                // Handle connection shutdown
+                _connection.ConnectionShutdownAsync += async (sender, args) =>
                 {
-                    logger.LogWarning("AMQP connection closed: {Error}", error?.ToString() ?? "Unknown reason");
+                    logger.LogWarning("RabbitMQ connection closed: {Reason}", args.ReplyText);
                 };
 
-                _connection = connection;
-
-                return connection;
+                return _connection;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to create AMQP connection to {Host}", _settings.Host);
+                logger.LogError(ex, "Failed to create RabbitMQ connection to {Host}", _factory.HostName);
 
                 throw;
             }
@@ -75,54 +80,82 @@ namespace Flaminco.RabbitMQ.AMQP.Services
         }
 
         /// <summary>
-        /// Gets an AMQP session for the specified queue.
+        /// Creates a channel for RabbitMQ operations.
         /// </summary>
-        public async Task<Session> GetSessionAsync(string queueName)
+        public async Task<IChannel> CreateChannelAsync(CancellationToken cancellationToken = default)
         {
             ObjectDisposedException.ThrowIf(_disposed, nameof(AmqpConnectionProvider));
 
-            // If we already have a session for this queue, return it
-            if (_sessions.TryGetValue(queueName, out var existingSession) && !existingSession.IsClosed)
-                return existingSession;
+            IConnection connection = await GetConnectionAsync(cancellationToken);
 
-            // Otherwise create a new session
-            Connection connection = await GetConnectionAsync();
+            return await connection.CreateChannelAsync(cancellationToken: cancellationToken);
+        }
 
-            // Create a new session on the connection
-            Session session = new(connection);
+        /// <summary>
+        /// Gets a dedicated channel for a queue and caches it.
+        /// </summary>
+        public async Task<IChannel> GetChannelForQueueAsync(string queueName, CancellationToken cancellationToken = default)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, nameof(AmqpConnectionProvider));
 
-            session.Closed += (sender, error) =>
+            // If we already have a channel for this queue, return it if still open
+            if (_channels.TryGetValue(queueName, out var existingChannel) && existingChannel.IsOpen)
+                return existingChannel;
+
+            IChannel channel = await CreateChannelAsync(cancellationToken: cancellationToken);
+
+            // Configure the channel as needed
+            channel.ChannelShutdownAsync += async (sender, args) =>
             {
-                logger.LogWarning("AMQP session for queue {QueueName} closed: {Error}", queueName, error?.ToString() ?? "Unknown reason");
+                logger.LogWarning("RabbitMQ channel for queue {QueueName} closed: {Reason}", queueName, args.ReplyText);
 
-                _sessions.TryRemove(queueName, out _);
+                _channels.TryRemove(queueName, out _);
             };
 
-            _sessions[queueName] = session;
+            // Add to our cache
+            _channels[queueName] = channel;
 
-            return session;
+            return channel;
         }
 
         /// <inheritdoc/>
-        public void Dispose()
+
+        public async ValueTask DisposeAsync()
         {
             if (_disposed)
                 return;
 
-            // Close all sessions
-            foreach (var session in _sessions.Values)
+            // Close all channels
+            foreach (IChannel channel in _channels.Values)
             {
-                try { session.Close(); } catch { }
+                try
+                {
+                    await channel.CloseAsync();
+
+                    channel.Dispose();
+                }
+                catch
+                {
+                    continue;
+                }
             }
 
-            _sessions.Clear();
+            _channels.Clear();
 
             // Close connection
             if (_connection != null)
             {
-                try { _connection.Close(); }
+                try
+                {
+                    await _connection.CloseAsync();
+                }
                 catch { }
-                _connection = null!; // Non-nullable field suppression with null-forgiving operator
+                try
+                {
+                    _connection.Dispose();
+                }
+                catch { }
+                _connection = null;
             }
 
             _connectionLock.Dispose();

@@ -1,4 +1,4 @@
-﻿using Flaminco.Keycloak.Authentication.Retrievers;
+﻿using Flaminco.Keycloak.Authentication.JwtBearer.Retrievers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;

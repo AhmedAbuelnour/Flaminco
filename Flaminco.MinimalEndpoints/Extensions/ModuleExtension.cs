@@ -5,6 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Flaminco.MinimalEndpoints.Extensions;
 
 
+/// <summary>
+/// Provides extension methods for working with endpoint modules.
+/// </summary>
 public static class ModuleExtension
 {
     /// <summary>
@@ -32,10 +35,10 @@ public static class ModuleExtension
     }
 
     /// <summary>
-    /// Adds all implementations of the IModule interface from the specified assembly to the service collection.
+    /// Adds all implementations of the IMinimalRouteEndpoint interface from the specified assembly to the service collection.
     /// </summary>
     /// <typeparam name="TEndpointScanner">The type used to locate the assembly to scan for endpoints.</typeparam>
-    /// <param name="services">The service collection to add the modules to.</param>
+    /// <param name="services">The service collection to add the endpoints to.</param>
     /// <returns>The updated service collection.</returns>
     public static IServiceCollection AddEndpoints<TEndpointScanner>(this IServiceCollection services)
     {

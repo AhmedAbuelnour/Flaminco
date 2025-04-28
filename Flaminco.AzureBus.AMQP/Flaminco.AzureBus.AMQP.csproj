@@ -6,11 +6,11 @@
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <Nullable>enable</Nullable>
-        <Version>2.2.1</Version>
+        <Version>3.0.0</Version>
         <Authors>Ahmed Abuelnour</Authors>
         <Company>Personal</Company>
         <Description>
-            Flaminco.AzureBus.AMQP is a .NET library that simplifies the integration of Azure bus in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with RabbitMQ queues.
+            Flaminco.AzureBus.AMQP is a .NET library that simplifies the integration of Azure Service Bus in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with Azure Service Bus queues and topics.
         </Description>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -22,8 +22,9 @@
 
 
 	<ItemGroup>
-
-		<PackageReference Include="AMQPNetLite" Version="2.4.11" />
+		<PackageReference Include="AspNetCore.HealthChecks.AzureServiceBus" Version="9.0.0" />
+		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.17.1" />
+		<PackageReference Include="Microsoft.Extensions.Azure" Version="1.11.0" />
 
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />

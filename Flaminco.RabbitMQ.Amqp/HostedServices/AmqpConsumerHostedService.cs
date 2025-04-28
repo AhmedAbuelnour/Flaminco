@@ -1,30 +1,28 @@
 ﻿namespace Flaminco.RabbitMQ.AMQP.HostedServices
 {
-    using Amqp;
     using Flaminco.RabbitMQ.AMQP.Abstractions;
     using Flaminco.RabbitMQ.AMQP.Attributes;
     using Flaminco.RabbitMQ.AMQP.Services;
+    using global::RabbitMQ.Client;
+    using global::RabbitMQ.Client.Events;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
-    using System;
     using System.Reflection;
-    using System.Threading;
-    using System.Threading.Tasks;
 
     /// <summary>
-    /// Hosted service responsible for managing AMQP consumers.
+    /// Hosted service responsible for managing RabbitMQ consumers.
     /// </summary>
     internal sealed class AmqpConsumerHostedService(IServiceProvider serviceProvider,
-                                                    AmqpConnectionProvider connectionProvider,
-                                                    ILogger<AmqpConsumerHostedService> logger) : IHostedService, IDisposable
+                                              AmqpConnectionProvider connectionProvider,
+                                              ILogger<AmqpConsumerHostedService> logger) : IHostedService, IAsyncDisposable
     {
-        private readonly List<(ReceiverLink Receiver, CancellationTokenSource CancellationSource)> _receivers = [];
+        private readonly List<(IChannel Channel, AsyncEventingBasicConsumer Consumer, CancellationTokenSource CancellationSource, string ConsumerTag)> _consumers = [];
         private bool _disposed;
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            logger.LogInformation("Starting AMQP consumers");
+            logger.LogInformation("Starting RabbitMQ consumers");
 
             foreach (Type consumerType in AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(t => t.GetCustomAttributes<QueueConsumerAttribute>().Any()))
             {
@@ -34,14 +32,23 @@
                     {
                         logger.LogInformation("Starting consumer for queue {Queue}", queueConsumer.Queue);
 
-                        // Get a session for this queue
-                        Session session = await connectionProvider.GetSessionAsync(queueConsumer.Queue);
+                        // Create a channel for this queue
+                        IChannel channel = await connectionProvider.GetChannelForQueueAsync(queueConsumer.Queue, cancellationToken);
 
                         // Create a cancellation token source for this consumer
                         CancellationTokenSource consumerCts = new();
 
-                        // Create a receiver for the queue
-                        ReceiverLink receiver = new(session, $"receiver-{Guid.NewGuid()}", queueConsumer.Queue);
+                        // Ensure the queue exists by declaring it (this will create it if it doesn't exist)
+                        await channel.QueueDeclareAsync(
+                            queue: queueConsumer.Queue,
+                            durable: true,
+                            exclusive: false,
+                            autoDelete: false,
+                            arguments: null,
+                            cancellationToken: cancellationToken);
+
+                        // Set QoS / prefetch count
+                        await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 20, global: false, cancellationToken);
 
                         // Get the message type by finding the generic type parameter of MessageConsumer<T>
                         Type? messageConsumerBaseType = consumerType.BaseType;
@@ -55,48 +62,51 @@
                         if (messageConsumerBaseType == null)
                         {
                             logger.LogError("Could not find MessageConsumer<T> base type for consumer {Consumer}", consumerType.Name);
-
                             continue;
                         }
 
-                        // Configure the receiver to handle messages
-                        receiver.Start(
-                            credit: 20,  // Prefetch count
-                            onMessage: async (receiver, message) =>
+                        // Create an async consumer
+                        AsyncEventingBasicConsumer consumer = new(channel);
+
+                        // Set up the received event handler
+                        consumer.ReceivedAsync += async (_, args) =>
+                        {
+                            try
                             {
-                                try
+                                AsyncServiceScope scope = serviceProvider.CreateAsyncScope();
+
+                                object consumerInstance = scope.ServiceProvider.GetRequiredService(consumerType);
+
+                                if (consumerType.BaseType?.GetMethod("ProcessMessageAsync", BindingFlags.NonPublic | BindingFlags.Instance) is MethodInfo processMethod)
                                 {
-                                    using AsyncServiceScope scope = serviceProvider.CreateAsyncScope();
-
-                                    object consumer = scope.ServiceProvider.GetRequiredService(consumerType);
-
-                                    if (consumerType.BaseType?.GetMethod("ProcessMessageAsync", BindingFlags.NonPublic | BindingFlags.Instance) is MethodInfo processMethod)
+                                    if (processMethod.Invoke(consumerInstance, [args, consumerCts.Token]) is Task processMessageTask)
                                     {
-                                        if (processMethod.Invoke(consumer, [message, consumerCts.Token]) is Task processMessageAsync)
-                                        {
-                                            await processMessageAsync;
+                                        await processMessageTask;
 
-                                            // Accept the message
-                                            receiver.Accept(message);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        logger.LogError("ProcessMessageAsync method not found on consumer {Consumer}", consumerType.Name);
-
-                                        receiver.Reject(message);
+                                        // Acknowledge the message
+                                        await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
                                     }
                                 }
-                                catch (Exception ex)
+                                else
                                 {
-                                    logger.LogError(ex, "Error processing message on queue {Queue}", queueConsumer.Queue);
+                                    logger.LogError("ProcessMessageAsync method not found on consumer {Consumer}", consumerType.Name);
 
-                                    receiver.Reject(message);
+                                    await channel.BasicNackAsync(args.DeliveryTag, multiple: false, requeue: true, cancellationToken);
                                 }
-                            });
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.LogError(ex, "Error processing message on queue {Queue}", queueConsumer.Queue);
+                                // Reject the message but allow it to be requeued
+                                await channel.BasicNackAsync(args.DeliveryTag, multiple: false, requeue: true, cancellationToken);
+                            }
+                        };
 
-                        // Store the receiver and cancellation token source
-                        _receivers.Add((receiver, consumerCts));
+                        // Start consuming from the queue
+                        string consumerTag = await channel.BasicConsumeAsync(queue: queueConsumer.Queue, autoAck: false, consumer: consumer, cancellationToken: cancellationToken);
+
+                        // Store the channel, consumer, and cancellation token source
+                        _consumers.Add((channel, consumer, consumerCts, consumerTag));
                     }
                     catch (Exception ex)
                     {
@@ -108,17 +118,20 @@
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            logger.LogInformation("Stopping AMQP consumers");
+            logger.LogInformation("Stopping RabbitMQ consumers");
 
-            foreach (var (receiver, cts) in _receivers)
+            foreach ((IChannel channel, AsyncEventingBasicConsumer _, CancellationTokenSource cts, string consumerTag) in _consumers)
             {
                 try
                 {
                     // Cancel any ongoing processing
-                    cts.Cancel();
+                    await cts.CancelAsync();
 
-                    // Close the receiver
-                    await receiver.CloseAsync();
+                    // Cancel the consumer
+                    if (channel.IsOpen)
+                    {
+                        await channel.BasicCancelAsync(consumerTag, cancellationToken: cancellationToken);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -126,16 +139,25 @@
                 }
             }
 
-            _receivers.Clear();
+            _consumers.Clear();
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
             if (_disposed)
                 return;
 
-            foreach (var (_, cts) in _receivers)
+            foreach ((IChannel channel, AsyncEventingBasicConsumer _, CancellationTokenSource cts, string _) in _consumers)
             {
+                try
+                {
+                    await channel.CloseAsync();
+
+                    channel.Dispose();
+                }
+                catch
+                {
+                }
                 cts.Dispose();
             }
 

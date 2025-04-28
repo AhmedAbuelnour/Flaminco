@@ -1,6 +1,16 @@
 # LowCodeHub.RabbitMQ.AMQP
 
-LowCodeHub.RabbitMQ.AMQP is a .NET library that simplifies the integration of RabbitMQ with AMQP 1.0 protocol in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with RabbitMQ queues using AMQP 1.0.
+LowCodeHub.RabbitMQ.AMQP is a .NET library that simplifies the integration of RabbitMQ with AMQP protocol in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with RabbitMQ queues.
+
+## Features
+
+- Simple abstractions for message publishing and consuming
+- Automatic queue declaration and management
+- Support for message properties and customization options
+- Built-in health checks for RabbitMQ connections
+- Automatic registration of publishers and consumers
+- Graceful handling of connection failures and retries
+- Support for .NET 9.0
 
 ## Installation
 
@@ -23,20 +33,27 @@ Install-Package LowCodeHub.RabbitMQ.AMQP
 First, you need to configure the AMQP client in your application's `Startup` or `Program` class:
 
 ```csharp
-builder.Services.AddAMQPClient<Program>(options =>
+// Configure using environment variables or your preferred configuration approach
+string rabbitMQHost = Environment.GetEnvironmentVariable("RabbitMQHost");
+string rabbitMQVHost = Environment.GetEnvironmentVariable("RabbitMQVHost");
+string rabbitMQUsername = Environment.GetEnvironmentVariable("RabbitMQUsername");
+string rabbitMQPassword = Environment.GetEnvironmentVariable("RabbitMQPassword");
+
+// Add RabbitMQ services to your application
+services.AddAmqpClient(options =>
 {
-    options.Host = "amqp://localhost:5672"; // RabbitMQ host with AMQP 1.0 plugin enabled
-    options.Username = "guest";
-    options.Password = "guest";
-    options.RetryCount = 3; // Optional: Set retry count
-    options.RetryInterval = TimeSpan.FromSeconds(2); // Optional: Set retry interval
-});
+    options.HostName = rabbitMQHost;
+    options.VirtualHost = rabbitMQVHost;
+    options.UserName = rabbitMQUsername;
+    options.Password = rabbitMQPassword;
+    options.ClientProvidedName = Environment.GetEnvironmentVariable("ApplicationId") ?? "MyApp";
+}, typeof(Program).Assembly); // Specify the assembly to scan for publishers and consumers
 ```
 
-> **Note**: To use AMQP 1.0 with RabbitMQ 4, you need to install the RabbitMQ AMQP 1.0 plugin:
-> ```bash
-> rabbitmq-plugins enable rabbitmq_amqp1_0
-> ```
+The library will automatically:
+- Register the AMQP connection provider
+- Scan the specified assembly for publisher and consumer implementations
+- Register health checks for the RabbitMQ connection
 
 ### Step 2: Create a Message Publisher
 
@@ -45,7 +62,7 @@ Implement a custom publisher by extending the `MessagePublisher` class. The publ
 ```csharp
 public class PersonPublisher : MessagePublisher
 {
-    public PersonPublisher(AMQPConnectionProvider connectionProvider) : base(connectionProvider)
+    public PersonPublisher(AmqpConnectionProvider connectionProvider) : base(connectionProvider)
     {
     }
 
@@ -58,42 +75,42 @@ public class PersonPublisher : MessagePublisher
 Now, you can use your custom publisher to send a message to the specified queue:
 
 ```csharp
-public class Person : IMessage
+// Define your message class (must be serializable)
+public class Person
 {
     public string Name { get; set; }
     public int Age { get; set; }
 }
 
-public class Example(PersonPublisher personPublisher)
+// Use the publisher in your service or controller
+public class PersonService
 {
-    [HttpGet]
-    public async Task PushMessage(CancellationToken cancellationToken)
+    private readonly PersonPublisher _personPublisher;
+    
+    public PersonService(PersonPublisher personPublisher)
+    {
+        _personPublisher = personPublisher;
+    }
+    
+    public async Task CreatePersonAsync(Person person, CancellationToken cancellationToken)
     {
         // Simple message publishing
-        await personPublisher.PublishAsync(new Person
-        {
-            Name = "Ahmed Abuelnour",
-            Age = 30
-        }, cancellationToken);
+        await _personPublisher.PublishAsync(person, cancellationToken);
         
         // Publishing with options
-        var options = new MessagePublishOptions
+        var properties = new BasicProperties
         {
-            MessageId = Guid.NewGuid(),
-            CorrelationId = Guid.NewGuid(),
-            TimeToLive = TimeSpan.FromHours(1),
+            MessageId = Guid.NewGuid().ToString(),
+            CorrelationId = Guid.NewGuid().ToString(),
             ContentType = "application/json",
-            ApplicationProperties = new Dictionary<string, string>
+            Expiration = "3600000", // TTL in milliseconds (1 hour)
+            Headers = new Dictionary<string, object>
             {
                 ["Priority"] = "High"
             }
         };
         
-        await personPublisher.PublishAsync(new Person
-        {
-            Name = "John Doe",
-            Age = 25
-        }, options, cancellationToken);
+        await _personPublisher.PublishAsync(person, properties, cancellationToken);
     }
 }
 ```
@@ -113,12 +130,12 @@ public class PersonConsumer : MessageConsumer<Person>
         _logger = logger;
     }
     
-    public override Task ConsumeAsync(Person message, MessageProperties properties, CancellationToken cancellationToken)
+    public override Task ConsumeAsync(Person message, IReadOnlyBasicProperties properties, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Received message: {Name}, Age: {Age}", message.Name, message.Age);
         
         // You can access message properties
-        if (properties.ApplicationProperties.TryGetValue("Priority", out var priority))
+        if (properties.Headers != null && properties.Headers.TryGetValue("Priority", out var priority))
         {
             _logger.LogInformation("Message priority: {Priority}", priority);
         }
@@ -126,7 +143,7 @@ public class PersonConsumer : MessageConsumer<Person>
         return Task.CompletedTask;
     }
 
-    public override Task ConsumeErrorAsync(Exception error, MessageProperties properties, CancellationToken cancellationToken)
+    public override Task ConsumeAsync(Exception error, IReadOnlyBasicProperties properties, CancellationToken cancellationToken)
     {
         _logger.LogError(error, "Error processing message");
         return Task.CompletedTask;
@@ -136,7 +153,45 @@ public class PersonConsumer : MessageConsumer<Person>
 
 ### Step 5: Run the Application
 
-Build and run your application. The consumer will automatically start and listen for messages on the specified queue, while the publisher can be used to send messages to that queue.
+Build and run your application. The hosted service will automatically:
+
+1. Discover all consumers decorated with the `QueueConsumerAttribute`
+2. Create channels for each queue
+3. Ensure the queues exist in RabbitMQ
+4. Set up consumers to listen for messages
+
+Publishers will be registered as scoped services and will be available for dependency injection wherever needed.
+
+## Advanced Features
+
+### Queue Auto-Creation
+
+The library automatically creates queues as needed:
+
+- When publishers send messages to a queue that doesn't exist, the queue is automatically created
+- When consumers attempt to consume from a queue that doesn't exist, the queue is automatically created
+
+This behavior ensures that your application can start in any order without requiring manual queue configuration.
+
+### Health Checks
+
+The library automatically registers a health check for the RabbitMQ connection. You can use this with ASP.NET Core's health check middleware:
+
+```csharp
+app.UseHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
+```
+
+### Connection Management
+
+The `AmqpConnectionProvider` service manages RabbitMQ connections and channels:
+
+- Connections are created on-demand and cached
+- Channels are cached for each queue
+- Connections and channels are automatically recovered after failures
+- Resources are properly disposed when the application shuts down
 
 ## Contributing
 

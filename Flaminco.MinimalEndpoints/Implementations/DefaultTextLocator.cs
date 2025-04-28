@@ -7,11 +7,20 @@ using System.Text.Json;
 
 namespace Flaminco.MinimalEndpoints.Implementations
 {
+    /// <summary>
+    /// Provides a default implementation of <see cref="IStringLocalizer"/> for retrieving localized strings
+    /// from JSON files based on the current UI culture.
+    /// </summary>
     internal sealed class DefaultTextLocator(IOptions<LocalizationOptions> options) : IStringLocalizer
     {
         // Static cache for storing localization data per culture.
         private static readonly ConcurrentDictionary<string, JsonElement> _localizationCache = new();
 
+        /// <summary>
+        /// Gets the localized string for the specified key.
+        /// </summary>
+        /// <param name="name">The key of the string to localize.</param>
+        /// <returns>A <see cref="LocalizedString"/> containing the localized value or the key if not found.</returns>
         public LocalizedString this[string name]
         {
             get
@@ -21,6 +30,12 @@ namespace Flaminco.MinimalEndpoints.Implementations
             }
         }
 
+        /// <summary>
+        /// Gets the localized string for the specified key and formats it with the provided arguments.
+        /// </summary>
+        /// <param name="name">The key of the string to localize.</param>
+        /// <param name="arguments">The arguments to format the localized string.</param>
+        /// <returns>A <see cref="LocalizedString"/> containing the formatted localized value or the key if not found.</returns>
         public LocalizedString this[string name, params object[] arguments]
         {
             get
@@ -31,6 +46,13 @@ namespace Flaminco.MinimalEndpoints.Implementations
             }
         }
 
+        /// <summary>
+        /// Retrieves the localized value for the specified key and culture from the JSON file.
+        /// </summary>
+        /// <param name="key">The key of the string to retrieve.</param>
+        /// <param name="culture">The culture for which to retrieve the localized string.</param>
+        /// <returns>The localized string value, or null if not found.</returns>
+        /// <exception cref="LocalizationNotFoundException">Thrown if the JSON file for the specified culture is not found.</exception>
         private string? GetValueFromJson(string key, string culture)
         {
             // Try to get the cached JSON object for the requested culture.
@@ -55,6 +77,11 @@ namespace Flaminco.MinimalEndpoints.Implementations
             return jsonObject.TryGetProperty(key, out var jsonValue) ? jsonValue.GetString() : null;
         }
 
+        /// <summary>
+        /// Retrieves all localized strings for the current UI culture.
+        /// </summary>
+        /// <param name="includeParentCultures">Indicates whether to include strings from parent cultures.</param>
+        /// <returns>An enumerable of <see cref="LocalizedString"/> containing all localized strings.</returns>
         public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
         {
             string culture = CultureInfo.CurrentUICulture.Name;

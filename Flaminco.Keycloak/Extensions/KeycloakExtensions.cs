@@ -1,4 +1,4 @@
-﻿using Flaminco.Keycloak.Authentication.ClaimsTransformations;
+﻿using Flaminco.Keycloak.Authentication.JwtBearer.ClaimsTransformations;
 using Flaminco.Keycloak.Authentication.JwtBearer.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

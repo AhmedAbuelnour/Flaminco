@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>0.0.3</Version>
+		<Version>0.0.4</Version>
 		<Authors>Ahmed Abuelnour</Authors>
 		<Company>Personal</Company>
 		<Description>A Simple REPR utulizing Minimal APIs</Description>

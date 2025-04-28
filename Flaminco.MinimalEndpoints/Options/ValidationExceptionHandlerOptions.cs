@@ -3,6 +3,9 @@
 
 namespace Flaminco.MinimalEndpoints.Options
 {
+    /// <summary>
+    /// Options for handling validation exceptions.
+    /// </summary>
     internal sealed class ValidationExceptionHandlerOptions : IExceptionHandlerOptions<ValidationException>
     {
         /// <inheritdoc />

@@ -4,6 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Flaminco.MinimalEndpoints.Extensions
 {
+    /// <summary>
+    /// Provides extension methods for configuring the event bus functionality.
+    /// </summary>
     public static class EventBusExtensions
     {
         /// <summary>
@@ -29,7 +32,5 @@ namespace Flaminco.MinimalEndpoints.Extensions
 
             return services;
         }
-
-
     }
 }

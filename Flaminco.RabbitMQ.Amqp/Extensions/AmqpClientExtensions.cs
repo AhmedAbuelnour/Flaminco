@@ -2,12 +2,10 @@
 {
     using Flaminco.RabbitMQ.AMQP.Abstractions;
     using Flaminco.RabbitMQ.AMQP.Attributes;
-    using Flaminco.RabbitMQ.AMQP.HealthChecks;
     using Flaminco.RabbitMQ.AMQP.HostedServices;
-    using Flaminco.RabbitMQ.AMQP.Models;
     using Flaminco.RabbitMQ.AMQP.Services;
+    using global::RabbitMQ.Client;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
     using System;
     using System.Reflection;
@@ -18,82 +16,56 @@
     public static class AmqpClientExtensions
     {
         /// <summary>
-        /// Configures the AMQP client by registering the AMQP locator, publishers, and consumers in the service collection.
+        /// Configures the AMQP client by registering the connection provider,
+        /// publishers, and consumers found in the given assemblies.
         /// </summary>
-        /// <typeparam name="TScanner">A type from the assembly to scan for message publisher implementations or consumer implementations.</typeparam>
-        /// <param name="services">The service collection to which the AMQP client, publishers, and consumers will be added.</param>
-        /// <param name="clientSettings">The settings used to configure the AMQP client.</param>
-        /// <returns>The updated service collection.</returns>
-        public static IServiceCollection AddAmqpClient<TScanner>(this IServiceCollection services, Action<AmqpClientSettings> clientSettings)
+        public static IServiceCollection AddAmqpClient(this IServiceCollection services, Action<ConnectionFactory> clientSettings, params Assembly[] scannerAssemblies)
         {
-            // Configure settings
+            // 1. Bind settings
             services.Configure(clientSettings);
 
-            // Add core services
+            // 2. Core connection provider
             services.AddSingleton<AmqpConnectionProvider>();
 
-            // Add publishers and consumers
-            services.AddPublishers<TScanner>();
+            // 3. Publishers & Consumers from all supplied assemblies
+            services.AddPublishers(scannerAssemblies).AddConsumers(scannerAssemblies);
 
-            services.AddConsumers<TScanner>();
-
-            // Add hosted service to manage consumer lifecycle
+            // 4. Hosted service for consumer lifecycle
             services.AddSingleton<IHostedService, AmqpConsumerHostedService>();
 
-            return services;
-        }
+            // 5. Health check against the AMQP connection
 
-        /// <summary>
-        /// Configures the AMQP client with health checks enabled.
-        /// </summary>
-        /// <param name="services">The service collection to which the AMQP client, publishers, and consumers will be added.</param>
-        /// <param name="healthCheckName">Optional name for the health check. Defaults to "amqp".</param>
-        /// <param name="failureStatus">Optional failure status for the health check. Defaults to HealthStatus.Unhealthy.</param>
-        /// <param name="tags">Optional tags for the health check.</param>
-        /// <returns>The updated service collection.</returns>
-        public static IServiceCollection AddAmqpHealthChecks(this IServiceCollection services,
-                                                             string healthCheckName = "amqp",
-                                                             HealthStatus failureStatus = HealthStatus.Unhealthy,
-                                                             IEnumerable<string>? tags = null)
-        {
-            // Add health check
-            services.AddHealthChecks().AddCheck<AmqpConnectionHealthCheck>(name: healthCheckName, failureStatus: failureStatus, tags: tags ?? ["amqp", "messaging", "rabbitmq"]);
-
-            return services;
-        }
-
-        /// <summary>
-        /// Adds consumer registrations to the service collection for the specified scanner type.
-        /// </summary>
-        /// <typeparam name="TScanner">A type used to scan for consumer implementations.</typeparam>
-        /// <param name="services">The service collection to which the consumers will be added.</param>
-        /// <returns>The updated service collection.</returns>
-        private static IServiceCollection AddConsumers<TScanner>(this IServiceCollection services)
-        {
-            var consumerTypes = typeof(TScanner).Assembly.GetTypes()
-                .Where(t => t.GetCustomAttributes<QueueConsumerAttribute>().Any())
-                .ToList();
-
-            foreach (var consumerType in consumerTypes)
+            services.AddHealthChecks().AddRabbitMQ(async sp =>
             {
-                services.AddTransient(consumerType);
-            }
+                return await sp.GetRequiredService<AmqpConnectionProvider>().GetConnectionAsync(CancellationToken.None);
+            });
+
+            return services;
+        }
+
+
+        /// <summary>
+        /// Scans the provided assemblies for any types deriving from MessagePublisher
+        /// (excluding abstract types) and registers them as scoped.
+        /// </summary>
+        private static IServiceCollection AddPublishers(this IServiceCollection services, params Assembly[] scannerAssemblies)
+        {
+            foreach (TypeInfo pub in scannerAssemblies.SelectMany(a => a.DefinedTypes).Where(t => t.IsSubclassOf(typeof(MessagePublisher)) && !t.IsAbstract))
+                services.AddScoped(pub.AsType());
 
             return services;
         }
 
         /// <summary>
-        /// Adds publisher registrations to the service collection for the specified scanner type.
+        /// Scans the provided assemblies for any types decorated with QueueConsumerAttribute
+        /// and registers them as transient.
         /// </summary>
-        /// <typeparam name="TScanner">A type used to scan for publisher implementations.</typeparam>
-        /// <param name="services">The service collection to which the publishers will be added.</param>
-        private static void AddPublishers<TScanner>(this IServiceCollection services)
+        private static IServiceCollection AddConsumers(this IServiceCollection services, params Assembly[] scannerAssemblies)
         {
-            foreach (var type in typeof(TScanner).Assembly.DefinedTypes
-                .Where(type => type.IsSubclassOf(typeof(MessagePublisher)) && !type.IsAbstract))
-            {
-                services.AddScoped(type);
-            }
+            foreach (Type consumer in scannerAssemblies.SelectMany(a => a.GetTypes()).Where(t => t.GetCustomAttributes<QueueConsumerAttribute>().Any()))
+                services.AddTransient(consumer);
+
+            return services;
         }
     }
 }

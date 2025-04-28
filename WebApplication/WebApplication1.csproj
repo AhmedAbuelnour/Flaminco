@@ -7,6 +7,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
@@ -17,6 +18,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Flaminco.AdvancedHybridCache\Flaminco.AdvancedHybridCache.csproj" />
+	  <ProjectReference Include="..\Flaminco.AzureBus.AMQP\Flaminco.AzureBus.AMQP.csproj" />
 	  <ProjectReference Include="..\Flaminco.DualMapper\Flaminco.DualMapper.csproj" />
 	  <ProjectReference Include="..\Flaminco.ManualMapper\Flaminco.ManualMapper.csproj" />
 	  <ProjectReference Include="..\Flaminco.MinimalMediatR\Flaminco.MinimalMediatR.csproj" />
