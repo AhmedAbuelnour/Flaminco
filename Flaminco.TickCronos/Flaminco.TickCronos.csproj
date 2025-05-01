@@ -4,7 +4,7 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>1.0.2</Version>
+		<Version>1.0.3</Version>
 		<Authors>Ahmed Abuelnour</Authors>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<Company>Personal</Company>
@@ -15,7 +15,7 @@
 		</Description>
 		<PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
 		<Copyright>
-			Copyright (c) 2024, Ahmed Abuelnour
+			Copyright (c) 2025, Ahmed Abuelnour
 		</Copyright>
 	</PropertyGroup>
 
@@ -25,8 +25,8 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cronos" Version="0.8.4" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
+    <PackageReference Include="Cronos" Version="0.10.0" />
+	  <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.4" />
   </ItemGroup>
 
 </Project>

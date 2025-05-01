@@ -1,4 +1,4 @@
-﻿namespace Flaminco.RabbitMQ.AMQP.Extensions
+﻿namespace Flaminco.AzureBus.AMQP.Extensions
 {
     using Azure.Messaging.ServiceBus;
     using Flaminco.AzureBus.AMQP.Abstractions;

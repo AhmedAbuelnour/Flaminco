@@ -1,6 +1,6 @@
 # Flaminco.TickCronos
 
-Flaminco.TickCronos is a flexible and lightweight .NET package designed for cron-based background job scheduling. Utilizing the high-performance .NET 8 TimeProvider, TickCronons ensures precise and efficient timing, while allowing you to set unique TimeProvider configurations for each scheduled task.
+Flaminco.TickCronos is a flexible and lightweight .NET package designed for cron-based background job scheduling. Utilizing the high-performance .NET 8 TimeProvider, TickCronos ensures precise and efficient timing, while allowing you to set unique TimeProvider configurations for each scheduled task.
 
 ## Features
 
@@ -21,81 +21,121 @@ dotnet add package Flaminco.TickCronos
 
 ### Step 1: Create a Cron Job
 
-Inherit from `TickCrononsJobService` to create your job class, implementing the `ExecuteAsync` method where the job logic is defined.
+Inherit from `JobRequest` and override the `Consume` method to implement your job logic:
 
 ```csharp
-
-public class MyTickCronosExample1 : TickCrononsJobService
+public class TestRequest : JobRequest
 {
-    public MyTickCronosExample1(ITickCrononsConfig<MyTickCronosExample1> config, IServiceProvider serviceProvider, ILogger<MyTickCronosExample1> logger)
-        : base(config.CronExpression, config.TimeProvider, serviceProvider, logger) { }
-
-    public override string CronJobName => nameof(MyTickCronosExample1);
-
-    public override async Task ExecuteAsync(IServiceScope scope, CancellationToken cancellationToken)
+    public TestRequest(IJobRequestConfig<TestRequest> jobRequestConfig, 
+                      JobQueue queue, 
+                      ILogger<TestRequest> logger) 
+        : base(jobRequestConfig.CronExpression, jobRequestConfig.TimeProvider, queue, logger)
     {
-        // Define your scheduled job logic
-        Console.WriteLine("Running scheduled job for MyTickCronosExample1...");
-        await Task.Delay(1000, cancellationToken);  // Simulated work
     }
-}
 
+    public override string Name => "TEST_REQUEST";
 
-public class MyTickCronosExample2(ITickCronosConfig<MyTickCronosExample2> config, IServiceProvider serviceProvider, ILogger<MyTickCronosExample2> logger)
-    : TickCronosJobService(config.CronExpression, config.TimeProvider, serviceProvider, logger)
-{
-    public override string CronJobName => nameof(MyTickCronosExample2);
-
-    public override async Task ExecuteAsync(IServiceScope scope, CancellationToken cancellationToken)
+    public override async Task Consume(CancellationToken cancellationToken)
     {
         // Your job logic here
-        Console.WriteLine("Running scheduled job...");
-        await Task.Delay(1000, cancellationToken);  // Simulated work
+        Console.WriteLine($"Executing {Name} job at {DateTime.Now}");
+        
+        // Example: Access any required services through dependency injection
+        // await _someService.DoWorkAsync();
     }
 }
 ```
 
-### Step 2: Configure and Register Jobs
+### Step 2: Configure and Register Jobs with Different Time Zones
 
-In your application setup (e.g., `Program.cs`), use `AddTickCronosJob` to configure and add your job with a cron expression and time provider.
-
+In your application setup (e.g., `Program.cs`), you can register multiple jobs with different time providers:
 
 ```csharp
-builder.Services.AddTickCronosJob<MyTickCronosExample1>(a =>
+// Add job queue first
+var jobQueueBuilder = builder.Services.AddJobQueue();
+
+// Register a job with System TimeProvider (local system time zone)
+jobQueueBuilder.AddJob<SystemTimeJob>(options =>
 {
-    a.CronExpression = "*/5 * * * * *";  // Every 5 seconds
-    a.TimeProvider = TimeProvider.System; // default if not provided
+    options.CronExpression = "0 */30 * * * *"; // Every 30 minutes
+    options.TimeProvider = TimeProvider.System; // Uses local system time zone
 });
 
-builder.Services.AddTickCronosJob<MyTickCronosExample2>(a =>
+// Register a job with UTC TimeProvider
+jobQueueBuilder.AddJob<UtcTimeJob>(options =>
 {
-    a.CronExpression = "*/5 * * * * *";  // Every 5 seconds
-    a.TimeProvider = new EgyptTimeProvider();
+    options.CronExpression = "0 0 */1 * * *"; // Every hour
+    options.TimeProvider = UtcTimeProvider.System; // Uses UTC time zone
+});
+
+// Register a job with Saudi TimeProvider
+jobQueueBuilder.AddJob<SaudiTimeJob>(options =>
+{
+    options.CronExpression = "0 0 9 * * *"; // Every day at 9 AM Saudi time
+    options.TimeProvider = SaudiTimeProvider.System; // Uses Saudi Arabia time zone
+});
+
+// Register a job with custom scheduling logic by overriding ConfigureNextOccurrence
+jobQueueBuilder.AddJob<CustomScheduleJob>(options =>
+{
+    // CronExpression is set to null to use custom scheduling logic
+    options.CronExpression = null;
+    options.TimeProvider = TimeProvider.System;
 });
 ```
 
-### Custom Time Provider Example
+With this configuration:
+- `SystemTimeJob` runs every 30 minutes in your local system time zone
+- `UtcTimeJob` runs every hour in UTC time zone
+- `SaudiTimeJob` runs daily at 9 AM Saudi time
+- `CustomScheduleJob` uses custom scheduling logic defined in the job class
 
-TickCronons allows for custom time providers. Here’s an example of a `EgyptTimeProvider` to run jobs in a specific time zone.
+### Custom Scheduling Logic
+
+You can create a job with custom scheduling logic by overriding the `ConfigureNextOccurrence` method:
 
 ```csharp
-public class EgyptTimeProvider : TimeProvider
+public class CustomScheduleJob : JobRequest
 {
-    private readonly TimeZoneInfo _timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-    public override DateTimeOffset GetUtcNow()
+    private readonly int _intervalMinutes;
+    
+    public CustomScheduleJob(IJobRequestConfig<CustomScheduleJob> jobRequestConfig,
+                          JobQueue queue,
+                          ILogger<CustomScheduleJob> logger)
+        : base(jobRequestConfig.CronExpression, jobRequestConfig.TimeProvider, queue, logger)
     {
-        return TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, _timeZoneInfo);
+        // Custom interval in minutes
+        _intervalMinutes = 15;
     }
 
-    public override TimeZoneInfo LocalTimeZone => _timeZoneInfo;
+    public override string Name => "CUSTOM_SCHEDULE_JOB";
+
+    // Override ConfigureNextOccurrence to implement custom scheduling logic
+    public override ValueTask<DateTimeOffset?> ConfigureNextOccurrence(CancellationToken cancellationToken = default)
+    {
+        // Example: Run every X minutes from the current time
+        var nextOccurrence = TimeProvider.GetLocalNow().AddMinutes(_intervalMinutes);
+        
+        return ValueTask.FromResult<DateTimeOffset?>(nextOccurrence);
+    }
+
+    public override async Task Consume(CancellationToken cancellationToken)
+    {
+        // Your job logic here
+        Console.WriteLine($"Executing {Name} with custom scheduling at {DateTime.Now}");
+        
+        // Example: Access any required services through dependency injection
+        await Task.CompletedTask;
+    }
 }
 ```
+
+This job will run every 15 minutes from the current time, regardless of when it was started.
 
 ## Configuration Options
 
-- **CronExpression**: Defines the cron schedule.
+- **CronExpression**: Defines the cron schedule. Set to null to use custom scheduling logic.
 - **TimeProvider**: Customize time zones or use the default system time.
-
 
 ## Logging
 

@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Flaminco.TickCronos;
+namespace Flaminco.TickCronos.Abstractions;
 
 /// <summary>
 /// Represents an abstract base class for implementing a cron-based background job service.
@@ -10,18 +10,24 @@ namespace Flaminco.TickCronos;
 /// <param name="cronExpression">The cron expression for scheduling the job.</param>
 /// <param name="timeProvider">The time provider used to obtain current time and time zones.</param>
 /// <param name="logger">The logger used for logging messages.</param>
-public abstract class TickCronosJob(string? cronExpression,
-                                    TimeProvider timeProvider,
-                                    ILogger logger) : IHostedService, IDisposable
+public abstract class JobRequest(string? cronExpression, TimeProvider timeProvider, ILogger logger) : IHostedService, IDisposable
 {
-
     private Task? _executingTask;
     private CancellationTokenSource? _stoppingCts;
     private CronExpression? _expression;
+
     /// <summary>
     /// Gets the name of the cron job.
     /// </summary>
-    public abstract string CronJobName { get; }
+    public abstract string Name { get; }
+
+    /// <summary>
+    /// Handles the job execution.
+    /// Override this method to implement custom job processing logic directly within the JobRequest class.
+    /// </summary>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public abstract Task Consume(CancellationToken cancellationToken);
 
     /// <summary>
     /// Starts the cron job service asynchronously.
@@ -30,7 +36,7 @@ public abstract class TickCronosJob(string? cronExpression,
     /// <returns>A task representing the start process.</returns>
     public virtual Task StartAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("{jobName}: started with expression [{expression}].", CronJobName, cronExpression);
+        logger.LogInformation("{JobName}: started with expression [{Expression}].", Name, cronExpression);
 
         _stoppingCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
@@ -45,7 +51,7 @@ public abstract class TickCronosJob(string? cronExpression,
     /// <returns>
     /// A <see cref="DateTimeOffset"/> representing the next occurrence of the job.
     /// </returns>
-    public virtual ValueTask<DateTimeOffset?> ConfigureNextOccurrence(CancellationToken cancellationToken)
+    public virtual ValueTask<DateTimeOffset?> ConfigureNextOccurrence(CancellationToken cancellationToken = default)
     {
         if (!string.IsNullOrWhiteSpace(cronExpression))
         {
@@ -68,54 +74,53 @@ public abstract class TickCronosJob(string? cronExpression,
         {
             try
             {
-                DateTimeOffset nowTime = timeProvider.GetUtcNow();
-
                 DateTimeOffset? next = await ConfigureNextOccurrence(cancellationToken);
 
                 if (!next.HasValue)
                 {
-                    logger.LogInformation("{jobName}: No upcoming schedules, job will not continue", CronJobName);
+                    logger.LogInformation("{JobName}: No upcoming schedules, job will not continue", Name);
 
                     break;
                 }
+
+                DateTimeOffset nowTime = timeProvider.GetLocalNow();
 
                 TimeSpan delay = RoundToNearestSecond(next.Value - nowTime);
 
                 if (delay.TotalMilliseconds <= 0)
                 {
-                    logger.LogInformation("{jobName}: Next occurrence is in the past, skipping...", CronJobName);
+                    logger.LogInformation("{JobName}: Next occurrence is in the past, skipping...", Name);
 
                     continue;
                 }
 
-                using PeriodicTimer periodicTimer = new(delay, timeProvider);
+                using PeriodicTimer periodicTimer = new(delay);
 
                 await periodicTimer.WaitForNextTickAsync(cancellationToken);  // Wait until the next schedule
 
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    await ExecuteAsync(cancellationToken);
-
-                    logger.LogInformation("{jobName}: Job executed at {time}", CronJobName, timeProvider.GetLocalNow());
+                    try
+                    {
+                        await Consume(cancellationToken);
+                        logger.LogInformation("{JobName}: Job executed at {Time}", Name, timeProvider.GetLocalNow());
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "{JobName}: Error occurred during job execution", Name);
+                    }
                 }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException ex)
             {
-                logger.LogInformation("{jobName}: job received cancellation signal, stopping...", CronJobName);
+                logger.LogInformation(ex, "{JobName}: job received cancellation signal, stopping...", Name);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "{jobName}: an error occurred while scheduling the job", CronJobName);
+                logger.LogError(e, "{JobName}: an error occurred while scheduling the job", Name);
             }
         }
     }
-
-    /// <summary>
-    /// Executes the job logic asynchronously.
-    /// </summary>
-    /// <param name="cancellationToken">The cancellation token to signal the execution process.</param>
-    /// <returns>A task representing the execution process.</returns>
-    public abstract Task ExecuteAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Stops the cron job service asynchronously.
@@ -124,14 +129,14 @@ public abstract class TickCronosJob(string? cronExpression,
     /// <returns>A task representing the stop process.</returns>
     public virtual async Task StopAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("{jobName}: stopping...", CronJobName);
+        logger.LogInformation("{JobName}: stopping...", Name);
 
         if (_stoppingCts is not null)
         {
             await _stoppingCts.CancelAsync();
         }
 
-        logger.LogInformation("{jobName}: stopped.", CronJobName);
+        logger.LogInformation("{JobName}: stopped.", Name);
     }
 
     /// <summary>

@@ -1,12 +1,13 @@
-﻿// Implementation of cron schedule configuration
-namespace Flaminco.TickCronos
+﻿using Flaminco.TickCronos.Abstractions;
+
+namespace Flaminco.TickCronos.Options
 {
 
     /// <summary>
     /// Represents the configuration interface for a scheduled cron job.
     /// </summary>
     /// <typeparam name="T">The type of the cron job service.</typeparam>
-    public interface ITickCronosConfig<T> where T : TickCronosJob
+    public interface IJobRequestConfig<T> where T : JobRequest
     {
         /// <summary>
         /// Gets or sets the cron expression used for scheduling.
@@ -20,11 +21,12 @@ namespace Flaminco.TickCronos
     }
 
     /// <inheritdoc/>
-    internal class TickCronosConfig<T> : ITickCronosConfig<T> where T : TickCronosJob
+    internal class JobRequestConfig<T> : IJobRequestConfig<T> where T : JobRequest
     {
         /// <inheritdoc/>
         public string? CronExpression { get; set; }
         /// <inheritdoc/>
         public TimeProvider TimeProvider { get; set; } = TimeProvider.System;
     }
+
 }
