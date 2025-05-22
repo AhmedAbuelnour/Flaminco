@@ -6,9 +6,7 @@
 		<Nullable>enable</Nullable>
 		<Version>1.0.3</Version>
 		<Authors>Ahmed Abuelnour</Authors>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<Company>Personal</Company>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Description>
 			A lightweight, flexible .NET package for effortlessly scheduling and managing cron-based background jobs, designed to bring precision and reliability to your periodic tasks.
@@ -19,10 +17,6 @@
 		</Copyright>
 	</PropertyGroup>
 
-	
-	<ItemGroup>
-		<None Include="README.md" Pack="true" PackagePath=""/>
-	</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Cronos" Version="0.10.0" />

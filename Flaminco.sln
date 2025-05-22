@@ -3,19 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32519.379
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Shield.Authentication.JwtBearer", "Flaminco.JWTHandler\Flaminco.Shield.Authentication.JwtBearer.csproj", "{5E3DD1D9-5BC6-405B-873B-A4E4D5DACC7C}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ProDownloader", "Flaminco.ProDownloader\Flaminco.ProDownloader.csproj", "{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ManualMapper", "Flaminco.ManualMapper\Flaminco.ManualMapper.csproj", "{7FDAAF88-9F9C-4911-B5B2-FD0AE04CF234}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.MinimalMediatR", "Flaminco.MinimalMediatR\Flaminco.MinimalMediatR.csproj", "{AEC18576-BF18-4BD5-A56A-B0BF89E6BE97}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Pipeline", "Flaminco.Pipeline\Flaminco.Pipeline.csproj", "{C859199F-C80C-4704-83D8-A1B85ADC5A11}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Migration.SqlServer", "Flaminco.Migration\Flaminco.Migration.SqlServer.csproj", "{2CDC09BD-96C9-479D-BF03-E15BD194A23A}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.MinimalExtensions", "Flaminco.MinimalExtensions\Flaminco.MinimalExtensions.csproj", "{97ADDA4A-5503-4A46-BF14-E6BA517C061C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Workflows", "Flaminco.Workflows\Flaminco.Workflows.csproj", "{187F5828-269E-4C8F-9F0B-8325E8EE67F4}"
 EndProject
@@ -29,27 +21,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.SLA", "Flaminco.SL
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RabbitMQ.AMQP", "Flaminco.RabbitMQ.Amqp\Flaminco.RabbitMQ.AMQP.csproj", "{A9C96AE9-A1A5-433C-8244-D025B7C0D197}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ImmutableStates", "Flaminco.ImmutableState\Flaminco.ImmutableStates.csproj", "{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RazorInk", "Flaminco.RazorInk\Flaminco.RazorInk.csproj", "{ED9E5E19-4977-43B5-BAF8-9771896D3CBB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.AzureBus.AMQP", "Flaminco.AzureBus.AMQP\Flaminco.AzureBus.AMQP.csproj", "{FBC830D0-EA93-41EC-830C-915691FD56F5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.TickCronos", "Flaminco.TickCronos\Flaminco.TickCronos.csproj", "{CD9D4100-2BE0-4061-B325-1211D74AB966}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication1", "WebApplication\WebApplication1.csproj", "{01A322AF-52ED-408B-AA24-1A5478D6A5D6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.AdvancedHybridCache", "Flaminco.AdvancedHybridCache\Flaminco.AdvancedHybridCache.csproj", "{27F39762-09BE-4D71-984F-CB8A36BD1199}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.DualMapper", "Flaminco.DualMapper\Flaminco.DualMapper.csproj", "{CEABA228-750C-4E35-B736-E3BAE0B14063}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Keycloak.Client", "Flaminco.Keycloak.Client\Flaminco.Keycloak.Client.csproj", "{8815AEA5-C58D-4CD0-8992-2077EB145DC1}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Minimal.Filters.Transaction", "Flaminco.Minimal.Filters.Transaction\Flaminco.Minimal.Filters.Transaction.csproj", "{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.StateMachine", "Flaminco.StateMachine\Flaminco.StateMachine.csproj", "{454DFFFC-EC7F-401C-B2F2-967C121D1AAC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.MinimalEndpoints", "Flaminco.MinimalEndpoints\Flaminco.MinimalEndpoints.csproj", "{09A40D9B-80B9-494B-911B-0540920F7603}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Migration.Oracle", "Flaminco.Migration.Oracle\Flaminco.Migration.Oracle.csproj", "{927EC06C-8F9B-4939-9B17-CF9B6085F9C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,22 +43,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5E3DD1D9-5BC6-405B-873B-A4E4D5DACC7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5E3DD1D9-5BC6-405B-873B-A4E4D5DACC7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5E3DD1D9-5BC6-405B-873B-A4E4D5DACC7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5E3DD1D9-5BC6-405B-873B-A4E4D5DACC7C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7FDAAF88-9F9C-4911-B5B2-FD0AE04CF234}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7FDAAF88-9F9C-4911-B5B2-FD0AE04CF234}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7FDAAF88-9F9C-4911-B5B2-FD0AE04CF234}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7FDAAF88-9F9C-4911-B5B2-FD0AE04CF234}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AEC18576-BF18-4BD5-A56A-B0BF89E6BE97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AEC18576-BF18-4BD5-A56A-B0BF89E6BE97}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AEC18576-BF18-4BD5-A56A-B0BF89E6BE97}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AEC18576-BF18-4BD5-A56A-B0BF89E6BE97}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C859199F-C80C-4704-83D8-A1B85ADC5A11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C859199F-C80C-4704-83D8-A1B85ADC5A11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C859199F-C80C-4704-83D8-A1B85ADC5A11}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -81,10 +55,6 @@ Global
 		{2CDC09BD-96C9-479D-BF03-E15BD194A23A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CDC09BD-96C9-479D-BF03-E15BD194A23A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CDC09BD-96C9-479D-BF03-E15BD194A23A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{97ADDA4A-5503-4A46-BF14-E6BA517C061C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{97ADDA4A-5503-4A46-BF14-E6BA517C061C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{97ADDA4A-5503-4A46-BF14-E6BA517C061C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{97ADDA4A-5503-4A46-BF14-E6BA517C061C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{187F5828-269E-4C8F-9F0B-8325E8EE67F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{187F5828-269E-4C8F-9F0B-8325E8EE67F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{187F5828-269E-4C8F-9F0B-8325E8EE67F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -109,10 +79,6 @@ Global
 		{A9C96AE9-A1A5-433C-8244-D025B7C0D197}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9C96AE9-A1A5-433C-8244-D025B7C0D197}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9C96AE9-A1A5-433C-8244-D025B7C0D197}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DF3BB7DC-42AE-42E8-BAAD-43A28B8FFCBA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ED9E5E19-4977-43B5-BAF8-9771896D3CBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ED9E5E19-4977-43B5-BAF8-9771896D3CBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED9E5E19-4977-43B5-BAF8-9771896D3CBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -125,26 +91,14 @@ Global
 		{CD9D4100-2BE0-4061-B325-1211D74AB966}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD9D4100-2BE0-4061-B325-1211D74AB966}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD9D4100-2BE0-4061-B325-1211D74AB966}.Release|Any CPU.Build.0 = Release|Any CPU
-		{01A322AF-52ED-408B-AA24-1A5478D6A5D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{01A322AF-52ED-408B-AA24-1A5478D6A5D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{01A322AF-52ED-408B-AA24-1A5478D6A5D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{01A322AF-52ED-408B-AA24-1A5478D6A5D6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{27F39762-09BE-4D71-984F-CB8A36BD1199}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{27F39762-09BE-4D71-984F-CB8A36BD1199}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27F39762-09BE-4D71-984F-CB8A36BD1199}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27F39762-09BE-4D71-984F-CB8A36BD1199}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CEABA228-750C-4E35-B736-E3BAE0B14063}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CEABA228-750C-4E35-B736-E3BAE0B14063}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CEABA228-750C-4E35-B736-E3BAE0B14063}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CEABA228-750C-4E35-B736-E3BAE0B14063}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8815AEA5-C58D-4CD0-8992-2077EB145DC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8815AEA5-C58D-4CD0-8992-2077EB145DC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8815AEA5-C58D-4CD0-8992-2077EB145DC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8815AEA5-C58D-4CD0-8992-2077EB145DC1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9E89C887-7AAC-4EE5-A4A5-ED24482D989F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{454DFFFC-EC7F-401C-B2F2-967C121D1AAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{454DFFFC-EC7F-401C-B2F2-967C121D1AAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{454DFFFC-EC7F-401C-B2F2-967C121D1AAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -153,6 +107,10 @@ Global
 		{09A40D9B-80B9-494B-911B-0540920F7603}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09A40D9B-80B9-494B-911B-0540920F7603}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09A40D9B-80B9-494B-911B-0540920F7603}.Release|Any CPU.Build.0 = Release|Any CPU
+		{927EC06C-8F9B-4939-9B17-CF9B6085F9C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{927EC06C-8F9B-4939-9B17-CF9B6085F9C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{927EC06C-8F9B-4939-9B17-CF9B6085F9C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{927EC06C-8F9B-4939-9B17-CF9B6085F9C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

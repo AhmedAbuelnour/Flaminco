@@ -19,9 +19,6 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Flaminco.AdvancedHybridCache\Flaminco.AdvancedHybridCache.csproj" />
 	  <ProjectReference Include="..\Flaminco.AzureBus.AMQP\Flaminco.AzureBus.AMQP.csproj" />
-	  <ProjectReference Include="..\Flaminco.DualMapper\Flaminco.DualMapper.csproj" />
-	  <ProjectReference Include="..\Flaminco.ManualMapper\Flaminco.ManualMapper.csproj" />
-	  <ProjectReference Include="..\Flaminco.MinimalMediatR\Flaminco.MinimalMediatR.csproj" />
 	  <ProjectReference Include="..\Flaminco.StateMachine\Flaminco.StateMachine.csproj" />
 	</ItemGroup>
 

@@ -42,6 +42,8 @@ namespace Flaminco.MinimalEndpoints.Abstractions
         /// <param name="cancellationToken">A token to observe for cancellation requests</param>
         /// <returns>A task representing the asynchronous operation, containing the HTTP result</returns>
         ValueTask<IResult> Handle(TRequest request, CancellationToken cancellationToken);
+
+
     }
 
     /// <summary>

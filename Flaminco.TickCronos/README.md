@@ -1,6 +1,6 @@
-# Flaminco.TickCronos
+# LowCodeHub.TickCronos
 
-Flaminco.TickCronos is a flexible and lightweight .NET package designed for cron-based background job scheduling. Utilizing the high-performance .NET 8 TimeProvider, TickCronos ensures precise and efficient timing, while allowing you to set unique TimeProvider configurations for each scheduled task.
+LowCodeHub.TickCronos is a flexible and lightweight .NET package designed for cron-based background job scheduling. Utilizing the high-performance .NET 8 TimeProvider, TickCronos ensures precise and efficient timing, while allowing you to set unique TimeProvider configurations for each scheduled task.
 
 ## Features
 
@@ -11,10 +11,10 @@ Flaminco.TickCronos is a flexible and lightweight .NET package designed for cron
 
 ## Installation
 
-Install Flaminco.TickCronos via NuGet:
+Install LowCodeHub.TickCronos via NuGet:
 
 ```bash
-dotnet add package Flaminco.TickCronos
+dotnet add package LowCodeHub.TickCronos
 ```
 
 ## Getting Started
@@ -139,7 +139,7 @@ This job will run every 15 minutes from the current time, regardless of when it 
 
 ## Logging
 
-Flaminco.TickCronos logs job status, execution times, and errors using the .NET `ILogger`. Ensure logging is set up in your application to capture job activities.
+LowCodeHub.TickCronos logs job status, execution times, and errors using the .NET `ILogger`. Ensure logging is set up in your application to capture job activities.
 
 ## License
 

@@ -1,46 +1,74 @@
-﻿using FluentValidation;
-using FluentValidation.Results;
+﻿using Flaminco.MinimalEndpoints.Abstractions;
+using Flaminco.MinimalEndpoints.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Flaminco.MinimalEndpoints.Filters
 {
-    /// <summary>
-    /// Represents an endpoint filter that validates a request using FluentValidation.
-    /// </summary>
-    /// <typeparam name="TRequest">The type of the request to validate.</typeparam>
-    /// <param name="validators">A collection of validators for the request type.</param>
-    internal sealed class ValidationEndpointFilter<TRequest>(IEnumerable<IValidator<TRequest>> validators) : IEndpointFilter where TRequest : notnull
+
+    public sealed class ValidationEndpointFilter<TRequest> : IEndpointFilter where TRequest : notnull
     {
-        /// <summary>
-        /// Invokes the endpoint filter to validate the request and proceed to the next delegate if valid.
-        /// </summary>
-        /// <param name="context">The context of the endpoint invocation.</param>
-        /// <param name="next">The next delegate in the filter pipeline.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the response object or null.</returns>
         public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
         {
-            // Try to get the request from the arguments
-            TRequest? request = context.Arguments.OfType<TRequest>().FirstOrDefault();
-
-            if (request == null || !validators.Any())
+            if (context.Arguments.OfType<TRequest>().FirstOrDefault() is TRequest request)
             {
-                return await next(context);
-            }
+                if (context.HttpContext.RequestServices.GetService<IMinimalValidator<TRequest>>() is IMinimalValidator<TRequest> validator)
+                {
+                    IEnumerable<ValidationFailure> failures = validator.Validate(request).ToList();
 
-            ValidationContext<TRequest> validationContext = new(request);
+                    if (failures.Any())
+                        return Results.BadRequest(ToProblem(context.HttpContext, failures));
+                }
+                else if (context.HttpContext.RequestServices.GetService<IAsyncMinimalValidator<TRequest>>() is IAsyncMinimalValidator<TRequest> asyncValidator)
+                {
+                    IEnumerable<ValidationFailure> failures = await asyncValidator.ValidateAsync(request, context.HttpContext.RequestAborted);
 
-            ValidationResult[] validationResults = await Task.WhenAll(validators.Select(v => v.ValidateAsync(validationContext)));
-
-            List<ValidationFailure> failures = [.. validationResults
-                    .SelectMany(result => result.Errors)
-                    .Where(failure => failure != null)];
-
-            if (failures.Count != 0)
-            {
-                throw new ValidationException(failures);
+                    if (failures.Any())
+                        return Results.BadRequest(ToProblem(context.HttpContext, failures));
+                }
             }
 
             return await next(context);
         }
+
+        /// <summary>
+        /// Converts a <see cref="ValidationFailure"/> into a <see cref="ProblemDetails"/> object.
+        /// </summary>
+        /// <param name="httpContext">The current HTTP context.</param>
+        /// <param name="validationFailures">The validation failures to convert.</param>
+        /// <returns>A <see cref="ProblemDetails"/> object representing the validation errors.</returns>
+        private ProblemDetails ToProblem(HttpContext httpContext, IEnumerable<ValidationFailure> validationFailures)
+        {
+            // Aggregate multiple validation errors into a dictionary format
+
+            httpContext.Response.StatusCode = StatusCodes.Status400BadRequest; // Explicitly set the status code
+
+            return new ProblemDetails
+            {
+                Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Bad Request",
+                Detail = "One or more validation errors occurred. Please refer to the 'errors' field for details.",
+                Instance = $"{httpContext.Request.Method} {httpContext.Request.Path}",
+                Extensions = new Dictionary<string, object?>
+                {
+                    {
+                        "errors", validationFailures.Select(failure => new
+                        {
+                            failure.ErrorCode,
+                            failure.ErrorMessage,
+                            failure.PropertyName,
+                            failure.AttemptedValue,
+                        })
+                    },  // Add the aggregated errors dictionary
+                    { "traceId", $"{httpContext.Features.Get<IHttpActivityFeature>()?.Activity?.Id}" },
+                    { "timestamp", DateTime.UtcNow.ToString("o") },
+                    { "userAgent", httpContext.Request.Headers.UserAgent.ToString() },
+                }
+            };
+        }
+
     }
 }
