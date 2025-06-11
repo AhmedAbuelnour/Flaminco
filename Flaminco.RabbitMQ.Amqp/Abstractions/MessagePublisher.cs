@@ -6,9 +6,7 @@ namespace Flaminco.RabbitMQ.AMQP.Abstractions
     /// Represents an abstract base class for publishing messages to a queue using MassTransit.
     /// </summary>
     /// <param name="_sendEndpointProvider">The send endpoint provider.</param>
-    /// <param name="_publishEndpoint">The publish endpoint.</param>
-    public abstract class MessagePublisher(ISendEndpointProvider _sendEndpointProvider,
-                                           IPublishEndpoint _publishEndpoint)
+    public abstract class MessagePublisher(ISendEndpointProvider _sendEndpointProvider)
     {
         /// <summary>
         /// Gets the name of the queue where the message will be published.
@@ -26,6 +24,7 @@ namespace Flaminco.RabbitMQ.AMQP.Abstractions
             where TMessage : class
         {
             ISendEndpoint endpoint = await _sendEndpointProvider.GetSendEndpoint(new($"queue:{Queue}"));
+
             await endpoint.Send(message, cancellationToken);
         }
     }
