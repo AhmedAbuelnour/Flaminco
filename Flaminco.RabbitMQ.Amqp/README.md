@@ -66,7 +66,8 @@ public class PersonPublisher : MessagePublisher
     {
     }
 
-    protected override string Queue => "HelloQueue";
+    // Use queue names from your constants
+    protected override string Queue => Constant.Queues.PersonCreated;
 }
 ```
 
@@ -104,7 +105,7 @@ public class PersonService
 Implement a custom consumer by extending the `MessageConsumer` class. The consumer defines the queue from which it will receive messages using the `QueueConsumerAttribute`:
 
 ```csharp
-[QueueConsumer(queue: "HelloQueue")]
+[QueueConsumer(Constant.Queues.PersonCreated)]
 public class PersonConsumer : MessageConsumer<Person>
 {
     private readonly ILogger<PersonConsumer> _logger;

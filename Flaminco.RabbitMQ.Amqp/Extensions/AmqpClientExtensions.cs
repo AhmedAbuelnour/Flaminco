@@ -1,6 +1,7 @@
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using Flaminco.RabbitMQ.AMQP.Attributes;
 
 namespace Flaminco.RabbitMQ.AMQP.Extensions
 {
@@ -26,8 +27,17 @@ namespace Flaminco.RabbitMQ.AMQP.Extensions
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.ConfigureEndpoints(context);
                     cfg.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5)));
+
+                    foreach (Type consumer in scannerAssemblies
+                        .SelectMany(a => a.GetTypes())
+                        .Where(t => t.IsClass && !t.IsAbstract && t.GetCustomAttribute<QueueConsumerAttribute>() != null))
+                    {
+                        QueueConsumerAttribute attribute = consumer.GetCustomAttribute<QueueConsumerAttribute>()!;
+                        cfg.ReceiveEndpoint(attribute.Queue, e => e.ConfigureConsumer(context, consumer));
+                    }
+
+                    cfg.ConfigureEndpoints(context);
 
                     busConfiguration?.Invoke(cfg);
                 });
