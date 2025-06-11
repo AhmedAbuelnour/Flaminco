@@ -8,7 +8,6 @@ LowCodeHub.RabbitMQ.AMQP is a .NET library that simplifies the integration of Ra
 - Automatic queue declaration and management
 - Support for message properties and customization options
 - Built-in health checks for RabbitMQ connections
-- Automatic registration of publishers and consumers
 - Graceful handling of connection failures and retries
 - Support for .NET 9.0
 
@@ -39,23 +38,31 @@ string rabbitMQVHost = Environment.GetEnvironmentVariable("RabbitMQVHost");
 string rabbitMQUsername = Environment.GetEnvironmentVariable("RabbitMQUsername");
 string rabbitMQPassword = Environment.GetEnvironmentVariable("RabbitMQPassword");
 
-// Add RabbitMQ services to your application
-services.AddAmqpClient(cfg =>
-{
-    cfg.Host(rabbitMQHost, rabbitMQVHost, h =>
+// Register MassTransit with RabbitMQ
+services.AddAmqpClient(
+    register: x =>
     {
-        h.Username(rabbitMQUsername);
-        h.Password(rabbitMQPassword);
+        x.AddConsumer<PersonConsumer>();
+        x.AddScoped<PersonPublisher>();
+    },
+    busConfiguration: (cfg, context) =>
+    {
+        cfg.Host(rabbitMQHost, rabbitMQVHost, h =>
+        {
+            h.Username(rabbitMQUsername);
+            h.Password(rabbitMQPassword);
+        });
+
+        cfg.ReceiveEndpoint(Constant.Queues.PersonCreated, e =>
+        {
+            e.ConfigureConsumer<PersonConsumer>(context);
+        });
+
+        cfg.UseRawJsonSerializer();
     });
-    // Enable compatibility with plain JSON messages
-    cfg.UseRawJsonSerializer();
-}, typeof(Program).Assembly);
 ```
 
-The library will automatically:
-- Register MassTransit and the RabbitMQ bus
-- Scan the specified assembly for consumer implementations
-- Register health checks for the RabbitMQ connection
+The library registers MassTransit with RabbitMQ and adds a health check for the connection.
 
 ### Step 2: Create a Message Publisher
 
@@ -104,10 +111,9 @@ public class PersonService
 
 ### Step 4: Create a Message Consumer
 
-Implement a custom consumer by extending the `MessageConsumer` class. The consumer defines the queue from which it will receive messages using the `QueueConsumerAttribute`:
+Implement a custom consumer by extending the `MessageConsumer` class. You will configure the queue when registering the consumer:
 
 ```csharp
-[QueueConsumer(Constant.Queues.PersonCreated)]
 public class PersonConsumer : MessageConsumer<Person>
 {
     private readonly ILogger<PersonConsumer> _logger;
@@ -129,9 +135,8 @@ public class PersonConsumer : MessageConsumer<Person>
 
 Build and run your application. MassTransit will automatically:
 
-1. Discover all consumers decorated with the `QueueConsumerAttribute`
-2. Create the required queues if they do not exist
-3. Configure retries and move failed messages to a queue with the `_error` suffix
+1. Create the required queues if they do not exist
+2. Configure retries and move failed messages to a queue with the `_error` suffix
 
 Publishers will be registered as scoped services and will be available for dependency injection wherever needed.
 
