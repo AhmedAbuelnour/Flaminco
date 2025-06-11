@@ -20,14 +20,15 @@
         </Copyright>
     </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="9.0.0" />
-		<PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
-	</ItemGroup>
+        <ItemGroup>
+            <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="9.0.0" />
+            <PackageReference Include="MassTransit" Version="8.3.5" />
+            <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.5" />
+            <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
+            <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
+            <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
+            <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+        </ItemGroup>
 
 
 	<ItemGroup>
