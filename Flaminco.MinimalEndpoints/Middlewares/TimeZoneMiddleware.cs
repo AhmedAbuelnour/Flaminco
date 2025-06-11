@@ -22,11 +22,9 @@ namespace Flaminco.MinimalEndpoints.Middlewares
                     {
                         TimeZoneContext.Zone = TimeZoneInfo.Utc; // Fallback to UTC if the specified timezone is not found
                     }
-
                     break;
                 }
             }
-
             await next(context);
         }
     }
