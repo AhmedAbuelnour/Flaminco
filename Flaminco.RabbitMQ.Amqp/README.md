@@ -47,6 +47,8 @@ services.AddAmqpClient(cfg =>
         h.Username(rabbitMQUsername);
         h.Password(rabbitMQPassword);
     });
+    // Enable compatibility with plain JSON messages
+    cfg.UseRawJsonSerializer();
 }, typeof(Program).Assembly);
 ```
 

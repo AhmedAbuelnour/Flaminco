@@ -27,6 +27,7 @@ namespace Flaminco.RabbitMQ.AMQP.Extensions
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
+                    cfg.UseRawJsonSerializer();
                     cfg.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5)));
 
                     foreach (Type consumer in scannerAssemblies
