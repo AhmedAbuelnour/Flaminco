@@ -8,7 +8,6 @@ LowCodeHub.RabbitMQ.AMQP is a .NET library that simplifies the integration of Ra
 - Automatic queue declaration and management
 - Support for message properties and customization options
 - Built-in health checks for RabbitMQ connections
-- Automatic registration of publishers and consumers
 - Graceful handling of connection failures and retries
 - Support for .NET 9.0
 
@@ -28,7 +27,7 @@ Install-Package LowCodeHub.RabbitMQ.AMQP
 
 ## Getting Started
 
-### Step 1: Configure the AMQP Client
+### Step 1: Configure MassTransit
 
 First, you need to configure the AMQP client in your application's `Startup` or `Program` class:
 
@@ -39,21 +38,31 @@ string rabbitMQVHost = Environment.GetEnvironmentVariable("RabbitMQVHost");
 string rabbitMQUsername = Environment.GetEnvironmentVariable("RabbitMQUsername");
 string rabbitMQPassword = Environment.GetEnvironmentVariable("RabbitMQPassword");
 
-// Add RabbitMQ services to your application
-services.AddAmqpClient(options =>
-{
-    options.HostName = rabbitMQHost;
-    options.VirtualHost = rabbitMQVHost;
-    options.UserName = rabbitMQUsername;
-    options.Password = rabbitMQPassword;
-    options.ClientProvidedName = Environment.GetEnvironmentVariable("ApplicationId") ?? "MyApp";
-}, typeof(Program).Assembly); // Specify the assembly to scan for publishers and consumers
+// Register MassTransit with RabbitMQ
+services.AddAmqpClient(
+    register: x =>
+    {
+        x.AddConsumer<PersonConsumer>();
+        x.AddScoped<PersonPublisher>();
+    },
+    busConfiguration: (cfg, context) =>
+    {
+        cfg.Host(rabbitMQHost, rabbitMQVHost, h =>
+        {
+            h.Username(rabbitMQUsername);
+            h.Password(rabbitMQPassword);
+        });
+
+        cfg.ReceiveEndpoint(Constant.Queues.PersonCreated, e =>
+        {
+            e.ConfigureConsumer<PersonConsumer>(context);
+        });
+
+        cfg.UseRawJsonSerializer();
+    });
 ```
 
-The library will automatically:
-- Register the AMQP connection provider
-- Scan the specified assembly for publisher and consumer implementations
-- Register health checks for the RabbitMQ connection
+The library registers MassTransit with RabbitMQ and adds a health check for the connection.
 
 ### Step 2: Create a Message Publisher
 
@@ -62,11 +71,12 @@ Implement a custom publisher by extending the `MessagePublisher` class. The publ
 ```csharp
 public class PersonPublisher : MessagePublisher
 {
-    public PersonPublisher(AmqpConnectionProvider connectionProvider) : base(connectionProvider)
+    public PersonPublisher(ISendEndpointProvider sendProvider, IPublishEndpoint publishEndpoint) : base(sendProvider, publishEndpoint)
     {
     }
 
-    protected override string Queue => "HelloQueue";
+    // Use queue names from your constants
+    protected override string Queue => Constant.Queues.PersonCreated;
 }
 ```
 
@@ -94,58 +104,28 @@ public class PersonService
     
     public async Task CreatePersonAsync(Person person, CancellationToken cancellationToken)
     {
-        // Simple message publishing
         await _personPublisher.PublishAsync(person, cancellationToken);
-        
-        // Publishing with options
-        var properties = new BasicProperties
-        {
-            MessageId = Guid.NewGuid().ToString(),
-            CorrelationId = Guid.NewGuid().ToString(),
-            ContentType = "application/json",
-            Expiration = "3600000", // TTL in milliseconds (1 hour)
-            Headers = new Dictionary<string, object>
-            {
-                ["Priority"] = "High"
-            }
-        };
-        
-        await _personPublisher.PublishAsync(person, properties, cancellationToken);
     }
 }
 ```
 
 ### Step 4: Create a Message Consumer
 
-Implement a custom consumer by extending the `MessageConsumer` class. The consumer defines the queue from which it will receive messages using the `QueueConsumerAttribute`:
+Implement a custom consumer by extending the `MessageConsumer` class. You will configure the queue when registering the consumer:
 
 ```csharp
-[QueueConsumer(queue: "HelloQueue")]
 public class PersonConsumer : MessageConsumer<Person>
 {
     private readonly ILogger<PersonConsumer> _logger;
-    
+
     public PersonConsumer(ILogger<PersonConsumer> logger)
     {
         _logger = logger;
     }
-    
-    public override Task ConsumeAsync(Person message, IReadOnlyBasicProperties properties, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Received message: {Name}, Age: {Age}", message.Name, message.Age);
-        
-        // You can access message properties
-        if (properties.Headers != null && properties.Headers.TryGetValue("Priority", out var priority))
-        {
-            _logger.LogInformation("Message priority: {Priority}", priority);
-        }
-        
-        return Task.CompletedTask;
-    }
 
-    public override Task ConsumeAsync(Exception error, IReadOnlyBasicProperties properties, CancellationToken cancellationToken)
+    public override Task Consume(ConsumeContext<Person> context)
     {
-        _logger.LogError(error, "Error processing message");
+        _logger.LogInformation("Received message: {Name}, Age: {Age}", context.Message.Name, context.Message.Age);
         return Task.CompletedTask;
     }
 }
@@ -153,12 +133,10 @@ public class PersonConsumer : MessageConsumer<Person>
 
 ### Step 5: Run the Application
 
-Build and run your application. The hosted service will automatically:
+Build and run your application. MassTransit will automatically:
 
-1. Discover all consumers decorated with the `QueueConsumerAttribute`
-2. Create channels for each queue
-3. Ensure the queues exist in RabbitMQ
-4. Set up consumers to listen for messages
+1. Create the required queues if they do not exist
+2. Configure retries and move failed messages to a queue with the `_error` suffix
 
 Publishers will be registered as scoped services and will be available for dependency injection wherever needed.
 
@@ -186,12 +164,7 @@ app.UseHealthChecks("/health", new HealthCheckOptions
 
 ### Connection Management
 
-The `AmqpConnectionProvider` service manages RabbitMQ connections and channels:
-
-- Connections are created on-demand and cached
-- Channels are cached for each queue
-- Connections and channels are automatically recovered after failures
-- Resources are properly disposed when the application shuts down
+MassTransit manages the RabbitMQ connections and automatically creates and recovers channels when required.
 
 ## Contributing
 
