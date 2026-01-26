@@ -1,5 +1,6 @@
 using Flaminco.RabbitMQ.AMQP.Services;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using RabbitMQ.Client;
 
 namespace Flaminco.RabbitMQ.AMQP.HealthChecks;
 
@@ -22,7 +23,7 @@ internal sealed class RabbitMqHealthCheck : IHealthCheck
     {
         try
         {
-            var connection = await _connectionManager.GetConnectionAsync(cancellationToken);
+            IConnection connection = await _connectionManager.GetConnectionAsync(cancellationToken);
 
             if (connection.IsOpen)
             {

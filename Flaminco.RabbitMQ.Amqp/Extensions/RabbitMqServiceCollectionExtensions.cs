@@ -19,26 +19,21 @@ public static class RabbitMqServiceCollectionExtensions
 {
     /// <summary>
     /// Adds RabbitMQ services to the service collection using configuration from appsettings.
-    /// Topology can be defined in appsettings.json under RabbitMQ:Topology section.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="configuration">The configuration instance.</param>
-    /// <param name="configureTopology">Optional action to configure additional topology (exchanges, queues, bindings).</param>
+    /// <param name="configureTopology">Action to configure topology using fluent API.</param>
     /// <param name="assemblies">Assemblies to scan for consumers. If not provided, scans entry assembly.</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddRabbitMq(
         this IServiceCollection services,
         IConfiguration configuration,
-        Action<TopologyConfiguration>? configureTopology = null,
+        Action<TopologyConfiguration> configureTopology,
         params Assembly[] assemblies)
     {
         // Bind RabbitMQ options from configuration
         var optionsSection = configuration.GetSection(RabbitMqOptions.SectionName);
         services.Configure<RabbitMqOptions>(options => optionsSection.Bind(options));
-
-        // Bind topology options from configuration (RabbitMQ:Topology)
-        var topologySection = configuration.GetSection(TopologyOptions.SectionName);
-        services.Configure<TopologyOptions>(options => topologySection.Bind(options));
 
         return services.AddRabbitMqCore(configureTopology, assemblies);
     }
@@ -48,31 +43,28 @@ public static class RabbitMqServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="configureOptions">Action to configure RabbitMQ options.</param>
-    /// <param name="configureTopology">Optional action to configure topology.</param>
+    /// <param name="configureTopology">Action to configure topology using fluent API.</param>
     /// <param name="assemblies">Assemblies to scan for consumers.</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddRabbitMq(
         this IServiceCollection services,
         Action<RabbitMqOptions> configureOptions,
-        Action<TopologyConfiguration>? configureTopology = null,
+        Action<TopologyConfiguration> configureTopology,
         params Assembly[] assemblies)
     {
         services.Configure(configureOptions);
-
-        // Initialize empty topology options for fluent-only configuration
-        services.Configure<TopologyOptions>(_ => { });
 
         return services.AddRabbitMqCore(configureTopology, assemblies);
     }
 
     private static IServiceCollection AddRabbitMqCore(
         this IServiceCollection services,
-        Action<TopologyConfiguration>? configureTopology,
+        Action<TopologyConfiguration> configureTopology,
         params Assembly[] assemblies)
     {
         // Configure fluent topology
         var topology = new TopologyConfiguration();
-        configureTopology?.Invoke(topology);
+        configureTopology(topology);
         services.Configure<TopologyConfiguration>(t =>
         {
             t.Exchanges.AddRange(topology.Exchanges);

@@ -33,6 +33,13 @@ public sealed class QueueAttribute : Attribute
     public ushort PrefetchCount { get; set; } = 0;
 
     /// <summary>
+    /// Gets or sets whether to automatically acknowledge messages. Default is false (manual acknowledgment).
+    /// When true, messages are automatically removed from the queue upon delivery.
+    /// When false, you must manually acknowledge messages using the context.
+    /// </summary>
+    public bool AutoAck { get; set; } = false;
+
+    /// <summary>
     /// Gets or sets the dead-letter exchange name.
     /// </summary>
     public string? DeadLetterExchange { get; set; }

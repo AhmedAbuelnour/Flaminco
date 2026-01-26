@@ -30,13 +30,12 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
     private readonly List<Type> _consumerTypes = [];
     private bool _disposed;
 
-    public RabbitMqConsumerHostedService(
-        IServiceProvider serviceProvider,
-        IRabbitMqConnectionManager connectionManager,
-        IMessageSerializer serializer,
-        TopologyInitializer topologyInitializer,
-        IOptions<RabbitMqOptions> options,
-        ILogger<RabbitMqConsumerHostedService> logger)
+    public RabbitMqConsumerHostedService(IServiceProvider serviceProvider,
+                                         IRabbitMqConnectionManager connectionManager,
+                                         IMessageSerializer serializer,
+                                         TopologyInitializer topologyInitializer,
+                                         IOptions<RabbitMqOptions> options,
+                                         ILogger<RabbitMqConsumerHostedService> logger)
     {
         _serviceProvider = serviceProvider;
         _connectionManager = connectionManager;
@@ -51,11 +50,11 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
 
     private void DiscoverConsumers()
     {
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+        foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
             try
             {
-                foreach (var type in assembly.GetTypes())
+                foreach (Type type in assembly.GetTypes())
                 {
                     if (!type.IsAbstract &&
                         !type.IsInterface &&
@@ -77,7 +76,7 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
 
     private static bool IsMessageConsumer(Type type)
     {
-        var baseType = type.BaseType;
+        Type? baseType = type.BaseType;
         while (baseType is not null)
         {
             if (baseType.IsGenericType &&
@@ -98,7 +97,7 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
         try
         {
             // Initialize topology first
-            await _topologyInitializer.InitializeAsync(_consumerTypes, cancellationToken);
+            await _topologyInitializer.InitializeAsync(cancellationToken);
 
             // Start all consumers
             foreach (var consumerType in _consumerTypes)
@@ -126,23 +125,20 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
         try
         {
             // Get or create a dedicated channel for this consumer
-            var channel = await _connectionManager.GetOrCreateChannelAsync(
+            IChannel channel = await _connectionManager.GetOrCreateChannelAsync(
                 $"consumer:{queueName}",
                 cancellationToken);
 
             // Set QoS
-            var prefetchCount = queueAttr.PrefetchCount > 0
-                ? queueAttr.PrefetchCount
-                : _options.DefaultPrefetchCount;
+            ushort prefetchCount = queueAttr.PrefetchCount > 0 ? queueAttr.PrefetchCount : _options.DefaultPrefetchCount;
 
-            await channel.BasicQosAsync(
-                prefetchSize: 0,
-                prefetchCount: prefetchCount,
-                global: false,
-                cancellationToken: cancellationToken);
+            await channel.BasicQosAsync(prefetchSize: 0,
+                                        prefetchCount: prefetchCount,
+                                        global: false,
+                                        cancellationToken: cancellationToken);
 
             // Get the message type from the consumer
-            var messageType = GetMessageType(consumerType);
+            Type messageType = GetMessageType(consumerType);
 
             // Create the event-based consumer
             var consumer = new AsyncEventingBasicConsumer(channel);
@@ -150,19 +146,18 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
 
             consumer.ReceivedAsync += async (sender, args) =>
             {
-                await HandleMessageAsync(
-                    consumerType,
-                    messageType,
-                    queueAttr,
-                    channel,
-                    args,
-                    cts.Token);
+                await HandleMessageAsync(consumerType,
+                                         messageType,
+                                         queueAttr,
+                                         channel,
+                                         args,
+                                         cts.Token);
             };
 
             // Start consuming
-            var consumerTag = await channel.BasicConsumeAsync(
+            string consumerTag = await channel.BasicConsumeAsync(
                 queue: queueName,
-                autoAck: false,
+                autoAck: queueAttr.AutoAck,
                 consumer: consumer,
                 cancellationToken: cancellationToken);
 
@@ -210,7 +205,11 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
             if (message is null)
             {
                 _logger.LogWarning("Failed to deserialize message from queue '{Queue}'", queueName);
-                await channel.BasicRejectAsync(args.DeliveryTag, requeue: false, cancellationToken);
+                // Only reject if manual acknowledgment is enabled
+                if (!queueAttr.AutoAck)
+                {
+                    await channel.BasicRejectAsync(args.DeliveryTag, requeue: false, cancellationToken);
+                }
                 return;
             }
 
@@ -243,7 +242,11 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
                     var shouldContinue = await beforeTask;
                     if (!shouldContinue)
                     {
-                        await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
+                        // Only acknowledge if manual acknowledgment is enabled
+                        if (!queueAttr.AutoAck)
+                        {
+                            await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
+                        }
                         return;
                     }
                 }
@@ -269,8 +272,11 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
                 }
             }
 
-            // Acknowledge the message
-            await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
+            // Acknowledge the message (only if manual acknowledgment is enabled)
+            if (!queueAttr.AutoAck)
+            {
+                await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
+            }
 
             _logger.LogDebug("Successfully processed message from queue '{Queue}'", queueName);
         }
@@ -290,6 +296,16 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
         CancellationToken cancellationToken)
     {
         var retryCount = GetRetryCount(args.BasicProperties);
+
+        // Only handle errors if manual acknowledgment is enabled
+        // With auto-ack, messages are already removed from queue upon delivery
+        if (queueAttr.AutoAck)
+        {
+            _logger.LogWarning(
+                "Error processing message from queue '{Queue}' with AutoAck enabled. Message was already removed from queue.",
+                queueAttr.Name);
+            return;
+        }
 
         // Check if we should retry
         if (retryCount < queueAttr.MaxRetryAttempts)

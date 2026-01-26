@@ -8,7 +8,7 @@ A powerful, modern .NET library that provides a clean abstraction layer over Rab
 - **Automatic Connection Recovery** - Built-in resilience with automatic reconnection
 - **Publisher Confirms** - Reliable message delivery with broker confirmations
 - **Dead Letter Queue Support** - Automatic DLQ creation and routing
-- **Hierarchical Topology Config** - Exchanges contain their queues with bindings and DLQ - all in one place
+- **Fluent Topology API** - Clean, hierarchical topology configuration in code
 - **Pluggable Serialization** - Use JSON (default) or implement custom serializers
 - **Health Checks** - Built-in health check for connection monitoring
 
@@ -17,7 +17,11 @@ A powerful, modern .NET library that provides a clean abstraction layer over Rab
 ```shell
 dotnet add package Flaminco.RabbitMQ.AMQP
 ```
-
+```
+Exchange   : {domain}.exchange 
+Routing key: {entity}.{event}
+Queue      : {service}.{entity}.{event}.queue
+```
 ---
 
 ## Quick Start
@@ -25,9 +29,22 @@ dotnet add package Flaminco.RabbitMQ.AMQP
 ```csharp
 // Program.cs
 using Flaminco.RabbitMQ.AMQP.Extensions;
+using Flaminco.RabbitMQ.AMQP.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddRabbitMq(builder.Configuration);
+
+builder.Services.AddRabbitMq(
+    options =>
+    {
+        options.HostName = "localhost";
+        options.Port = 5672;
+        options.UserName = "guest";
+        options.Password = "guest";
+    },
+    topology =>
+    {
+        // Define your topology here (see below)
+    });
 
 var app = builder.Build();
 app.Run();
@@ -35,185 +52,113 @@ app.Run();
 
 ---
 
-## Configuration (appsettings.json)
+## Topology Configuration (Fluent API)
 
-### Compact Hierarchical Structure
+### Basic Structure
 
-Exchanges contain their queues, bindings, and dead-letter config all in one place:
+Exchanges contain their queues, bindings, and dead-letter config - all in one place:
 
-```json
-{
-  "RabbitMQ": {
-    "HostName": "localhost",
-    "Port": 5672,
-    "UserName": "guest",
-    "Password": "guest",
-    "AutomaticRecoveryEnabled": true,
-    "DefaultPrefetchCount": 10,
+```csharp
+builder.Services.AddRabbitMq(
+    options => { /* connection options */ },
+    topology =>
+    {
+        // Exchange with queues and bindings
+        topology.Exchange("orders", exchange => exchange
+            .Topic()
+            .WithDeadLetterExchange()  // Auto-creates "orders.dlx"
+            .Queue("orders.created", "order.created.#", queue => queue
+                .DeadLetter())  // Auto-creates "orders.created.dlq"
+            .Queue("orders.shipped", "order.shipped.#", queue => queue
+                .MaxLength(10000)
+                .DeadLetter(dl => dl.Queue("orders.shipped.failed"))));
 
-    "Topology": {
-      "Exchanges": [
-        {
-          "Name": "orders",
-          "Type": "topic",
-          "Queues": [
-            {
-              "Name": "orders.created",
-              "RoutingKey": "order.created.#",
-              "PrefetchCount": 20,
-              "DeadLetter": {
-                "Queue": "orders.created.dlq"
-              }
-            },
-            {
-              "Name": "orders.shipped",
-              "RoutingKey": "order.shipped.#",
-              "DeadLetter": {}
-            }
-          ]
-        },
-        {
-          "Name": "notifications",
-          "Type": "fanout",
-          "Queues": [
-            {
-              "Name": "notifications.email",
-              "RoutingKey": ""
-            },
-            {
-              "Name": "notifications.sms",
-              "RoutingKey": ""
-            }
-          ]
-        }
-      ],
+        // Another exchange
+        topology.Exchange("notifications", exchange => exchange
+            .Fanout()
+            .Queue("notifications.email", "")
+            .Queue("notifications.sms", ""));
 
-      "Queues": [
-        {
-          "Name": "background.jobs",
-          "MaxLength": 10000,
-          "DeadLetter": {
-            "Queue": "background.jobs.dlq"
-          }
-        }
-      ]
-    }
-  }
-}
+        // Standalone queue (uses default exchange)
+        topology.Queue("background.jobs", queue => queue
+            .MaxLength(10000)
+            .DeadLetter());
+    });
 ```
 
-### What Gets Created Automatically
+### What Gets Created
 
-From the above config:
-
-| Created | Details |
-|---------|---------|
-| Exchange `orders` | Topic exchange |
-| Exchange `orders.dlx` | Auto-created dead-letter exchange |
-| Queue `orders.created` | Bound to `orders` with key `order.created.#` |
-| Queue `orders.created.dlq` | Auto-created, bound to `orders.dlx` |
-| Queue `orders.shipped` | Bound to `orders` with key `order.shipped.#` |
-| Queue `orders.shipped.dlq` | Auto-created (defaults to `{queueName}.dlq`) |
-| Exchange `notifications` | Fanout exchange |
-| Queue `notifications.email` | Bound to `notifications` |
-| Queue `notifications.sms` | Bound to `notifications` |
-| Queue `background.jobs` | Standalone queue (default exchange) |
-| Queue `background.jobs.dlq` | Auto-created DLQ |
-
-### DeadLetter Configuration
-
-When you specify `DeadLetter: {}`, the system automatically creates:
-- DLX exchange: `{parentExchange}.dlx` (or custom name)
-- DLQ queue: `{queueName}.dlq` (or custom name)
-- Binding between them
-
-```json
-{
-  "Name": "my.queue",
-  "RoutingKey": "my.#",
-  "DeadLetter": {
-    "Exchange": "custom.dlx",      // Optional - defaults to {exchange}.dlx
-    "Queue": "custom.dlq",         // Optional - defaults to {queue}.dlq
-    "RoutingKey": "custom.key",    // Optional - defaults to {queue}.dlq
-    "MessageTtl": 60000            // Optional - TTL for DLQ messages
-  }
-}
 ```
+Exchange "orders" (topic)
+├── Exchange "orders.dlx" (direct) - auto-created
+├── Queue "orders.created"
+│   ├── Binding: "order.created.#"
+│   └── DLQ: "orders.created.dlq" → bound to "orders.dlx"
+└── Queue "orders.shipped"
+    ├── Binding: "order.shipped.#"
+    ├── MaxLength: 10000
+    └── DLQ: "orders.shipped.failed" → bound to "orders.dlx"
 
-### Queue Options
+Exchange "notifications" (fanout)
+├── Queue "notifications.email"
+└── Queue "notifications.sms"
 
-```json
-{
-  "Name": "orders.priority",
-  "RoutingKey": "order.priority.#",
-  "Durable": true,
-  "Exclusive": false,
-  "AutoDelete": false,
-  "MessageTtl": 86400000,
-  "MaxLength": 10000,
-  "MaxLengthBytes": 104857600,
-  "MaxPriority": 10,
-  "QueueMode": "lazy",
-  "PrefetchCount": 50,
-  "DeadLetter": {}
-}
+Queue "background.jobs" (default exchange)
+└── DLQ: "background.jobs.dlq"
 ```
 
 ---
 
-## Publishing Messages
+## Complete Fluent API Reference
 
-Inject `IMessagePublisher`:
+### Exchange Configuration
 
 ```csharp
-using Flaminco.RabbitMQ.AMQP.Abstractions;
+topology.Exchange("name", exchange => exchange
+    .Topic()                           // or .Direct(), .Fanout(), .Headers()
+    .Durable(true)                     // default: true
+    .WithDeadLetterExchange("custom")  // optional: custom DLX name (default: {name}.dlx)
+    .Queue("queue.name", "routing.key", queue => ...));
+```
 
-public class OrderService
-{
-    private readonly IMessagePublisher _publisher;
+### Queue Configuration (Bound to Exchange)
 
-    public OrderService(IMessagePublisher publisher)
-    {
-        _publisher = publisher;
-    }
+```csharp
+.Queue("name", "routing.key", queue => queue
+    .Durable(true)                     // default: true
+    .MessageTtl(60000)                 // TTL in milliseconds
+    .MaxLength(10000)                  // max messages
+    .MaxLengthBytes(104857600)          // max bytes
+    .MaxPriority(10)                   // enable priority queue (0-255)
+    .QueueMode("lazy")                 // lazy queue
+    .DeadLetter(dl => dl               // configure dead-letter
+        .Exchange("custom.dlx")        // optional: custom DLX name
+        .Queue("custom.dlq")           // optional: custom DLQ name
+        .RoutingKey("custom.key")      // optional: custom routing key
+        .MessageTtl(30000)));          // optional: DLQ message TTL
+```
 
-    // Publish to queue (default exchange)
-    public Task CreateOrderAsync(Order order) =>
-        _publisher.PublishToQueueAsync("orders.created", order);
+### Standalone Queue Configuration
 
-    // Publish to exchange
-    public Task NotifyAsync(OrderEvent evt) =>
-        _publisher.PublishAsync("orders", "order.created.new", evt);
-
-    // Reliable publish with broker confirmation
-    public Task<bool> CriticalPublishAsync(Order order) =>
-        _publisher.PublishWithConfirmAsync("orders", "order.critical", order);
-
-    // With options
-    public Task PublishWithOptionsAsync(Order order) =>
-        _publisher.PublishAsync("orders", "order.priority", order, new PublishOptions
-        {
-            Priority = 9,
-            CorrelationId = order.Id.ToString(),
-            Headers = { ["source"] = "api" }
-        });
-
-    // Batch publish
-    public Task BatchPublishAsync(IEnumerable<Order> orders) =>
-        _publisher.PublishBatchAsync("orders", "order.batch", orders);
-}
+```csharp
+topology.Queue("name", queue => queue
+    .Durable(true)
+    .MessageTtl(60000)
+    .MaxLength(10000)
+    .DeadLetter("custom.dlq"));       // optional: custom DLQ name
 ```
 
 ---
 
 ## Consuming Messages
 
-Extend `MessageConsumer<T>` and add `[Queue]` attribute:
+**Consumers only need the queue name!** The `[Queue]` attribute is **required** for each consumer.
 
 ```csharp
 using Flaminco.RabbitMQ.AMQP.Abstractions;
 using Flaminco.RabbitMQ.AMQP.Attributes;
 
+// Required: [Queue] attribute with queue name
 [Queue("orders.created", PrefetchCount = 20, MaxRetryAttempts = 3)]
 public class OrderCreatedConsumer : MessageConsumer<OrderCreatedEvent>
 {
@@ -233,7 +178,7 @@ public class OrderCreatedConsumer : MessageConsumer<OrderCreatedEvent>
 }
 ```
 
-### Consumer with All Lifecycle Hooks
+### Consumer with Lifecycle Hooks
 
 ```csharp
 [Queue("orders.processor", MaxRetryAttempts = 3)]
@@ -287,42 +232,118 @@ public class OrderProcessor : MessageConsumer<OrderMessage>
 }
 ```
 
-### Using Attributes for Topology
+### QueueAttribute Options
 
-If you prefer to define topology on consumers instead of JSON:
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `Name` | string | **required** | Queue name to consume from |
+| `PrefetchCount` | ushort | 0 (uses global) | Messages to prefetch |
+| `MaxRetryAttempts` | int | 3 | Max retries before DLQ |
+| `RequeueOnFailure` | bool | false | Requeue on error |
+| `Durable` | bool | true | Queue durability |
+| `DeadLetterExchange` | string | null | DLX name |
+| `DeadLetterRoutingKey` | string | null | DLQ routing key |
+| `MessageTtl` | int | 0 | Message TTL in ms |
+
+---
+
+## Publishing Messages
+
+Inject `IMessagePublisher`:
 
 ```csharp
-[Exchange("orders", Type = "topic")]
-[Queue("orders.processor", DeadLetterExchange = "orders.dlx")]
-[Binding("orders", RoutingKey = "order.#")]
-public class OrderProcessor : MessageConsumer<OrderMessage>
+using Flaminco.RabbitMQ.AMQP.Abstractions;
+
+public class OrderService
 {
-    public override Task ConsumeAsync(ConsumeContext<OrderMessage> context, CancellationToken ct)
+    private readonly IMessagePublisher _publisher;
+
+    public OrderService(IMessagePublisher publisher)
     {
-        return Task.CompletedTask;
+        _publisher = publisher;
     }
+
+    // Publish to queue (default exchange)
+    public Task CreateOrderAsync(Order order) =>
+        _publisher.PublishToQueueAsync("orders.created", order);
+
+    // Publish to exchange with routing key
+    public Task NotifyAsync(OrderEvent evt) =>
+        _publisher.PublishAsync("orders", "order.created.new", evt);
+
+    // Reliable publish with broker confirmation
+    public Task<bool> CriticalPublishAsync(Order order) =>
+        _publisher.PublishWithConfirmAsync("orders", "order.critical", order);
+
+    // With options
+    public Task PublishWithOptionsAsync(Order order) =>
+        _publisher.PublishAsync("orders", "order.priority", order, new PublishOptions
+        {
+            Priority = 9,
+            CorrelationId = order.Id.ToString(),
+            Headers = { ["source"] = "api" }
+        });
+
+    // Batch publish
+    public Task BatchPublishAsync(IEnumerable<Order> orders) =>
+        _publisher.PublishBatchAsync("orders", "order.batch", orders);
 }
 ```
 
 ---
 
-## Fluent Topology API
+## Routing Key Patterns (Topic Exchange)
+
+| Pattern | Matches | Example |
+|---------|---------|---------|
+| `order.created.#` | Zero or more words after | `order.created`, `order.created.new`, `order.created.new.customer` |
+| `order.*.status` | Exactly one word | `order.new.status`, `order.old.status` |
+| `order.#` | Any order event | `order.created`, `order.updated`, `order.deleted` |
+| `#` | Everything | All routing keys |
+
+---
+
+## Configuration Options
+
+### Connection Options
 
 ```csharp
 builder.Services.AddRabbitMq(
     options =>
     {
         options.HostName = "localhost";
+        options.Port = 5672;
+        options.VirtualHost = "/";
         options.UserName = "guest";
         options.Password = "guest";
+        options.AutomaticRecoveryEnabled = true;
+        options.NetworkRecoveryIntervalSeconds = 5;
+        options.RequestedHeartbeat = 60;
+        options.DefaultPrefetchCount = 10;
     },
-    topology =>
-    {
-        topology
-            .DeclareExchange("orders", ExchangeTypes.Topic)
-            .DeclareQueueWithDeadLetter("orders.created", "orders.dlx")
-            .BindQueue("orders.created", "orders", "order.created.#");
-    });
+    topology => { /* topology config */ });
+```
+
+### SSL/TLS
+
+```csharp
+options.Ssl = new RabbitMqSslOptions
+{
+    Enabled = true,
+    ServerName = "rabbitmq.example.com",
+    CertificatePath = "/certs/client.pfx",
+    CertificatePassword = "secret"
+};
+```
+
+### Clustering
+
+```csharp
+options.Endpoints = new List<RabbitMqEndpoint>
+{
+    new() { HostName = "rabbit1.example.com", Port = 5672 },
+    new() { HostName = "rabbit2.example.com", Port = 5672 }
+};
 ```
 
 ---
@@ -338,40 +359,42 @@ public class MessagePackSerializer : IMessageSerializer
     public object? Deserialize(ReadOnlySpan<byte> data, Type type) => MessagePackSerializer.Deserialize(type, data.ToArray());
 }
 
-builder.Services.AddRabbitMq(configuration).UseMessageSerializer<MessagePackSerializer>();
+builder.Services.AddRabbitMq(options, topology)
+    .UseMessageSerializer<MessagePackSerializer>();
 ```
 
 ---
 
-## SSL/TLS
+## Summary
 
-```json
+### Topology Setup (Fluent API Only)
+
+```csharp
+topology.Exchange("orders", e => e
+    .Topic()
+    .WithDeadLetterExchange()
+    .Queue("orders.created", "order.created.#", q => q.DeadLetter())
+    .Queue("orders.shipped", "order.shipped.#", q => q.MaxLength(10000)));
+```
+
+### Consumer Setup (Queue Attribute Required)
+
+```csharp
+[Queue("orders.created")]  // Required: queue name
+public class OrderConsumer : MessageConsumer<OrderEvent>
 {
-  "RabbitMQ": {
-    "HostName": "rabbitmq.example.com",
-    "Ssl": {
-      "Enabled": true,
-      "ServerName": "rabbitmq.example.com",
-      "CertificatePath": "/certs/client.pfx",
-      "CertificatePassword": "secret"
+    public override Task ConsumeAsync(ConsumeContext<OrderEvent> context, CancellationToken ct)
+    {
+        // Process message
+        return Task.CompletedTask;
     }
-  }
 }
 ```
 
----
+### Publishing
 
-## Clustering
-
-```json
-{
-  "RabbitMQ": {
-    "Endpoints": [
-      { "HostName": "rabbit1.example.com", "Port": 5672 },
-      { "HostName": "rabbit2.example.com", "Port": 5672 }
-    ]
-  }
-}
+```csharp
+await _publisher.PublishAsync("orders", "order.created.new", message);
 ```
 
 ---
@@ -381,15 +404,9 @@ builder.Services.AddRabbitMq(configuration).UseMessageSerializer<MessagePackSeri
 | Type | Description |
 |------|-------------|
 | `IMessagePublisher` | Publish messages |
-| `MessageConsumer<T>` | Base class for consumers |
+| `MessageConsumer<T>` | Base class for consumers (requires `[Queue]` attribute) |
 | `ConsumeContext<T>` | Message context with metadata |
 | `PublishOptions` | Publishing options |
-
-| Attribute | Description |
-|-----------|-------------|
-| `[Queue]` | Declare queue for consumer |
-| `[Exchange]` | Declare exchange |
-| `[Binding]` | Bind queue to exchange |
 
 | ErrorHandlingResult | Behavior |
 |---------------------|----------|
