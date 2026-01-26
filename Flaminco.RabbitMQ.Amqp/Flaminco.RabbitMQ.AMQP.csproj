@@ -1,37 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <Nullable>enable</Nullable>
-		<Version>2.2.2</Version>
-		<Authors>Ahmed Abuelnour</Authors>
-        <Company>Personal</Company>
+        <Version>3.0.0</Version>
+        <Authors>Ahmed Abuelnour</Authors>
+        <Company>Flaminco</Company>
         <Description>
-            Flaminco.RabbitMQ.AMQP is a .NET library that simplifies the integration of RabbitMQ in your applications. This library provides a clean and easy-to-use API for creating consumers and publishers to interact with RabbitMQ queues.
+            Flaminco.RabbitMQ.AMQP is a powerful, modern .NET library that provides a clean abstraction layer over RabbitMQ.Client 7.2. 
+            Features include: fluent configuration, automatic connection recovery, publisher confirms, consumer retry policies, 
+            dead-letter queue support, exchange/queue/binding declarations, pluggable serialization, and health checks.
         </Description>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
-        <Copyright>
-            Copyright (c) 2024, Ahmed Abuelnour
-        </Copyright>
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageTags>rabbitmq;amqp;messaging;queue;asp.net-core;dotnet</PackageTags>
+        <RepositoryUrl>https://github.com/AhmedAbuelnworFlaminco.RabbitMQ.AMQP</RepositoryUrl>
+        <Copyright>Copyright (c) 2026, Ahmed Abuelnour</Copyright>
+        <LangVersion>preview</LangVersion>
     </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="9.0.0" />
-		<PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="RabbitMQ.Client" Version="7.2.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0-preview.1.25080.5" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0-preview.1.25080.5" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.0-preview.1.25120.3" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0-preview.1.25080.5" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0-preview.1.25080.5" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0-preview.1.25080.5" />
+    </ItemGroup>
 
-
-	<ItemGroup>
-		<None Include="README.md" Pack="true" PackagePath="" />
-	</ItemGroup>
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="" />
+    </ItemGroup>
 
 </Project>

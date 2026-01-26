@@ -1,0 +1,3 @@
+﻿namespace Flaminco.MinimalEndpoints.Extensions
+{
+}

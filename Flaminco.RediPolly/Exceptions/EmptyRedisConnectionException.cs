@@ -1,4 +1,4 @@
-﻿namespace Flaminco.RediPolly.Exceptions;
+﻿namespace Flaminco.RedisChannels.Exceptions;
 
 internal sealed class EmptyRedisConnectionException(string argumentName)
     : ArgumentException("You need provider a correct redis connection string", argumentName)

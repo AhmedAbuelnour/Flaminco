@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <Version>1.0.1</Version>
@@ -11,7 +11,7 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Description>
-            The library offers an abstract class designed to simplify the creation and consuming Redis Pub/Sub feature with polly support to support retrying stratgies.
+            A Redis Streams-based channel implementation similar to System.Threading.Channels.Channel&lt;T&gt;, designed for distributed systems with multi-pod support.
         </Description>
         <PackageIconUrl>https://img.icons8.com/color/200/fan-2.png</PackageIconUrl>
         <Copyright>
@@ -21,10 +21,9 @@
 
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0"/>
-        <PackageReference Include="Polly" Version="8.4.0"/>
         <PackageReference Include="StackExchange.Redis" Version="2.7.33"/>
-    </ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
+	</ItemGroup>
 
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath=""/>

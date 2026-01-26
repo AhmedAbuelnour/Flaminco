@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.2.32519.379
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.ProDownloader", "Flaminco.ProDownloader\Flaminco.ProDownloader.csproj", "{9186A0D9-AB72-4320-91CA-28C86B8B0DCE}"
 EndProject
@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Workflows", "Flami
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.QueryableExtensions", "Flaminco.Pagination\Flaminco.QueryableExtensions.csproj", "{4AA11A3F-3CCC-4547-92B7-0CE63023037D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RediPolly", "Flaminco.RediPolly\Flaminco.RediPolly.csproj", "{3ACDA3BD-51A3-49D9-8352-8F67885E36A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.RedisChannels", "Flaminco.RediPolly\Flaminco.RedisChannels.csproj", "{3ACDA3BD-51A3-49D9-8352-8F67885E36A0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flaminco.Keycloak.Authentication.JwtBearer", "Flaminco.Keycloak\Flaminco.Keycloak.Authentication.JwtBearer.csproj", "{D4E2C683-0674-4914-9A69-7817468BCDC3}"
 EndProject
@@ -36,6 +36,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.MinimalEndpoints", "Flaminco.MinimalEndpoints\Flaminco.MinimalEndpoints.csproj", "{09A40D9B-80B9-494B-911B-0540920F7603}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.Migration.Oracle", "Flaminco.Migration.Oracle\Flaminco.Migration.Oracle.csproj", "{927EC06C-8F9B-4939-9B17-CF9B6085F9C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flaminco.POC", "Flaminco.POC\Flaminco.POC.csproj", "{2D83724F-49FA-4C76-B5C9-49BBD60671E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -111,6 +113,10 @@ Global
 		{927EC06C-8F9B-4939-9B17-CF9B6085F9C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{927EC06C-8F9B-4939-9B17-CF9B6085F9C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{927EC06C-8F9B-4939-9B17-CF9B6085F9C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D83724F-49FA-4C76-B5C9-49BBD60671E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D83724F-49FA-4C76-B5C9-49BBD60671E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D83724F-49FA-4C76-B5C9-49BBD60671E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D83724F-49FA-4C76-B5C9-49BBD60671E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

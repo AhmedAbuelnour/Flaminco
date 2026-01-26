@@ -1,0 +1,15 @@
+@Flaminco.POC_HostAddress = http://localhost:5149
+
+### Publish a message to the pub/sub channel
+POST {{Flaminco.POC_HostAddress}}/test-channel/publish
+Content-Type: application/json
+
+"Hello from HTTP client!"
+
+###
+
+### Connect to SSE endpoint to receive messages (open this in browser or use a tool that supports SSE)
+GET {{Flaminco.POC_HostAddress}}/test-channel/events
+Accept: text/event-stream
+
+###
