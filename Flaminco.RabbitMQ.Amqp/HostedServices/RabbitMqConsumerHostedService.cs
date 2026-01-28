@@ -58,7 +58,7 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
                 {
                     if (!type.IsAbstract &&
                         !type.IsInterface &&
-                        IsMessageConsumer(type) &&
+                        (IsMessageConsumer(type) || IsRpcMessageConsumer(type)) &&
                         type.GetCustomAttribute<QueueAttribute>() is not null)
                     {
                         _consumerTypes.Add(type);
@@ -81,6 +81,21 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
         {
             if (baseType.IsGenericType &&
                 baseType.GetGenericTypeDefinition() == typeof(MessageConsumer<>))
+            {
+                return true;
+            }
+            baseType = baseType.BaseType;
+        }
+        return false;
+    }
+
+    private static bool IsRpcMessageConsumer(Type type)
+    {
+        Type? baseType = type.BaseType;
+        while (baseType is not null)
+        {
+            if (baseType.IsGenericType &&
+                baseType.GetGenericTypeDefinition() == typeof(RpcMessageConsumer<,>))
             {
                 return true;
             }
@@ -213,78 +228,208 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
                 return;
             }
 
-            // Create the context using reflection
-            var contextType = typeof(ConsumeContext<>).MakeGenericType(messageType);
-            var context = Activator.CreateInstance(contextType);
-
-            // Set context properties
-            SetContextProperty(context!, "Message", message);
-            SetContextProperty(context!, "Body", args.Body);
-            SetContextProperty(context!, "Properties", args.BasicProperties);
-            SetContextProperty(context!, "DeliveryTag", args.DeliveryTag);
-            SetContextProperty(context!, "Exchange", args.Exchange);
-            SetContextProperty(context!, "RoutingKey", args.RoutingKey);
-            SetContextProperty(context!, "Redelivered", args.Redelivered);
-            SetContextProperty(context!, "ConsumerTag", args.ConsumerTag);
-            SetContextProperty(context!, "RetryCount", retryCount);
-
-            // Get lifecycle methods
-            var beforeMethod = consumerType.GetMethod("OnBeforeConsumeAsync");
-            var consumeMethod = consumerType.GetMethod("ConsumeAsync");
-            var afterMethod = consumerType.GetMethod("OnAfterConsumeAsync");
-
-            // Call OnBeforeConsumeAsync
-            if (beforeMethod is not null)
+            // Check if this is an RPC consumer
+            if (IsRpcMessageConsumer(consumerType))
             {
-                var beforeResult = beforeMethod.Invoke(consumer, [context, cancellationToken]);
-                if (beforeResult is Task<bool> beforeTask)
-                {
-                    var shouldContinue = await beforeTask;
-                    if (!shouldContinue)
-                    {
-                        // Only acknowledge if manual acknowledgment is enabled
-                        if (!queueAttr.AutoAck)
-                        {
-                            await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
-                        }
-                        return;
-                    }
-                }
+                await HandleRpcMessageAsync(consumerType, messageType, message, queueAttr, channel, args, cancellationToken);
             }
-
-            // Call ConsumeAsync
-            if (consumeMethod is not null)
+            else
             {
-                var consumeResult = consumeMethod.Invoke(consumer, [context, cancellationToken]);
-                if (consumeResult is Task consumeTask)
-                {
-                    await consumeTask;
-                }
+                await HandleRegularMessageAsync(consumerType, messageType, message, queueAttr, channel, args, retryCount, consumer, cancellationToken);
             }
-
-            // Call OnAfterConsumeAsync
-            if (afterMethod is not null)
-            {
-                var afterResult = afterMethod.Invoke(consumer, [context, cancellationToken]);
-                if (afterResult is Task afterTask)
-                {
-                    await afterTask;
-                }
-            }
-
-            // Acknowledge the message (only if manual acknowledgment is enabled)
-            if (!queueAttr.AutoAck)
-            {
-                await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
-            }
-
-            _logger.LogDebug("Successfully processed message from queue '{Queue}'", queueName);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing message from queue '{Queue}'", queueName);
             await HandleMessageErrorAsync(consumerType, queueAttr, channel, args, ex, cancellationToken);
         }
+    }
+
+    private async Task HandleRpcMessageAsync(
+        Type consumerType,
+        Type messageType,
+        object message,
+        QueueAttribute queueAttr,
+        IChannel channel,
+        BasicDeliverEventArgs args,
+        CancellationToken cancellationToken)
+    {
+        await using var scope = _serviceProvider.CreateAsyncScope();
+        var consumer = scope.ServiceProvider.GetRequiredService(consumerType);
+
+        // Get response type from RpcMessageConsumer<TRequest, TResponse>
+        var baseType = consumerType.BaseType!;
+        var responseType = baseType.GetGenericArguments()[1];
+
+        var messageId = args.BasicProperties.MessageId ?? Guid.NewGuid().ToString();
+        var correlationId = args.BasicProperties.CorrelationId;
+        var replyTo = args.BasicProperties.ReplyTo;
+        var headers = args.BasicProperties.Headers;
+        var timestamp = args.BasicProperties.Timestamp.UnixTime > 0
+            ? DateTimeOffset.FromUnixTimeSeconds(args.BasicProperties.Timestamp.UnixTime).DateTime
+            : DateTime.UtcNow;
+
+        // Create respond function
+        Func<object, Task> respondFunc = async (response) =>
+        {
+            if (string.IsNullOrEmpty(replyTo))
+                throw new InvalidOperationException("Cannot respond: ReplyTo is not set");
+
+            var responseBody = _serializer.Serialize(response);
+            var replyProperties = new BasicProperties
+            {
+                CorrelationId = correlationId,
+                ContentType = _serializer.ContentType,
+                DeliveryMode = DeliveryModes.Transient
+            };
+
+            await channel.BasicPublishAsync(
+                exchange: "",
+                routingKey: replyTo,
+                mandatory: false,
+                basicProperties: replyProperties,
+                body: responseBody,
+                cancellationToken: cancellationToken);
+        };
+
+        // Create RpcContext
+        var rpcContextType = typeof(RpcContext<>).MakeGenericType(messageType);
+        var rpcContext = Activator.CreateInstance(
+            rpcContextType,
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+            null,
+            new object?[] { message, messageId, correlationId, replyTo, headers, timestamp, args.Exchange, args.RoutingKey, respondFunc },
+            null)!;
+
+        try
+        {
+            // Call HandleAsync method
+            var handleMethod = consumerType.GetMethod("HandleAsync")!;
+            var responseTask = (Task)handleMethod.Invoke(consumer, new[] { rpcContext, cancellationToken })!;
+            await responseTask;
+
+            // Get response from task
+            var responseProperty = responseTask.GetType().GetProperty("Result")!;
+            var response = responseProperty.GetValue(responseTask)!;
+
+            // Send response
+            await respondFunc(response);
+
+            // Acknowledge (only if manual acknowledgment is enabled)
+            if (!queueAttr.AutoAck)
+            {
+                await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
+            }
+
+            _logger.LogDebug("Successfully processed RPC request from queue '{Queue}'", queueAttr.Name);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error handling RPC request from queue '{Queue}'", queueAttr.Name);
+
+            // Call OnErrorAsync
+            var onErrorMethod = consumerType.GetMethod("OnErrorAsync")!;
+            var errorTask = (Task<ErrorHandlingResult>)onErrorMethod.Invoke(consumer, new[] { rpcContext, ex, cancellationToken })!;
+            var result = await errorTask;
+
+            // Only handle errors if manual acknowledgment is enabled
+            if (!queueAttr.AutoAck)
+            {
+                switch (result)
+                {
+                    case ErrorHandlingResult.Acknowledge:
+                        await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
+                        break;
+                    case ErrorHandlingResult.Reject:
+                        await channel.BasicRejectAsync(args.DeliveryTag, requeue: false, cancellationToken);
+                        break;
+                    case ErrorHandlingResult.Requeue:
+                        await channel.BasicNackAsync(args.DeliveryTag, multiple: false, requeue: true, cancellationToken);
+                        break;
+                }
+            }
+
+            throw;
+        }
+    }
+
+    private async Task HandleRegularMessageAsync(
+        Type consumerType,
+        Type messageType,
+        object message,
+        QueueAttribute queueAttr,
+        IChannel channel,
+        BasicDeliverEventArgs args,
+        int retryCount,
+        object consumer,
+        CancellationToken cancellationToken)
+    {
+        // Create the context using reflection
+        var contextType = typeof(ConsumeContext<>).MakeGenericType(messageType);
+        var context = Activator.CreateInstance(contextType);
+
+        // Set context properties
+        SetContextProperty(context!, "Message", message);
+        SetContextProperty(context!, "Body", args.Body);
+        SetContextProperty(context!, "Properties", args.BasicProperties);
+        SetContextProperty(context!, "DeliveryTag", args.DeliveryTag);
+        SetContextProperty(context!, "Exchange", args.Exchange);
+        SetContextProperty(context!, "RoutingKey", args.RoutingKey);
+        SetContextProperty(context!, "Redelivered", args.Redelivered);
+        SetContextProperty(context!, "ConsumerTag", args.ConsumerTag);
+        SetContextProperty(context!, "RetryCount", retryCount);
+
+        // Get lifecycle methods
+        var beforeMethod = consumerType.GetMethod("OnBeforeConsumeAsync");
+        var consumeMethod = consumerType.GetMethod("ConsumeAsync");
+        var afterMethod = consumerType.GetMethod("OnAfterConsumeAsync");
+
+        // Call OnBeforeConsumeAsync
+        if (beforeMethod is not null)
+        {
+            var beforeResult = beforeMethod.Invoke(consumer, [context, cancellationToken]);
+            if (beforeResult is Task<bool> beforeTask)
+            {
+                var shouldContinue = await beforeTask;
+                if (!shouldContinue)
+                {
+                    // Only acknowledge if manual acknowledgment is enabled
+                    if (!queueAttr.AutoAck)
+                    {
+                        await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
+                    }
+                    return;
+                }
+            }
+        }
+
+        // Call ConsumeAsync
+        if (consumeMethod is not null)
+        {
+            var consumeResult = consumeMethod.Invoke(consumer, [context, cancellationToken]);
+            if (consumeResult is Task consumeTask)
+            {
+                await consumeTask;
+            }
+        }
+
+        // Call OnAfterConsumeAsync
+        if (afterMethod is not null)
+        {
+            var afterResult = afterMethod.Invoke(consumer, [context, cancellationToken]);
+            if (afterResult is Task afterTask)
+            {
+                await afterTask;
+            }
+        }
+
+        // Acknowledge the message (only if manual acknowledgment is enabled)
+        if (!queueAttr.AutoAck)
+        {
+            await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
+        }
+
+        _logger.LogDebug("Successfully processed message from queue '{Queue}'", queueAttr.Name);
     }
 
     private async Task HandleMessageErrorAsync(
@@ -350,11 +495,18 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
             {
                 return baseType.GetGenericArguments()[0];
             }
+
+            if (baseType.IsGenericType &&
+                baseType.GetGenericTypeDefinition() == typeof(RpcMessageConsumer<,>))
+            {
+                return baseType.GetGenericArguments()[0]; // Request type
+            }
+
             baseType = baseType.BaseType;
         }
 
         throw new InvalidOperationException(
-            $"Consumer type {consumerType.Name} must extend MessageConsumer<T>");
+            $"Consumer type {consumerType.Name} must extend MessageConsumer<T> or RpcMessageConsumer<TRequest, TResponse>");
     }
 
     private static void SetContextProperty(object context, string propertyName, object value)

@@ -131,12 +131,12 @@ public sealed class ExchangeBuilder
     /// Adds a queue bound to this exchange.
     /// </summary>
     /// <param name="name">The queue name.</param>
-    /// <param name="routingKey">The routing key for binding.</param>
+    /// <param name="bindingKey">The binding key for queue.</param>
     /// <param name="configure">Optional action to configure the queue.</param>
-    public ExchangeBuilder Queue(string name, string routingKey = "", Action<BoundQueueBuilder>? configure = null)
+    public ExchangeBuilder Queue(string name, string bindingKey = "", Action<BoundQueueBuilder>? configure = null)
     {
         var builder = new BoundQueueBuilder(name, _name, _dlxName, _topology);
-        builder.RoutingKey(routingKey);
+        builder.RoutingKey(bindingKey);
         configure?.Invoke(builder);
         builder.Build();
         return this;

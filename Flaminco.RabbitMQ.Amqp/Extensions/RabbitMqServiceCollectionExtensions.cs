@@ -96,6 +96,17 @@ public static class RabbitMqServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Adds RPC client support to the service collection.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddRabbitMqRpc(this IServiceCollection services)
+    {
+        services.AddSingleton<IMessageRpcClient, RabbitMqRpcClient>();
+        return services;
+    }
+
+    /// <summary>
     /// Registers a custom message serializer.
     /// </summary>
     /// <typeparam name="TSerializer">The serializer type.</typeparam>
