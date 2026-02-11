@@ -1,6 +1,12 @@
+using Flaminco.Chat.SSE.Contracts;
+using Flaminco.Chat.SSE.Extensions;
 using Flaminco.MinimalEndpoints.Abstractions;
 using Flaminco.MinimalEndpoints.Extensions;
+using Microsoft.Data.Sqlite;
 using StackExchange.Redis;
+using System.Net.ServerSentEvents;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,7 +56,27 @@ builder.Services.AddRedisEventBus(options =>
     options.PopTimeoutSeconds = 3; // Keep below Redis client timeout to avoid false timeout exceptions on idle queues
 }, typeof(Program).Assembly);
 
+
+
+builder.Services.AddFlamincoChatSse<AppChatMessage, AppChatHistoryReader, AppChatHeartbeatFactory>(options =>
+{
+    options.ConnectionString = "localhost:6379";
+    options.StreamKeyPrefix = "poc.chat.sse:";
+    options.ChatMessageEventType = "chat-message";
+    options.MaxStreamLength = 10_000;
+    options.UseApproximateTrimming = true;
+    options.PollIntervalMs = 200;
+    options.ReplayBatchSize = 100;
+    options.HeartbeatIntervalSeconds = 10;
+    options.MaxPayloadBytes = 8 * 1024;
+});
+
+var historyDbPath = Path.Combine(AppContext.BaseDirectory, "poc-chat-history.db");
+builder.Services.AddSingleton(new ChatHistoryDb($"Data Source={historyDbPath}"));
+
 var app = builder.Build();
+
+await app.Services.GetRequiredService<ChatHistoryDb>().InitializeAsync();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -59,6 +85,61 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapPost("/chat/{channel}/messages", async (
+        string channel,
+        SendAppChatRequest request,
+        IChatMessagePublisher publisher,
+        ChatHistoryDb historyDb,
+        CancellationToken cancellationToken) =>
+    {
+        if (string.IsNullOrWhiteSpace(channel))
+            return Results.BadRequest("Channel is required.");
+
+        if (request is null)
+            return Results.BadRequest("Request body is required.");
+
+        var message = new AppChatMessage(
+            MessageId: Guid.NewGuid().ToString("N"),
+            Channel: channel,
+            SenderId: request.SenderId,
+            SenderDisplayName: string.IsNullOrWhiteSpace(request.SenderDisplayName) ? request.SenderId : request.SenderDisplayName,
+            Content: request.Content,
+            SentAtUtc: DateTimeOffset.UtcNow,
+            Metadata: request.Metadata);
+
+        var streamId = await publisher.PublishAsync(message, cancellationToken);
+        await historyDb.SaveMessageAsync(message, cancellationToken);
+
+        return Results.Accepted(value: new
+        {
+            streamId,
+            messageId = message.MessageId,
+            channel = message.Channel,
+            sentAtUtc = message.SentAtUtc
+        });
+    })
+    .WithName("FlamincoChatSse.Publish");
+
+app.MapGet("/chat/{channel}/events", (
+        string channel,
+        HttpContext httpContext,
+        IChatSseStreamService streamService) =>
+    {
+        if (string.IsNullOrWhiteSpace(channel))
+            return Results.BadRequest("Channel is required.");
+
+        httpContext.Request.Headers.TryGetValue("Last-Event-ID", out var lastEventHeader);
+        string? lastEventId = lastEventHeader.FirstOrDefault();
+
+        IAsyncEnumerable<SseItem<AppChatMessage>> stream = streamService.StreamAsync<AppChatMessage>(
+            channel,
+            lastEventId,
+            httpContext.RequestAborted);
+
+        return TypedResults.ServerSentEvents(stream);
+    })
+    .WithName("FlamincoChatSse.Stream");
 
 
 app.MapGet("/Get", async (IEventBus eventBus) =>
@@ -142,10 +223,235 @@ public class OrderCreatedHandler : IDomainEventHandler<OrderCreated>
     }
 }
 
+public sealed record AppChatMessage(
+    string MessageId,
+    string Channel,
+    string SenderId,
+    string SenderDisplayName,
+    string Content,
+    DateTimeOffset SentAtUtc,
+    IReadOnlyDictionary<string, string>? Metadata = null) : IChatStreamMessage;
+
+public sealed class SendAppChatRequest
+{
+    public string SenderId { get; set; } = string.Empty;
+    public string SenderDisplayName { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
+    public Dictionary<string, string>? Metadata { get; set; }
+}
+
+
+internal sealed class AppChatHistoryReader : IChatHistoryReader<AppChatMessage>
+{
+    private readonly ChatHistoryDb _db;
+
+    public AppChatHistoryReader(ChatHistoryDb db)
+    {
+        _db = db;
+    }
+
+    public IAsyncEnumerable<ChatHistoryEntry<AppChatMessage>> ReadAfterAsync(
+        string channel,
+        string? lastEventId,
+        CancellationToken cancellationToken = default)
+    {
+        return _db.LoadHistoryAfterAsync(channel, lastEventId, cancellationToken);
+    }
+}
+
+internal sealed class AppChatHeartbeatFactory : IChatHeartbeatFactory<AppChatMessage>
+{
+    public AppChatMessage Create(string channel)
+    {
+        return new AppChatMessage(
+            MessageId: "heartbeat",
+            Channel: channel,
+            SenderId: "system",
+            SenderDisplayName: "system",
+            Content: "heartbeat",
+            SentAtUtc: DateTimeOffset.UtcNow,
+            Metadata: new Dictionary<string, string> { ["type"] = "heartbeat" });
+    }
+}
+
+
+
 // DTO classes
 class PublisMessageTest
 {
     public int Id { get; set; }
+}
+
+internal sealed class ChatHistoryDb
+{
+    private readonly string _connectionString;
+
+    public ChatHistoryDb(string connectionString)
+    {
+        _connectionString = connectionString;
+    }
+
+    public async Task InitializeAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        var command = connection.CreateCommand();
+        command.CommandText = """
+            CREATE TABLE IF NOT EXISTS chat_messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                channel TEXT NOT NULL,
+                message_id TEXT NOT NULL,
+                sender_id TEXT NOT NULL,
+                sender_display_name TEXT NOT NULL,
+                content TEXT NOT NULL,
+                sent_at_utc TEXT NOT NULL,
+                metadata_json TEXT NULL
+            );
+
+            CREATE INDEX IF NOT EXISTS ix_chat_messages_channel_sent_at
+                ON chat_messages(channel, sent_at_utc, id);
+            """;
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    public async Task SaveMessageAsync(AppChatMessage message, CancellationToken cancellationToken)
+    {
+        await using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        var command = connection.CreateCommand();
+        command.CommandText = """
+            INSERT INTO chat_messages (
+                channel,
+                message_id,
+                sender_id,
+                sender_display_name,
+                content,
+                sent_at_utc,
+                metadata_json)
+            VALUES (
+                $channel,
+                $messageId,
+                $senderId,
+                $senderDisplayName,
+                $content,
+                $sentAtUtc,
+                $metadataJson);
+            """;
+
+        command.Parameters.AddWithValue("$channel", message.Channel);
+        command.Parameters.AddWithValue("$messageId", message.MessageId);
+        command.Parameters.AddWithValue("$senderId", message.SenderId);
+        command.Parameters.AddWithValue("$senderDisplayName", message.SenderDisplayName);
+        command.Parameters.AddWithValue("$content", message.Content);
+        command.Parameters.AddWithValue("$sentAtUtc", message.SentAtUtc.UtcDateTime.ToString("O"));
+        command.Parameters.AddWithValue("$metadataJson", message.Metadata is null ? DBNull.Value : JsonSerializer.Serialize(message.Metadata));
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    public async IAsyncEnumerable<ChatHistoryEntry<AppChatMessage>> LoadHistoryAfterAsync(
+        string channel,
+        string? lastEventId,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var lastSeenAtUtc = ParseEventIdToTimestamp(lastEventId);
+        if (!lastSeenAtUtc.HasValue)
+            yield break;
+
+        await using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT message_id, sender_id, sender_display_name, content, sent_at_utc, metadata_json
+            FROM chat_messages
+            WHERE channel = $channel
+              AND sent_at_utc > $lastSeenAtUtc
+            ORDER BY sent_at_utc, id
+            LIMIT 500;
+            """;
+
+        command.Parameters.AddWithValue("$channel", channel);
+        command.Parameters.AddWithValue("$lastSeenAtUtc", lastSeenAtUtc.Value.UtcDateTime.ToString("O"));
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var sentAtUtcRaw = reader.GetString(4);
+            if (!DateTimeOffset.TryParse(sentAtUtcRaw, out var sentAtUtc))
+                continue;
+
+            var metadataJson = reader.IsDBNull(5) ? null : reader.GetString(5);
+
+            var message = new AppChatMessage(
+                MessageId: reader.GetString(0),
+                Channel: channel,
+                SenderId: reader.GetString(1),
+                SenderDisplayName: reader.GetString(2),
+                Content: reader.GetString(3),
+                SentAtUtc: sentAtUtc,
+                Metadata: DeserializeMetadata(metadataJson));
+
+            var eventId = GenerateEventId(sentAtUtc);
+            yield return new ChatHistoryEntry<AppChatMessage>(
+                EventId: eventId,
+                Message: message,
+                EventType: "chat-message");
+        }
+    }
+
+    private static IReadOnlyDictionary<string, string>? DeserializeMetadata(string? metadataJson)
+    {
+        if (string.IsNullOrWhiteSpace(metadataJson))
+            return null;
+
+        try
+        {
+            return JsonSerializer.Deserialize<Dictionary<string, string>>(metadataJson);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static DateTimeOffset? ParseEventIdToTimestamp(string? eventId)
+    {
+        if (string.IsNullOrWhiteSpace(eventId))
+            return null;
+
+        var value = eventId.Trim();
+
+        if (value == "0")
+            return null;
+
+        if (value.StartsWith("db:", StringComparison.OrdinalIgnoreCase))
+            value = value[3..];
+
+        var dashIndex = value.IndexOf('-');
+        if (dashIndex > 0)
+            value = value[..dashIndex];
+
+        if (!long.TryParse(value, out var unixMs))
+            return null;
+
+        try
+        {
+            return DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string GenerateEventId(DateTimeOffset timestamp)
+    {
+        return timestamp.ToUnixTimeMilliseconds().ToString();
+    }
 }
 
 class ConsumerMessageTest

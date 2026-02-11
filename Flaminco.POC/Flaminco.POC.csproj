@@ -8,9 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.10" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Flaminco.Chat.SSE\Flaminco.Chat.SSE.csproj" />
     <ProjectReference Include="..\Flaminco.MinimalEndpoints\Flaminco.MinimalEndpoints.csproj" />
     <ProjectReference Include="..\LowCodeHub.Operations\LowCodeHub.Operations.csproj" />
     <ProjectReference Include="..\LowCodeHub.Operations\SourceGenerators\LowCodeHub.Operations.SourceGenerators.csproj" PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
