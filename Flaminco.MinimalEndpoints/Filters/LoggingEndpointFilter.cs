@@ -10,7 +10,7 @@ namespace Flaminco.MinimalEndpoints.Filters
     /// </summary>
     /// <typeparam name="TEndpoint">The type of endpoint being filtered</typeparam>
     /// <param name="logger">The logger instance for the endpoint</param>
-    internal sealed class LoggingEndpointFilter<TEndpoint>(ILogger<TEndpoint> logger) : IEndpointFilter where TEndpoint : IMinimalRouteEndpoint
+    internal sealed class LoggingEndpointFilter<TEndpoint>(ILogger<TEndpoint> logger) : IEndpointFilter where TEndpoint : IMinimalEndpoint
     {
         /// <summary>
         /// Invokes the filter to log the start and end of endpoint execution along with timing information.

@@ -4,6 +4,7 @@ using Flaminco.RedisChannels.Implementations;
 using Flaminco.RedisChannels.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System.Reflection;
 using StackExchange.Redis;
 
 namespace Flaminco.RedisChannels.Extensions;
@@ -33,6 +34,47 @@ public static class RedisStreamExtensions
         {
             opt.ConnectionMultiplexer = ConnectionMultiplexer.Connect(redisConnection);
             configure?.Invoke(opt);
+        });
+
+        return services;
+    }
+
+    /// <summary>
+    ///     Adds Redis Streams support and registers a typed Redis-backed event bus.
+    ///     This is useful when replacing in-memory Channel-based event buses for distributed deployments.
+    /// </summary>
+    /// <typeparam name="TEventBase">The base event contract type (for example, IDomainEvent).</typeparam>
+    /// <param name="services">The collection of service descriptors.</param>
+    /// <param name="redisConnection">The connection string for the Redis server.</param>
+    /// <param name="streamKey">The Redis stream key used as the event bus transport.</param>
+    /// <param name="knownTypeAssemblies">Optional assemblies that contain concrete event types.</param>
+    /// <param name="configure">Optional action to configure Redis Stream options.</param>
+    /// <returns>The modified service collection.</returns>
+    public static IServiceCollection AddRedisEventBus<TEventBase>(
+        this IServiceCollection services,
+        string redisConnection,
+        string streamKey,
+        IEnumerable<Assembly>? knownTypeAssemblies = null,
+        Action<RedisStreamConfiguration>? configure = null)
+    {
+        services.AddRedisStreams(redisConnection, options =>
+        {
+            options.EnablePolymorphicSerialization = true;
+            options.AddKnownTypeAssemblies(typeof(TEventBase).Assembly);
+
+            if (knownTypeAssemblies is not null)
+            {
+                foreach (Assembly assembly in knownTypeAssemblies)
+                    options.AddKnownTypeAssemblies(assembly);
+            }
+
+            configure?.Invoke(options);
+        });
+
+        services.AddSingleton<IRedisEventBus<TEventBase>>(provider =>
+        {
+            IOptions<RedisStreamConfiguration> options = provider.GetRequiredService<IOptions<RedisStreamConfiguration>>();
+            return new RedisEventBus<TEventBase>(options, streamKey);
         });
 
         return services;
@@ -72,5 +114,24 @@ public static class RedisStreamExtensions
     {
         var options = services.GetRequiredService<IOptions<RedisStreamConfiguration>>();
         return new RedisPubSubChannel<T>(options, channelName);
+    }
+
+    /// <summary>
+    ///     Creates a Redis-backed event bus that mirrors the in-memory Channel event bus pattern.
+    /// </summary>
+    /// <typeparam name="TEventBase">The base event contract type.</typeparam>
+    /// <param name="services">The service provider.</param>
+    /// <param name="streamKey">The Redis stream key.</param>
+    /// <param name="consumerGroup">Optional consumer group name.</param>
+    /// <param name="consumerName">Optional consumer name.</param>
+    /// <returns>A Redis-backed event bus instance.</returns>
+    public static IRedisEventBus<TEventBase> CreateRedisEventBus<TEventBase>(
+        this IServiceProvider services,
+        string streamKey,
+        string? consumerGroup = null,
+        string? consumerName = null)
+    {
+        var options = services.GetRequiredService<IOptions<RedisStreamConfiguration>>();
+        return new RedisEventBus<TEventBase>(options, streamKey, consumerGroup, consumerName);
     }
 }

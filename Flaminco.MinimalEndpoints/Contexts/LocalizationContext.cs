@@ -1,34 +1,33 @@
-using Flaminco.MinimalEndpoints.Abstractions;
+using Microsoft.Extensions.Localization;
 
-namespace Flaminco.MinimalEndpoints.Contexts
+namespace Flaminco.MinimalEndpoints.Contexts;
+
+/// <summary>
+/// Provides ambient context for localization using AsyncLocal to share IStringLocalizer across the async flow.
+/// </summary>
+public static class LocalizationContext
 {
+    private static readonly AsyncLocal<IStringLocalizer?> _current = new();
+
     /// <summary>
-    /// Provides ambient context for localization using AsyncLocal to share IStringLocalizer across the async flow.
+    /// Gets the current IStringLocalizer from the async context.
     /// </summary>
-    public static class LocalizationContext
+    public static IStringLocalizer? Current => _current.Value;
+
+    /// <summary>
+    /// Sets the IStringLocalizer for the current async context.
+    /// </summary>
+    /// <param name="localizer">The IStringLocalizer to set.</param>
+    public static void SetCurrent(IStringLocalizer? localizer)
     {
-        private static readonly AsyncLocal<IPropertyAwareTextLocator?> _propertyAware = new();
+        _current.Value = localizer;
+    }
 
-        /// <summary>
-        /// Gets the current IPropertyAwareTextLocator from the async context.
-        /// </summary>
-        public static IPropertyAwareTextLocator? PropertyAware => _propertyAware.Value;
-
-        /// <summary>
-        /// Sets the IStringLocalizer for the current async context.
-        /// </summary>
-        /// <param name="localizer">The IStringLocalizer to set.</param>
-        public static void SetCurrent(IPropertyAwareTextLocator? localizer)
-        {
-            _propertyAware.Value = localizer;
-        }
-
-        /// <summary>
-        /// Clears the current IStringLocalizer from the async context.
-        /// </summary>
-        public static void Clear()
-        {
-            _propertyAware.Value = null;
-        }
+    /// <summary>
+    /// Clears the current IStringLocalizer from the async context.
+    /// </summary>
+    public static void Clear()
+    {
+        _current.Value = null;
     }
 }

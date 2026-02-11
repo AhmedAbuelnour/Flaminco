@@ -86,7 +86,8 @@ public static class RabbitMqServiceCollectionExtensions
             ? assemblies
             : [Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly()];
 
-        services.RegisterConsumers(assembliesToScan);
+        var consumerTypes = services.RegisterConsumers(assembliesToScan);
+        services.AddSingleton(new ConsumerTypeRegistry(consumerTypes));
 
         // Health check
         services.AddHealthChecks()
@@ -126,8 +127,10 @@ public static class RabbitMqServiceCollectionExtensions
         return services;
     }
 
-    private static void RegisterConsumers(this IServiceCollection services, Assembly[] assemblies)
+    private static IReadOnlyList<Type> RegisterConsumers(this IServiceCollection services, Assembly[] assemblies)
     {
+        var registeredTypes = new List<Type>();
+
         foreach (var assembly in assemblies)
         {
             try
@@ -136,10 +139,11 @@ public static class RabbitMqServiceCollectionExtensions
                 {
                     if (!type.IsAbstract &&
                         !type.IsInterface &&
-                        IsMessageConsumer(type) &&
+                        (IsMessageConsumer(type) || IsRpcMessageConsumer(type)) &&
                         type.GetCustomAttribute<QueueAttribute>() is not null)
                     {
                         services.AddScoped(type);
+                        registeredTypes.Add(type);
                     }
                 }
             }
@@ -148,6 +152,8 @@ public static class RabbitMqServiceCollectionExtensions
                 // Ignore assemblies that can't be loaded
             }
         }
+
+        return registeredTypes;
     }
 
     private static bool IsMessageConsumer(Type type)
@@ -157,6 +163,21 @@ public static class RabbitMqServiceCollectionExtensions
         {
             if (baseType.IsGenericType &&
                 baseType.GetGenericTypeDefinition() == typeof(MessageConsumer<>))
+            {
+                return true;
+            }
+            baseType = baseType.BaseType;
+        }
+        return false;
+    }
+
+    private static bool IsRpcMessageConsumer(Type type)
+    {
+        var baseType = type.BaseType;
+        while (baseType is not null)
+        {
+            if (baseType.IsGenericType &&
+                baseType.GetGenericTypeDefinition() == typeof(RpcMessageConsumer<,>))
             {
                 return true;
             }

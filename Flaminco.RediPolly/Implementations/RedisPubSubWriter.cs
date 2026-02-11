@@ -2,7 +2,6 @@ using Flaminco.RedisChannels.Abstractions;
 using Flaminco.RedisChannels.Options;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using System.Text.Json;
 
 namespace Flaminco.RedisChannels.Implementations;
 
@@ -14,6 +13,7 @@ public sealed class RedisPubSubWriter<T> : IRedisPubSubWriter<T>
 {
     private readonly ISubscriber _subscriber;
     private readonly RedisChannel _channel;
+    private readonly RedisStreamConfiguration _config;
     private bool _completed;
     private Exception? _completionError;
 
@@ -21,7 +21,8 @@ public sealed class RedisPubSubWriter<T> : IRedisPubSubWriter<T>
         IOptions<RedisStreamConfiguration> options,
         string channelName)
     {
-        _subscriber = options.Value.ConnectionMultiplexer.GetSubscriber();
+        _config = options.Value;
+        _subscriber = _config.ConnectionMultiplexer.GetSubscriber();
         _channel = RedisChannel.Literal(channelName);
     }
 
@@ -37,7 +38,7 @@ public sealed class RedisPubSubWriter<T> : IRedisPubSubWriter<T>
 
         try
         {
-            var json = JsonSerializer.Serialize(item);
+            var json = RedisChannelSerializer.Serialize(item, _config);
             var subscribers = await _subscriber.PublishAsync(_channel, json);
             return subscribers > 0 || true; // Return true even if no subscribers (message was published)
         }

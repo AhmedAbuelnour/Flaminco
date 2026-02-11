@@ -15,21 +15,21 @@
         </Description>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageIcon>icon.png</PackageIcon>
+        <PackageIcon></PackageIcon>
         <PackageTags>rabbitmq;amqp;messaging;queue;asp.net-core;dotnet</PackageTags>
-        <RepositoryUrl>https://github.com/AhmedAbuelnworFlaminco.RabbitMQ.AMQP</RepositoryUrl>
+        <RepositoryUrl>https://github.com/AhmedAbuelnour/Flaminco.RabbitMQ.AMQP</RepositoryUrl>
         <Copyright>Copyright (c) 2026, Ahmed Abuelnour</Copyright>
-        <LangVersion>preview</LangVersion>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="RabbitMQ.Client" Version="7.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0-preview.1.25080.5" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0-preview.1.25080.5" />
-        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.0-preview.1.25120.3" />
-        <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0-preview.1.25080.5" />
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0-preview.1.25080.5" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0-preview.1.25080.5" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
     </ItemGroup>
 
     <ItemGroup>

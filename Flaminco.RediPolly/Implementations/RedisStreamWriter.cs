@@ -39,7 +39,7 @@ public sealed class RedisStreamWriter<T> : IRedisStreamWriter<T>
 
         try
         {
-            var json = JsonSerializer.Serialize(item);
+            var json = RedisChannelSerializer.Serialize(item, _config);
             var nameValuePairs = new NameValueEntry[]
             {
                 new("data", json)

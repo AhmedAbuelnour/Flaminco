@@ -192,7 +192,7 @@ public sealed class RedisStreamReader<T> : IRedisStreamReader<T>, IDisposable
                                 {
                                     try
                                     {
-                                        var item = JsonSerializer.Deserialize<T>(jsonValue);
+                                        var item = RedisChannelSerializer.Deserialize<T>(jsonValue, _config);
                                         if (item is not null)
                                         {
                                             _buffer.Enqueue((item, entry.Id.ToString()));
@@ -327,16 +327,7 @@ public sealed class RedisStreamReader<T> : IRedisStreamReader<T>, IDisposable
                             var jsonValue = dataField.Value.ToString();
                             if (!string.IsNullOrEmpty(jsonValue))
                             {
-                                T? item = default;
-                                try
-                                {
-                                    item = JsonSerializer.Deserialize<T>(jsonValue);
-                                }
-                                catch (JsonException)
-                                {
-                                    // Skip invalid JSON entries
-                                    continue;
-                                }
+                                var item = RedisChannelSerializer.Deserialize<T>(jsonValue, _config);
 
                                 if (item is not null)
                                 {

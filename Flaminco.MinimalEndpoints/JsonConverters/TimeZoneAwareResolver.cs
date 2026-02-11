@@ -16,7 +16,7 @@ namespace Flaminco.MinimalEndpoints.JsonConverters
             foreach (JsonPropertyInfo propInfo in jsonTypeInfo.Properties)
             {
                 // propInfo.AttributeProvider can see all CLR attributes on that property/field.
-                if (propInfo.AttributeProvider.GetCustomAttributes(typeof(TimeZoneAwareAttribute), inherit: true).Length > 0)
+                if (propInfo.AttributeProvider?.GetCustomAttributes(typeof(TimeZoneAwareAttribute), inherit: true).Length > 0)
                 {
                     if (propInfo.PropertyType == typeof(DateTimeOffset))
                     {

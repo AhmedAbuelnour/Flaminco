@@ -7,10 +7,7 @@ namespace Flaminco.MinimalEndpoints.JsonConverters
     {
         private readonly TimeZoneAwareDateTimeOffsetConverter _inner = new();
 
-        public override DateTimeOffset? Read(
-            ref Utf8JsonReader reader,
-            Type typeToConvert,
-            JsonSerializerOptions options)
+        public override DateTimeOffset? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType == JsonTokenType.Null)
             {
@@ -21,10 +18,7 @@ namespace Flaminco.MinimalEndpoints.JsonConverters
             return _inner.Read(ref reader, typeof(DateTimeOffset), options);
         }
 
-        public override void Write(
-            Utf8JsonWriter writer,
-            DateTimeOffset? value,
-            JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, DateTimeOffset? value, JsonSerializerOptions options)
         {
             if (value == null)
             {

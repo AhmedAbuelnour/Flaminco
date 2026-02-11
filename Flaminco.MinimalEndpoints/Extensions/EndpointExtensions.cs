@@ -3,7 +3,6 @@ using Flaminco.MinimalEndpoints.Filters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Flaminco.MinimalEndpoints.Extensions;
 
@@ -13,28 +12,22 @@ namespace Flaminco.MinimalEndpoints.Extensions;
 public static class EndpointExtensions
 {
     /// <summary>
-    /// Maps a minimal endpoint to the endpoint route builder.
+    /// Provides methods for mapping endpoints to the application.
     /// </summary>
-    /// <typeparam name="TEndpoint">The type of endpoint to map</typeparam>
-    /// <param name="app">The endpoint route builder</param>
-    /// <returns>The endpoint route builder for method chaining</returns>
-    public static IEndpointRouteBuilder MapEndpoint<TEndpoint>(this IEndpointRouteBuilder app) where TEndpoint : IMinimalRouteEndpoint
+    public static IEndpointRouteBuilder MapEndpoint<TEndpoint>(this IEndpointRouteBuilder app)
+           where TEndpoint : class, IMinimalEndpoint
     {
-        AsyncServiceScope scope = app.ServiceProvider.CreateAsyncScope();
-
-        // Resolve the endpoint from the DI container.
-        scope.ServiceProvider.GetRequiredService<TEndpoint>().AddRoute(app);
+        TEndpoint.AddRoute(app);
 
         return app;
     }
-
     /// <summary>
     /// Adds logging functionality to an endpoint.
     /// </summary>
     /// <typeparam name="TEndpoint">The type of endpoint to add logging to</typeparam>
     /// <param name="builder">The route handler builder</param>
     /// <returns>The route handler builder with logging filter added</returns>
-    public static RouteHandlerBuilder AddLogging<TEndpoint>(this RouteHandlerBuilder builder) where TEndpoint : IMinimalRouteEndpoint
+    public static RouteHandlerBuilder AddLogging<TEndpoint>(this RouteHandlerBuilder builder) where TEndpoint : IMinimalEndpoint
     {
         return builder.AddEndpointFilter<LoggingEndpointFilter<TEndpoint>>();
     }
@@ -45,7 +38,7 @@ public static class EndpointExtensions
     /// <typeparam name="TRequest">The type of request to validate</typeparam>
     /// <param name="builder">The route handler builder</param>
     /// <returns>The route handler builder with validation filter added</returns>
-    public static RouteHandlerBuilder AddValidator<TRequest>(this RouteHandlerBuilder builder) where TRequest : notnull
+    public static RouteHandlerBuilder AddValidator<TRequest>(this RouteHandlerBuilder builder) where TRequest : class
     {
         return builder.AddEndpointFilter<ValidationEndpointFilter<TRequest>>();
     }

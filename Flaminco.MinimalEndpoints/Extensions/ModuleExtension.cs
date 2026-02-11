@@ -1,6 +1,6 @@
 ﻿using Flaminco.MinimalEndpoints.Abstractions;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace Flaminco.MinimalEndpoints.Extensions;
 
@@ -11,14 +11,13 @@ namespace Flaminco.MinimalEndpoints.Extensions;
 public static class ModuleExtension
 {
     /// <summary>
-    /// Adds all implementations of the IModule interface from the specified assembly to the service collection.
+    /// Maps the routes for all registered modules to the endpoint route builder.
     /// </summary>
-    /// <typeparam name="TModuleScanner">The type used to locate the assembly to scan for modules.</typeparam>
-    /// <param name="services">The service collection to add the modules to.</param>
-    /// <returns>The updated service collection.</returns>
-    public static IServiceCollection AddModules<TModuleScanner>(this IServiceCollection services)
+    /// <param name="builder">The endpoint route builder to map the module routes to.</param>
+    /// <returns>The updated endpoint route builder.</returns>
+    public static IEndpointRouteBuilder MapModules<TModuleScanner>(this IEndpointRouteBuilder builder)
     {
-        static IEnumerable<System.Reflection.TypeInfo> enumerable()
+        static IEnumerable<TypeInfo> enumerable()
         {
             foreach (var type in typeof(TModuleScanner).Assembly.DefinedTypes)
             {
@@ -29,38 +28,64 @@ public static class ModuleExtension
             }
         }
 
-        foreach (var type in enumerable() ?? []) services.AddSingleton(typeof(IModule), type);
-
-        return services;
-    }
-
-    /// <summary>
-    /// Adds all implementations of the IMinimalRouteEndpoint interface from the specified assembly to the service collection.
-    /// </summary>
-    /// <typeparam name="TEndpointScanner">The type used to locate the assembly to scan for endpoints.</typeparam>
-    /// <param name="services">The service collection to add the endpoints to.</param>
-    /// <returns>The updated service collection.</returns>
-    public static IServiceCollection AddEndpoints<TEndpointScanner>(this IServiceCollection services)
-    {
-        foreach (Type? endpoint in typeof(TEndpointScanner).Assembly.GetTypes()
-                                                                  .Where(t => t.GetInterfaces().Contains(typeof(IMinimalRouteEndpoint)))
-                                                                  .Where(t => !t.IsInterface))
+        foreach (var moduleType in enumerable() ?? [])
         {
-            services.AddScoped(endpoint);
+            var method = moduleType.GetMethod(nameof(IModule.AddRoutes), BindingFlags.Public | BindingFlags.Static);
+
+            if (method?.GetParameters() is [var param] && param.ParameterType == typeof(IEndpointRouteBuilder))
+            {
+                try
+                {
+                    method.Invoke(null, [builder]);
+                }
+                catch (Exception ex)
+                {
+                    // Log or handle module registration failures
+                    throw new InvalidOperationException($"Failed to register module {moduleType.Name}", ex);
+                }
+            }
         }
 
-        return services;
+        return builder;
     }
 
-    /// <summary>
-    /// Maps the routes for all registered modules to the endpoint route builder.
-    /// </summary>
-    /// <param name="builder">The endpoint route builder to map the module routes to.</param>
-    /// <returns>The updated endpoint route builder.</returns>
-    public static IEndpointRouteBuilder MapModules(this IEndpointRouteBuilder builder)
+    public static IEndpointRouteBuilder MapModules(this IEndpointRouteBuilder builder, params Assembly[] assemblies)
     {
-        foreach (var module in builder.ServiceProvider.GetServices<IModule>()) module.AddRoutes(builder);
+        if (assemblies == null || assemblies.Length == 0)
+        {
+            throw new ArgumentNullException(nameof(assemblies));
+        }
 
+        static IEnumerable<TypeInfo> enumerable(Assembly[] assemblies)
+        {
+            foreach (var assembly in assemblies)
+            {
+                foreach (var type in assembly.DefinedTypes)
+                {
+                    if (!type.IsAbstract && typeof(IModule).IsAssignableFrom(type) && type != typeof(IModule) && type.IsPublic)
+                    {
+                        yield return type;
+                    }
+                }
+            }
+        }
+
+        foreach (var moduleType in enumerable(assemblies) ?? [])
+        {
+            var method = moduleType.GetMethod(nameof(IModule.AddRoutes), BindingFlags.Public | BindingFlags.Static);
+            if (method?.GetParameters() is [var param] && param.ParameterType == typeof(IEndpointRouteBuilder))
+            {
+                try
+                {
+                    method.Invoke(null, [builder]);
+                }
+                catch (Exception ex)
+                {
+                    // Log or handle module registration failures
+                    throw new InvalidOperationException($"Failed to register module {moduleType.Name}", ex);
+                }
+            }
+        }
         return builder;
     }
 }

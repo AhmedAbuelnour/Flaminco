@@ -1,6 +1,7 @@
 using Flaminco.RabbitMQ.AMQP.Abstractions;
 using Flaminco.RabbitMQ.AMQP.Attributes;
 using Flaminco.RabbitMQ.AMQP.Configuration;
+using Flaminco.RabbitMQ.AMQP.Observability;
 using Flaminco.RabbitMQ.AMQP.Serialization;
 using Flaminco.RabbitMQ.AMQP.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Diagnostics;
 using System.Collections.Concurrent;
 using System.Reflection;
 
@@ -23,17 +25,20 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
     private readonly IRabbitMqConnectionManager _connectionManager;
     private readonly IMessageSerializer _serializer;
     private readonly TopologyInitializer _topologyInitializer;
+    private readonly ConsumerTypeRegistry _consumerTypeRegistry;
     private readonly RabbitMqOptions _options;
     private readonly ILogger<RabbitMqConsumerHostedService> _logger;
 
     private readonly ConcurrentDictionary<string, ConsumerRegistration> _consumers = new();
-    private readonly List<Type> _consumerTypes = [];
+    private readonly ConcurrentDictionary<Type, ConsumerExecutionPlan> _consumerPlans = new();
+    private readonly ConcurrentDictionary<Type, RpcExecutionPlan> _rpcPlans = new();
     private bool _disposed;
 
     public RabbitMqConsumerHostedService(IServiceProvider serviceProvider,
                                          IRabbitMqConnectionManager connectionManager,
                                          IMessageSerializer serializer,
                                          TopologyInitializer topologyInitializer,
+                                         ConsumerTypeRegistry consumerTypeRegistry,
                                          IOptions<RabbitMqOptions> options,
                                          ILogger<RabbitMqConsumerHostedService> logger)
     {
@@ -41,52 +46,9 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
         _connectionManager = connectionManager;
         _serializer = serializer;
         _topologyInitializer = topologyInitializer;
+        _consumerTypeRegistry = consumerTypeRegistry;
         _options = options.Value;
         _logger = logger;
-
-        // Discover all consumer types
-        DiscoverConsumers();
-    }
-
-    private void DiscoverConsumers()
-    {
-        foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            try
-            {
-                foreach (Type type in assembly.GetTypes())
-                {
-                    if (!type.IsAbstract &&
-                        !type.IsInterface &&
-                        (IsMessageConsumer(type) || IsRpcMessageConsumer(type)) &&
-                        type.GetCustomAttribute<QueueAttribute>() is not null)
-                    {
-                        _consumerTypes.Add(type);
-                    }
-                }
-            }
-            catch (ReflectionTypeLoadException)
-            {
-                // Ignore assembly loading issues
-            }
-        }
-
-        _logger.LogInformation("Discovered {Count} message consumers", _consumerTypes.Count);
-    }
-
-    private static bool IsMessageConsumer(Type type)
-    {
-        Type? baseType = type.BaseType;
-        while (baseType is not null)
-        {
-            if (baseType.IsGenericType &&
-                baseType.GetGenericTypeDefinition() == typeof(MessageConsumer<>))
-            {
-                return true;
-            }
-            baseType = baseType.BaseType;
-        }
-        return false;
     }
 
     private static bool IsRpcMessageConsumer(Type type)
@@ -115,10 +77,12 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
             await _topologyInitializer.InitializeAsync(cancellationToken);
 
             // Start all consumers
-            foreach (var consumerType in _consumerTypes)
+            foreach (var consumerType in _consumerTypeRegistry.ConsumerTypes)
             {
                 await StartConsumerAsync(consumerType, cancellationToken);
             }
+
+            _logger.LogInformation("Discovered {Count} message consumers", _consumerTypeRegistry.ConsumerTypes.Count);
 
             _logger.LogInformation("All RabbitMQ consumers started successfully");
         }
@@ -205,6 +169,14 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
         CancellationToken cancellationToken)
     {
         var queueName = queueAttr.Name;
+        var startTimestamp = Stopwatch.GetTimestamp();
+        using var activity = RabbitMqDiagnostics.ActivitySource.StartActivity("rabbitmq.consume", ActivityKind.Consumer);
+        activity?.SetTag("messaging.system", "rabbitmq");
+        activity?.SetTag("messaging.destination", queueName);
+        activity?.SetTag("messaging.rabbitmq.routing_key", args.RoutingKey);
+        activity?.SetTag("messaging.operation", "process");
+        activity?.SetTag("messaging.message.id", args.BasicProperties.MessageId);
+        activity?.SetTag("messaging.conversation_id", args.BasicProperties.CorrelationId);
 
         try
         {
@@ -231,17 +203,38 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
             // Check if this is an RPC consumer
             if (IsRpcMessageConsumer(consumerType))
             {
-                await HandleRpcMessageAsync(consumerType, messageType, message, queueAttr, channel, args, cancellationToken);
+                await HandleRpcMessageAsync(consumerType, messageType, message, queueAttr, channel, args, consumer, cancellationToken);
             }
             else
             {
                 await HandleRegularMessageAsync(consumerType, messageType, message, queueAttr, channel, args, retryCount, consumer, cancellationToken);
             }
+
+            RabbitMqDiagnostics.ConsumerMessagesProcessed.Add(
+                1,
+                new KeyValuePair<string, object?>("queue", queueName),
+                new KeyValuePair<string, object?>("consumer_type", consumerType.Name),
+                new KeyValuePair<string, object?>("success", true));
+
+            RabbitMqDiagnostics.ConsumerProcessingDurationMs.Record(
+                Stopwatch.GetElapsedTime(startTimestamp).TotalMilliseconds,
+                new KeyValuePair<string, object?>("queue", queueName),
+                new KeyValuePair<string, object?>("consumer_type", consumerType.Name));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing message from queue '{Queue}'", queueName);
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            RabbitMqDiagnostics.ConsumerMessagesFailed.Add(
+                1,
+                new KeyValuePair<string, object?>("queue", queueName),
+                new KeyValuePair<string, object?>("consumer_type", consumerType.Name));
             await HandleMessageErrorAsync(consumerType, queueAttr, channel, args, ex, cancellationToken);
+
+            RabbitMqDiagnostics.ConsumerProcessingDurationMs.Record(
+                Stopwatch.GetElapsedTime(startTimestamp).TotalMilliseconds,
+                new KeyValuePair<string, object?>("queue", queueName),
+                new KeyValuePair<string, object?>("consumer_type", consumerType.Name));
         }
     }
 
@@ -252,14 +245,14 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
         QueueAttribute queueAttr,
         IChannel channel,
         BasicDeliverEventArgs args,
+        object consumer,
         CancellationToken cancellationToken)
     {
-        await using var scope = _serviceProvider.CreateAsyncScope();
-        var consumer = scope.ServiceProvider.GetRequiredService(consumerType);
+        var plan = _rpcPlans.GetOrAdd(consumerType, _ => CreateRpcExecutionPlan(consumerType, messageType));
 
         // Get response type from RpcMessageConsumer<TRequest, TResponse>
         var baseType = consumerType.BaseType!;
-        var responseType = baseType.GetGenericArguments()[1];
+        _ = baseType.GetGenericArguments()[1];
 
         var messageId = args.BasicProperties.MessageId ?? Guid.NewGuid().ToString();
         var correlationId = args.BasicProperties.CorrelationId;
@@ -293,24 +286,17 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
         };
 
         // Create RpcContext
-        var rpcContextType = typeof(RpcContext<>).MakeGenericType(messageType);
-        var rpcContext = Activator.CreateInstance(
-            rpcContextType,
-            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
-            null,
-            new object?[] { message, messageId, correlationId, replyTo, headers, timestamp, args.Exchange, args.RoutingKey, respondFunc },
-            null)!;
+        var rpcContext = plan.ContextConstructor.Invoke(
+            new object?[] { message, messageId, correlationId, replyTo, headers, timestamp, args.Exchange, args.RoutingKey, respondFunc });
 
         try
         {
             // Call HandleAsync method
-            var handleMethod = consumerType.GetMethod("HandleAsync")!;
-            var responseTask = (Task)handleMethod.Invoke(consumer, new[] { rpcContext, cancellationToken })!;
+            var responseTask = (Task)plan.HandleMethod.Invoke(consumer, new[] { rpcContext, cancellationToken })!;
             await responseTask;
 
             // Get response from task
-            var responseProperty = responseTask.GetType().GetProperty("Result")!;
-            var response = responseProperty.GetValue(responseTask)!;
+            var response = plan.ResponseResultProperty.GetValue(responseTask)!;
 
             // Send response
             await respondFunc(response);
@@ -328,8 +314,7 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
             _logger.LogError(ex, "Error handling RPC request from queue '{Queue}'", queueAttr.Name);
 
             // Call OnErrorAsync
-            var onErrorMethod = consumerType.GetMethod("OnErrorAsync")!;
-            var errorTask = (Task<ErrorHandlingResult>)onErrorMethod.Invoke(consumer, new[] { rpcContext, ex, cancellationToken })!;
+            var errorTask = (Task<ErrorHandlingResult>)plan.OnErrorMethod.Invoke(consumer, new[] { rpcContext, ex, cancellationToken })!;
             var result = await errorTask;
 
             // Only handle errors if manual acknowledgment is enabled
@@ -364,72 +349,75 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
         object consumer,
         CancellationToken cancellationToken)
     {
-        // Create the context using reflection
-        var contextType = typeof(ConsumeContext<>).MakeGenericType(messageType);
-        var context = Activator.CreateInstance(contextType);
+        var plan = _consumerPlans.GetOrAdd(consumerType, _ => CreateConsumerExecutionPlan(consumerType, messageType));
+        var context = Activator.CreateInstance(plan.ContextType)!;
 
         // Set context properties
-        SetContextProperty(context!, "Message", message);
-        SetContextProperty(context!, "Body", args.Body);
-        SetContextProperty(context!, "Properties", args.BasicProperties);
-        SetContextProperty(context!, "DeliveryTag", args.DeliveryTag);
-        SetContextProperty(context!, "Exchange", args.Exchange);
-        SetContextProperty(context!, "RoutingKey", args.RoutingKey);
-        SetContextProperty(context!, "Redelivered", args.Redelivered);
-        SetContextProperty(context!, "ConsumerTag", args.ConsumerTag);
-        SetContextProperty(context!, "RetryCount", retryCount);
+        SetContextProperty(context, plan.MessageProperty, message);
+        SetContextProperty(context, plan.BodyProperty, args.Body);
+        SetContextProperty(context, plan.PropertiesProperty, args.BasicProperties);
+        SetContextProperty(context, plan.DeliveryTagProperty, args.DeliveryTag);
+        SetContextProperty(context, plan.ExchangeProperty, args.Exchange);
+        SetContextProperty(context, plan.RoutingKeyProperty, args.RoutingKey);
+        SetContextProperty(context, plan.RedeliveredProperty, args.Redelivered);
+        SetContextProperty(context, plan.ConsumerTagProperty, args.ConsumerTag);
+        SetContextProperty(context, plan.RetryCountProperty, retryCount);
 
-        // Get lifecycle methods
-        var beforeMethod = consumerType.GetMethod("OnBeforeConsumeAsync");
-        var consumeMethod = consumerType.GetMethod("ConsumeAsync");
-        var afterMethod = consumerType.GetMethod("OnAfterConsumeAsync");
-
-        // Call OnBeforeConsumeAsync
-        if (beforeMethod is not null)
+        try
         {
-            var beforeResult = beforeMethod.Invoke(consumer, [context, cancellationToken]);
-            if (beforeResult is Task<bool> beforeTask)
+            // Call OnBeforeConsumeAsync
+            if (plan.BeforeMethod is not null)
             {
-                var shouldContinue = await beforeTask;
-                if (!shouldContinue)
+                var beforeResult = plan.BeforeMethod.Invoke(consumer, [context, cancellationToken]);
+                if (beforeResult is Task<bool> beforeTask)
                 {
-                    // Only acknowledge if manual acknowledgment is enabled
-                    if (!queueAttr.AutoAck)
+                    var shouldContinue = await beforeTask;
+                    if (!shouldContinue)
                     {
-                        await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
+                        // Only acknowledge if manual acknowledgment is enabled
+                        if (!queueAttr.AutoAck)
+                        {
+                            await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
+                        }
+                        return;
                     }
-                    return;
                 }
             }
-        }
 
-        // Call ConsumeAsync
-        if (consumeMethod is not null)
-        {
-            var consumeResult = consumeMethod.Invoke(consumer, [context, cancellationToken]);
+            // Call ConsumeAsync
+            var consumeResult = plan.ConsumeMethod.Invoke(consumer, [context, cancellationToken]);
             if (consumeResult is Task consumeTask)
             {
                 await consumeTask;
             }
-        }
 
-        // Call OnAfterConsumeAsync
-        if (afterMethod is not null)
-        {
-            var afterResult = afterMethod.Invoke(consumer, [context, cancellationToken]);
-            if (afterResult is Task afterTask)
+            // Call OnAfterConsumeAsync
+            if (plan.AfterMethod is not null)
             {
-                await afterTask;
+                var afterResult = plan.AfterMethod.Invoke(consumer, [context, cancellationToken]);
+                if (afterResult is Task afterTask)
+                {
+                    await afterTask;
+                }
             }
-        }
 
-        // Acknowledge the message (only if manual acknowledgment is enabled)
-        if (!queueAttr.AutoAck)
+            // Acknowledge the message (only if manual acknowledgment is enabled)
+            if (!queueAttr.AutoAck)
+            {
+                await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
+            }
+
+            _logger.LogDebug("Successfully processed message from queue '{Queue}'", queueAttr.Name);
+        }
+        catch (Exception ex)
         {
-            await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
-        }
+            _logger.LogError(ex, "Error in regular consumer pipeline for queue '{Queue}'", queueAttr.Name);
 
-        _logger.LogDebug("Successfully processed message from queue '{Queue}'", queueAttr.Name);
+            var errorTask = (Task<ErrorHandlingResult>)plan.OnErrorMethod.Invoke(consumer, new[] { context, ex, cancellationToken })!;
+            var errorResult = await errorTask;
+
+            await ApplyRegularErrorResultAsync(queueAttr, channel, args, errorResult, cancellationToken);
+        }
     }
 
     private async Task HandleMessageErrorAsync(
@@ -453,11 +441,10 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
         }
 
         // Check if we should retry
-        if (retryCount < queueAttr.MaxRetryAttempts)
+        if (queueAttr.RequeueOnFailure && retryCount < queueAttr.MaxRetryAttempts)
         {
-            // Requeue with incremented retry count
-            var requeue = queueAttr.RequeueOnFailure;
-            await channel.BasicNackAsync(args.DeliveryTag, multiple: false, requeue: requeue, cancellationToken);
+            await RepublishForRetryAsync(queueAttr, channel, args, retryCount + 1, cancellationToken);
+            await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
         }
         else
         {
@@ -468,6 +455,99 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
 
             await channel.BasicRejectAsync(args.DeliveryTag, requeue: false, cancellationToken);
         }
+    }
+
+    private async Task ApplyRegularErrorResultAsync(
+        QueueAttribute queueAttr,
+        IChannel channel,
+        BasicDeliverEventArgs args,
+        ErrorHandlingResult result,
+        CancellationToken cancellationToken)
+    {
+        if (queueAttr.AutoAck)
+            return;
+
+        switch (result)
+        {
+            case ErrorHandlingResult.Acknowledge:
+                await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
+                break;
+
+            case ErrorHandlingResult.Requeue:
+            {
+                var retryCount = GetRetryCount(args.BasicProperties);
+                if (retryCount < queueAttr.MaxRetryAttempts)
+                {
+                    await RepublishForRetryAsync(queueAttr, channel, args, retryCount + 1, cancellationToken);
+                    await channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken);
+                }
+                else
+                {
+                    _logger.LogWarning(
+                        "Max retry attempts ({MaxRetries}) reached for message in queue '{Queue}'. Rejecting.",
+                        queueAttr.MaxRetryAttempts,
+                        queueAttr.Name);
+
+                    await channel.BasicRejectAsync(args.DeliveryTag, requeue: false, cancellationToken);
+                }
+                break;
+            }
+
+            case ErrorHandlingResult.Reject:
+            default:
+                await channel.BasicRejectAsync(args.DeliveryTag, requeue: false, cancellationToken);
+                break;
+        }
+    }
+
+    private async Task RepublishForRetryAsync(
+        QueueAttribute queueAttr,
+        IChannel channel,
+        BasicDeliverEventArgs args,
+        int nextRetryCount,
+        CancellationToken cancellationToken)
+    {
+        var headers = args.BasicProperties.Headers is not null
+            ? new Dictionary<string, object?>(args.BasicProperties.Headers)
+            : new Dictionary<string, object?>();
+
+        headers["x-retry-count"] = nextRetryCount;
+
+        var retryProperties = new BasicProperties
+        {
+            MessageId = args.BasicProperties.MessageId,
+            CorrelationId = args.BasicProperties.CorrelationId,
+            ReplyTo = args.BasicProperties.ReplyTo,
+            ContentType = args.BasicProperties.ContentType,
+            ContentEncoding = args.BasicProperties.ContentEncoding,
+            DeliveryMode = args.BasicProperties.DeliveryMode,
+            Priority = args.BasicProperties.Priority,
+            Expiration = args.BasicProperties.Expiration,
+            Type = args.BasicProperties.Type,
+            UserId = args.BasicProperties.UserId,
+            AppId = args.BasicProperties.AppId,
+            Timestamp = args.BasicProperties.Timestamp,
+            Headers = headers
+        };
+
+        await channel.BasicPublishAsync(
+            exchange: args.Exchange,
+            routingKey: args.RoutingKey,
+            mandatory: false,
+            basicProperties: retryProperties,
+            body: args.Body,
+            cancellationToken: cancellationToken);
+
+        RabbitMqDiagnostics.ConsumerMessagesRetried.Add(
+            1,
+            new KeyValuePair<string, object?>("queue", queueAttr.Name),
+            new KeyValuePair<string, object?>("retry_attempt", nextRetryCount));
+
+        _logger.LogInformation(
+            "Republished failed message from queue '{Queue}' for retry attempt {Retry}/{MaxRetries}",
+            queueAttr.Name,
+            nextRetryCount,
+            queueAttr.MaxRetryAttempts);
     }
 
     private static int GetRetryCount(IReadOnlyBasicProperties properties)
@@ -509,10 +589,55 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
             $"Consumer type {consumerType.Name} must extend MessageConsumer<T> or RpcMessageConsumer<TRequest, TResponse>");
     }
 
-    private static void SetContextProperty(object context, string propertyName, object value)
+    private static void SetContextProperty(object context, PropertyInfo property, object value)
     {
-        var property = context.GetType().GetProperty(propertyName);
-        property?.SetValue(context, value);
+        property.SetValue(context, value);
+    }
+
+    private static ConsumerExecutionPlan CreateConsumerExecutionPlan(Type consumerType, Type messageType)
+    {
+        var contextType = typeof(ConsumeContext<>).MakeGenericType(messageType);
+
+        static PropertyInfo RequiredProperty(Type contextType, string name) =>
+            contextType.GetProperty(name) ?? throw new InvalidOperationException($"Property '{name}' not found on '{contextType.Name}'");
+
+        return new ConsumerExecutionPlan(
+            ContextType: contextType,
+            MessageProperty: RequiredProperty(contextType, "Message"),
+            BodyProperty: RequiredProperty(contextType, "Body"),
+            PropertiesProperty: RequiredProperty(contextType, "Properties"),
+            DeliveryTagProperty: RequiredProperty(contextType, "DeliveryTag"),
+            ExchangeProperty: RequiredProperty(contextType, "Exchange"),
+            RoutingKeyProperty: RequiredProperty(contextType, "RoutingKey"),
+            RedeliveredProperty: RequiredProperty(contextType, "Redelivered"),
+            ConsumerTagProperty: RequiredProperty(contextType, "ConsumerTag"),
+            RetryCountProperty: RequiredProperty(contextType, "RetryCount"),
+            BeforeMethod: consumerType.GetMethod("OnBeforeConsumeAsync"),
+            ConsumeMethod: consumerType.GetMethod("ConsumeAsync") ?? throw new InvalidOperationException($"ConsumeAsync not found for consumer '{consumerType.Name}'"),
+            AfterMethod: consumerType.GetMethod("OnAfterConsumeAsync"),
+            OnErrorMethod: consumerType.GetMethod("OnErrorAsync") ?? throw new InvalidOperationException($"OnErrorAsync not found for consumer '{consumerType.Name}'"));
+    }
+
+    private static RpcExecutionPlan CreateRpcExecutionPlan(Type consumerType, Type messageType)
+    {
+        var contextType = typeof(RpcContext<>).MakeGenericType(messageType);
+        var constructor = contextType.GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+            .SingleOrDefault() ?? throw new InvalidOperationException($"Expected constructor for RPC context '{contextType.Name}'");
+
+        var handleMethod = consumerType.GetMethod("HandleAsync")
+            ?? throw new InvalidOperationException($"HandleAsync not found for RPC consumer '{consumerType.Name}'");
+
+        var onErrorMethod = consumerType.GetMethod("OnErrorAsync")
+            ?? throw new InvalidOperationException($"OnErrorAsync not found for RPC consumer '{consumerType.Name}'");
+
+        var responseResultProperty = handleMethod.ReturnType.GetProperty("Result")
+            ?? throw new InvalidOperationException($"Could not resolve response Result property for RPC consumer '{consumerType.Name}'");
+
+        return new RpcExecutionPlan(
+            ContextConstructor: constructor,
+            HandleMethod: handleMethod,
+            OnErrorMethod: onErrorMethod,
+            ResponseResultProperty: responseResultProperty);
     }
 
     /// <inheritdoc />
@@ -573,4 +698,26 @@ internal sealed class RabbitMqConsumerHostedService : IHostedService, IAsyncDisp
         Type ConsumerType,
         Type MessageType,
         QueueAttribute QueueAttribute);
+
+    private sealed record ConsumerExecutionPlan(
+        Type ContextType,
+        PropertyInfo MessageProperty,
+        PropertyInfo BodyProperty,
+        PropertyInfo PropertiesProperty,
+        PropertyInfo DeliveryTagProperty,
+        PropertyInfo ExchangeProperty,
+        PropertyInfo RoutingKeyProperty,
+        PropertyInfo RedeliveredProperty,
+        PropertyInfo ConsumerTagProperty,
+        PropertyInfo RetryCountProperty,
+        MethodInfo? BeforeMethod,
+        MethodInfo ConsumeMethod,
+        MethodInfo? AfterMethod,
+        MethodInfo OnErrorMethod);
+
+    private sealed record RpcExecutionPlan(
+        ConstructorInfo ContextConstructor,
+        MethodInfo HandleMethod,
+        MethodInfo OnErrorMethod,
+        PropertyInfo ResponseResultProperty);
 }

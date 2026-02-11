@@ -167,15 +167,16 @@ internal sealed class RabbitMqConnectionManager : IRabbitMqConnectionManager
             {
                 Enabled = true,
                 ServerName = _options.Ssl.ServerName ?? _options.HostName,
-                AcceptablePolicyErrors = SslPolicyErrors.RemoteCertificateNameMismatch |
-                                        SslPolicyErrors.RemoteCertificateChainErrors
+                AcceptablePolicyErrors = _options.Ssl.AllowInsecureCertificateValidation
+                    ? SslPolicyErrors.RemoteCertificateNameMismatch | SslPolicyErrors.RemoteCertificateChainErrors
+                    : SslPolicyErrors.None
             };
 
             if (!string.IsNullOrEmpty(_options.Ssl.CertificatePath))
             {
                 var cert = string.IsNullOrEmpty(_options.Ssl.CertificatePassword)
-                    ? X509CertificateLoader.LoadCertificateFromFile(_options.Ssl.CertificatePath)
-                    : X509CertificateLoader.LoadPkcs12FromFile(_options.Ssl.CertificatePath, _options.Ssl.CertificatePassword);
+                    ? new X509Certificate2(_options.Ssl.CertificatePath)
+                    : new X509Certificate2(_options.Ssl.CertificatePath, _options.Ssl.CertificatePassword);
                 factory.Ssl.Certs = [cert];
             }
         }

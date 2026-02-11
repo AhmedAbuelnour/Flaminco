@@ -224,6 +224,7 @@ public class OrderProcessor : MessageConsumer<OrderMessage>
         Exception exception,
         CancellationToken cancellationToken = default)
     {
+        // The library increments x-retry-count on each requeue republish
         if (context.RetryCount < 3)
             return Task.FromResult(ErrorHandlingResult.Requeue);
         
@@ -238,8 +239,8 @@ public class OrderProcessor : MessageConsumer<OrderMessage>
 |----------|------|---------|-------------|
 | `Name` | string | **required** | Queue name to consume from |
 | `PrefetchCount` | ushort | 0 (uses global) | Messages to prefetch |
-| `MaxRetryAttempts` | int | 3 | Max retries before DLQ |
-| `RequeueOnFailure` | bool | false | Requeue on error |
+| `MaxRetryAttempts` | int | 3 | Max retries when requeueing via `ErrorHandlingResult.Requeue` or fallback error path |
+| `RequeueOnFailure` | bool | false | Fallback requeue behavior when unhandled exceptions occur |
 | `Durable` | bool | true | Queue durability |
 | `DeadLetterExchange` | string | null | DLX name |
 | `DeadLetterRoutingKey` | string | null | DLQ routing key |
@@ -332,7 +333,9 @@ options.Ssl = new RabbitMqSslOptions
     Enabled = true,
     ServerName = "rabbitmq.example.com",
     CertificatePath = "/certs/client.pfx",
-    CertificatePassword = "secret"
+    CertificatePassword = "secret",
+    // Optional for local/dev only. Keep false in production.
+    AllowInsecureCertificateValidation = false
 };
 ```
 
@@ -550,6 +553,76 @@ app.MapGet("/calculate", async (IMessageRpcClient rpcClient, int a, int b, strin
 4. **Use direct exchanges** - More efficient for point-to-point RPC
 5. **Monitor response times** - Add telemetry to RPC handlers
 6. **Consider idempotency** - RPC calls may be retried on timeout
+
+---
+
+## Idempotency & Retry Guardrails
+
+When using retries or requeue behavior, handlers must be idempotent.
+
+### Why it matters
+
+Messages can be delivered more than once due to broker redelivery, consumer restarts, or retry workflows. Your business handler may run multiple times for the same logical message.
+
+### Recommended guardrails
+
+1. **Use a stable idempotency key**
+   - Prefer `context.MessageId` when producers set it consistently.
+   - Otherwise derive a deterministic key from business payload (for example `OrderId + EventType`).
+
+2. **Store processed keys**
+   - Persist idempotency keys in durable storage with TTL (SQL/Redis).
+   - If key already exists, skip side effects and return success.
+
+3. **Make side effects transactional where possible**
+   - Save domain change and idempotency marker atomically.
+
+4. **Treat `ErrorHandlingResult.Requeue` as at-least-once**
+   - Requeue is for transient failures only.
+   - The library increments `x-retry-count` on each retry republish and respects `MaxRetryAttempts`.
+
+5. **Use DLQ for poison messages**
+   - After retry budget is exhausted, messages should be rejected to DLQ for investigation.
+
+### Example idempotent consumer pattern
+
+```csharp
+[Queue("orders.created", MaxRetryAttempts = 3)]
+public class OrderCreatedConsumer : MessageConsumer<OrderCreated>
+{
+    private readonly IIdempotencyStore _store;
+    private readonly IOrderService _service;
+
+    public OrderCreatedConsumer(IIdempotencyStore store, IOrderService service)
+    {
+        _store = store;
+        _service = service;
+    }
+
+    public override async Task ConsumeAsync(ConsumeContext<OrderCreated> context, CancellationToken ct = default)
+    {
+        var key = context.MessageId ?? $"order-created:{context.Message.OrderId}";
+
+        if (await _store.ExistsAsync(key, ct))
+            return; // duplicate delivery, no-op
+
+        await _service.ProcessAsync(context.Message, ct);
+        await _store.MarkProcessedAsync(key, TimeSpan.FromDays(7), ct);
+    }
+
+    public override Task<ErrorHandlingResult> OnErrorAsync(
+        ConsumeContext<OrderCreated> context,
+        Exception exception,
+        CancellationToken cancellationToken = default)
+    {
+        // transient failures can retry
+        return Task.FromResult(
+            context.RetryCount < 3
+                ? ErrorHandlingResult.Requeue
+                : ErrorHandlingResult.Reject);
+    }
+}
+```
 
 ---
 

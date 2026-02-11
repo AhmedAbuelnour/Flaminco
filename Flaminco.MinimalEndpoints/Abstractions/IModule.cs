@@ -11,5 +11,5 @@ public interface IModule
     /// Adds routes from this module to the specified endpoint route builder.
     /// </summary>
     /// <param name="app">The endpoint route builder to add routes to</param>
-    void AddRoutes(IEndpointRouteBuilder app);
+    abstract static void AddRoutes(IEndpointRouteBuilder app);
 }

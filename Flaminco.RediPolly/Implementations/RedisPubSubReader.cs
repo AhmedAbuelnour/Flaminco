@@ -3,7 +3,6 @@ using Flaminco.RedisChannels.Options;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
-using System.Text.Json;
 
 namespace Flaminco.RedisChannels.Implementations;
 
@@ -15,6 +14,7 @@ public sealed class RedisPubSubReader<T> : IRedisPubSubReader<T>, IDisposable
 {
     private readonly ISubscriber _subscriber;
     private readonly RedisChannel _channel;
+    private readonly RedisStreamConfiguration _config;
     private readonly ConcurrentQueue<T> _buffer = new();
     private bool _completionRequested;
     private Task? _subscriptionTask;
@@ -26,7 +26,8 @@ public sealed class RedisPubSubReader<T> : IRedisPubSubReader<T>, IDisposable
         IOptions<RedisStreamConfiguration> options,
         string channelName)
     {
-        _subscriber = options.Value.ConnectionMultiplexer.GetSubscriber();
+        _config = options.Value;
+        _subscriber = _config.ConnectionMultiplexer.GetSubscriber();
         _channel = RedisChannel.Literal(channelName);
 
         // Start subscription task
@@ -106,16 +107,16 @@ public sealed class RedisPubSubReader<T> : IRedisPubSubReader<T>, IDisposable
                             
                             try
                             {
-                                item = JsonSerializer.Deserialize<T>(json);
+                                item = RedisChannelSerializer.Deserialize<T>(json, _config);
                             }
-                            catch (JsonException)
+                            catch
                             {
                                 // If generic deserialization fails and T is string, try string-specific deserialization
                                 if (typeof(T) == typeof(string))
                                 {
                                     try
                                     {
-                                        var stringValue = JsonSerializer.Deserialize<string>(json);
+                                        var stringValue = RedisChannelSerializer.Deserialize<string>(json, _config);
                                         if (stringValue is not null)
                                         {
                                             item = (T)(object)stringValue;

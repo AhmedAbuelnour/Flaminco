@@ -13,17 +13,61 @@ namespace Flaminco.MinimalEndpoints.Filters
             {
                 if (context.HttpContext.RequestServices.GetService<IMinimalValidator<TRequest>>() is IMinimalValidator<TRequest> validator)
                 {
-                    IEnumerable<ValidationFailure> failures = validator.Validate(request).ToList();
+                    IReadOnlyList<ValidationFailure> failures = validator.Validate(request).ToList();
 
                     if (failures.Any())
-                        return TypedResults.BadRequest(EndpointResult<IEnumerable<ValidationFailure>>.Failure("ValidationError", "One or more validation errors occurred.", failures));
+                    {
+                        Dictionary<string, string[]> errors = failures
+                            .GroupBy(f => string.IsNullOrWhiteSpace(f.PropertyName) ? "general" : f.PropertyName)
+                            .ToDictionary(
+                                g => g.Key,
+                                g => g.Select(x => x.ErrorMessage ?? "Validation failed").ToArray()
+                            );
+
+                        return Results.ValidationProblem(errors: errors,
+                                                         title: "Validation Error",
+                                                         instance: context.HttpContext.Request.Path,
+                                                         type: "https://httpstatuses.com/400",
+                                                         statusCode: StatusCodes.Status400BadRequest,
+                                                         extensions: new Dictionary<string, object?>
+                        {
+                            { "timestamp", DateTimeOffset.UtcNow.ToString("O") },
+                            { "traceId", context.HttpContext.TraceIdentifier },
+                            { "failures", failures }
+                        });
+                    }
+
                 }
                 else if (context.HttpContext.RequestServices.GetService<IAsyncMinimalValidator<TRequest>>() is IAsyncMinimalValidator<TRequest> asyncValidator)
                 {
-                    IEnumerable<ValidationFailure> failures = await asyncValidator.ValidateAsync(request, context.HttpContext.RequestAborted);
+                    List<ValidationFailure> failures = [];
 
-                    if (failures.Any())
-                        return TypedResults.BadRequest(EndpointResult<IEnumerable<ValidationFailure>>.Failure("ValidationError", "One or more validation errors occurred.", failures));
+                    await foreach (ValidationFailure failure in asyncValidator.ValidateAsync(request, context.HttpContext.RequestAborted))
+                    {
+                        failures.Add(failure);
+                    }
+
+                    if (failures.Count != 0)
+                    {
+                        Dictionary<string, string[]> errors = failures
+                              .GroupBy(f => string.IsNullOrWhiteSpace(f.PropertyName) ? "general" : f.PropertyName)
+                              .ToDictionary(
+                                  g => g.Key,
+                                  g => g.Select(x => x.ErrorMessage ?? "Validation failed").ToArray()
+                              );
+
+                        return Results.ValidationProblem(errors: errors,
+                                                         title: "Validation Error",
+                                                         instance: context.HttpContext.Request.Path,
+                                                         type: "https://httpstatuses.com/400",
+                                                         statusCode: StatusCodes.Status400BadRequest,
+                                                         extensions: new Dictionary<string, object?>
+                        {
+                            { "timestamp", DateTimeOffset.UtcNow.ToString("O") },
+                            { "traceId", context.HttpContext.TraceIdentifier },
+                            { "failures", failures }
+                        });
+                    }
                 }
             }
 

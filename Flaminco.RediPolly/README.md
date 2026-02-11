@@ -41,6 +41,58 @@ services.AddRedisStreams("Your Redis Connection String", options =>
 });
 ```
 
+### Domain Events / EventBus Style Usage
+
+If your application currently uses an in-memory `Channel<IDomainEvent>` event bus, you can switch to a Redis-backed transport with a very similar shape.
+
+```csharp
+using Flaminco.MinimalEndpoints.Abstractions;
+using Flaminco.RedisChannels.Abstractions;
+using Flaminco.RedisChannels.Extensions;
+
+// Program.cs
+builder.Services.AddRedisEventBus<IDomainEvent>(
+    redisConnection: builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379",
+    streamKey: "domain-events",
+    knownTypeAssemblies: [typeof(IDomainEvent).Assembly],
+    configure: options =>
+    {
+        options.DefaultConsumerGroupName = "my-app-events";
+        options.ConsumerName = Environment.MachineName;
+        options.AutoAcknowledge = true;
+    });
+
+// Publishing (similar to EventBus.Publish)
+public sealed class EventPublisher(IRedisEventBus<IDomainEvent> bus)
+{
+    public ValueTask Publish(IDomainEvent domainEvent, CancellationToken ct)
+        => bus.Publish(domainEvent, ct);
+}
+
+// Consuming (similar to EventProcessor loop)
+public sealed class EventWorker(
+    IRedisEventBus<IDomainEvent> bus,
+    IServiceScopeFactory scopeFactory) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        await foreach (var domainEvent in bus.Reader.WithCancellation(stoppingToken))
+        {
+            using var scope = scopeFactory.CreateScope();
+            var handlerType = typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType());
+            var handlers = scope.ServiceProvider.GetServices(handlerType);
+
+            foreach (var handler in handlers)
+            {
+                var method = handler.GetType().GetMethod("Handle");
+                if (method?.Invoke(handler, [domainEvent, stoppingToken]) is ValueTask vt)
+                    await vt;
+            }
+        }
+    }
+}
+```
+
 ### Usage
 
 #### Real-Time Chat with Server-Sent Events (SSE) - .NET 10

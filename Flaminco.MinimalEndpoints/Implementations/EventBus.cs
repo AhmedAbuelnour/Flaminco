@@ -6,7 +6,7 @@ namespace Flaminco.MinimalEndpoints.Implementations
     /// <summary>
     /// Represents an event bus for publishing and subscribing to domain events.
     /// </summary>
-    public sealed class EventBus
+    public sealed class EventBus : IEventBus
     {
         private readonly Channel<IDomainEvent> _channel = Channel.CreateUnbounded<IDomainEvent>();
 
@@ -20,6 +20,14 @@ namespace Flaminco.MinimalEndpoints.Implementations
         public ValueTask Publish<TDomainEvent>(TDomainEvent domainEvent, CancellationToken cancellationToken = default) where TDomainEvent : IDomainEvent
         {
             return Writer.WriteAsync(domainEvent, cancellationToken);
+        }
+
+        /// <summary>
+        /// Reads all domain events from the in-memory channel.
+        /// </summary>
+        public IAsyncEnumerable<IDomainEvent> ReadAllAsync(CancellationToken cancellationToken = default)
+        {
+            return Reader.ReadAllAsync(cancellationToken);
         }
 
         /// <summary>

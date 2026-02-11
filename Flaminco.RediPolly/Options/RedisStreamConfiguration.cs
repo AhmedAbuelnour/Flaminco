@@ -1,4 +1,5 @@
 using StackExchange.Redis;
+using System.Reflection;
 
 namespace Flaminco.RedisChannels.Options;
 
@@ -57,4 +58,29 @@ public sealed class RedisStreamConfiguration
     ///     Default is true.
     /// </summary>
     public bool AutoAcknowledge { get; set; } = true;
+
+    /// <summary>
+    ///     Gets or sets whether channel payloads should include runtime type metadata when needed.
+    ///     This is useful when using interface/abstract message contracts (for example IDomainEvent).
+    ///     Default is true.
+    /// </summary>
+    public bool EnablePolymorphicSerialization { get; set; } = true;
+
+    /// <summary>
+    ///     Gets the additional assemblies that should be searched when resolving envelope runtime types.
+    /// </summary>
+    public ISet<Assembly> KnownTypeAssemblies { get; } = new HashSet<Assembly>();
+
+    /// <summary>
+    ///     Registers one or more assemblies that contain message runtime types.
+    /// </summary>
+    /// <param name="assemblies">Assemblies to register for runtime type resolution.</param>
+    /// <returns>The current configuration instance.</returns>
+    public RedisStreamConfiguration AddKnownTypeAssemblies(params Assembly[] assemblies)
+    {
+        foreach (Assembly assembly in assemblies.Where(a => a is not null))
+            KnownTypeAssemblies.Add(assembly);
+
+        return this;
+    }
 }

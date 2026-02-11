@@ -105,6 +105,12 @@ public sealed class RabbitMqSslOptions
     /// Gets or sets the certificate password.
     /// </summary>
     public string? CertificatePassword { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to relax TLS certificate validation (not recommended for production).
+    /// Default is false.
+    /// </summary>
+    public bool AllowInsecureCertificateValidation { get; set; } = false;
 }
 
 /// <summary>

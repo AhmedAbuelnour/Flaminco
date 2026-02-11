@@ -1,4 +1,4 @@
-﻿using Flaminco.MinimalEndpoints.JsonConverters;
+﻿using Flaminco.MinimalEndpoints.Contexts;
 using Flaminco.MinimalEndpoints.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -16,7 +16,7 @@ namespace Flaminco.MinimalEndpoints.Middlewares
                 {
                     try
                     {
-                        TimeZoneContext.Zone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneHeader);
+                        TimeZoneContext.Zone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneHeader.ToString() ?? "UTC");
                     }
                     catch (TimeZoneNotFoundException)
                     {
@@ -25,6 +25,7 @@ namespace Flaminco.MinimalEndpoints.Middlewares
                     break;
                 }
             }
+
             await next(context);
         }
     }

@@ -12,7 +12,7 @@ public sealed class JsonMessageSerializer : IMessageSerializer
     /// <summary>
     /// Initializes a new instance with default options.
     /// </summary>
-    public JsonMessageSerializer() : this(JsonSerializerOptions.Web)
+    public JsonMessageSerializer() : this(new JsonSerializerOptions(JsonSerializerDefaults.Web))
     {
     }
 

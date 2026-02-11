@@ -7,8 +7,8 @@ namespace Flaminco.MinimalEndpoints.Abstractions
         IEnumerable<ValidationFailure> Validate(TRequest request);
     }
 
-    public interface IAsyncMinimalValidator<TRequest>
+    public interface IAsyncMinimalValidator<in TRequest>
     {
-        Task<IEnumerable<ValidationFailure>> ValidateAsync(TRequest request, CancellationToken cancellationToken = default);
+        IAsyncEnumerable<ValidationFailure> ValidateAsync(TRequest request, CancellationToken cancellationToken = default);
     }
 }
